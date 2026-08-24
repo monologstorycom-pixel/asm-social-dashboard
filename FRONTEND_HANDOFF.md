@@ -1,6 +1,6 @@
 # Frontend handoff
 
-All list endpoints return JSON and all errors use `{ "error": string, "issues"?: [{ "path": (string|number)[], "message": string }] }`.
+All list endpoints return JSON and all errors use `{ "error": string, "issues"?: [{ "path": (string|number)[], "message": string }] }`. Every state-changing route requires `Authorization: Bearer $INTERNAL_API_TOKEN`; browser clients must call it through a trusted server-side proxy and must never receive this token.
 
 ## Routes
 

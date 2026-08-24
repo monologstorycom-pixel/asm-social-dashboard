@@ -2,9 +2,11 @@ import { parseContentPlanCsv } from "@/lib/content-plan";
 import { contentPlanImportOutcome, readCsvPayload } from "@/lib/content-plan-api";
 import { db } from "@/lib/db";
 import { HttpError, safeRoute } from "@/lib/http";
+import { authorizeInternalRequest } from "@/lib/operations";
 
 export async function POST(request: Request) {
   return safeRoute(async () => {
+    authorizeInternalRequest(request);
     const parsed = parseContentPlanCsv(await readCsvPayload(request));
     const fatal = parsed.errors.find(({ row }) => row <= 1);
     if (fatal) throw new HttpError(400, fatal.message);

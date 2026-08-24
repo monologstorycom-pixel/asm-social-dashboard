@@ -4,13 +4,14 @@ import { z } from "zod";
 import { contentIdSchema, contentPlanJson, contentPlanStatusSchema } from "@/lib/content-plan-api";
 import { db } from "@/lib/db";
 import { HttpError, readJson, safeRoute } from "@/lib/http";
-import { assertGeneralTransition } from "@/lib/operations";
+import { assertGeneralTransition, authorizeInternalRequest } from "@/lib/operations";
 
 type Context = { params: Promise<{ contentId: string }> };
 const bodySchema = z.object({ status: contentPlanStatusSchema }).strict();
 
 export async function PATCH(request: Request, context: Context) {
   return safeRoute(async () => {
+    authorizeInternalRequest(request);
     const contentId = contentIdSchema.parse((await context.params).contentId);
     const { status } = bodySchema.parse(await readJson(request));
     const item = await db.$transaction(async (tx) => {

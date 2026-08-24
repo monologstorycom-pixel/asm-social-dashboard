@@ -187,6 +187,19 @@ test("publish-result service rejects stale approval attempts before any write", 
   assert.equal(writes, 0);
 });
 
+test("every non-preview mutation route requires internal bearer authentication", () => {
+  for (const path of [
+    "../src/app/api/posts/route.ts",
+    "../src/app/api/posts/[id]/route.ts",
+    "../src/app/api/posts/[id]/metrics/route.ts",
+    "../src/app/api/content-plan/import/route.ts",
+    "../src/app/api/content-plan/[contentId]/status/route.ts",
+  ]) {
+    const route = readFileSync(new URL(path, import.meta.url), "utf8");
+    assert.match(route, /authorizeInternalRequest\(request\)/, path);
+  }
+});
+
 test("operational migration is additive and prior deployed migration hashes stay documented", () => {
   const migration = readFileSync(new URL("../prisma/migrations/20260824180000_add_content_operations/migration.sql", import.meta.url), "utf8");
   assert.doesNotMatch(migration, /DROP TABLE|TRUNCATE|DELETE FROM|CHECK\s*\(/);

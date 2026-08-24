@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { HttpError, queryObject, readJson, safeRoute } from "@/lib/http";
 import { analyticsWhere, resolveAnalyticsMode } from "@/lib/operations-db";
+import { authorizeInternalRequest } from "@/lib/operations";
 import { metricJson } from "@/lib/post-query";
 import { analyticsModeSchema, idSchema, updatePostSchema } from "@/lib/validation";
 
@@ -31,6 +32,7 @@ export async function GET(request: Request, context: Context) {
 
 export async function PATCH(request: Request, context: Context) {
   return safeRoute(async () => {
+    authorizeInternalRequest(request);
     const id = idSchema.parse((await context.params).id);
     const input = updatePostSchema.parse(await readJson(request));
     const item = await db.contentPost.update({

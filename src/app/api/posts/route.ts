@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { safeRoute, queryObject, readJson } from "@/lib/http";
 import { buildPostWhere, metricJson, sortPosts } from "@/lib/post-query";
 import { analyticsWhere, resolveAnalyticsMode } from "@/lib/operations-db";
+import { authorizeInternalRequest } from "@/lib/operations";
 import { createPostSchema, postFiltersSchema } from "@/lib/validation";
 
 export async function GET(request: Request) {
@@ -30,6 +31,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   return safeRoute(async () => {
+    authorizeInternalRequest(request);
     const input = createPostSchema.parse(await readJson(request));
     const item = await db.contentPost.create({
       data: { ...input, publishedAt: input.publishedAt ? new Date(input.publishedAt) : null },

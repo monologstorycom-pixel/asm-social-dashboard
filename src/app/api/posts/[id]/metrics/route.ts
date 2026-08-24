@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { HttpError, queryObject, readJson, safeRoute } from "@/lib/http";
 import { analyticsWhere, resolveAnalyticsMode } from "@/lib/operations-db";
+import { authorizeInternalRequest } from "@/lib/operations";
 import { metricJson } from "@/lib/post-query";
 import { analyticsModeSchema, idSchema, metricSchema } from "@/lib/validation";
 
@@ -22,6 +23,7 @@ export async function GET(request: Request, context: Context) {
 
 export async function POST(request: Request, context: Context) {
   return safeRoute(async () => {
+    authorizeInternalRequest(request);
     const contentPostId = idSchema.parse((await context.params).id);
     const input = metricSchema.parse(await readJson(request));
     const item = await db.postMetric.create({ data: { ...input, contentPostId, capturedAt: new Date(input.capturedAt) } });
