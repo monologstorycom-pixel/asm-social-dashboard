@@ -87,13 +87,18 @@ test("Meta sync stores each due window once and advances the first live snapshot
   assert.equal(measured, true);
 });
 
-test("reconciliation reports drift and only suggests bounded status repairs", () => {
-  const report = buildReconciliationReport({
-    status: "published", approvedAt: null, scheduledAt: null, publishedAt: null,
-    contentPostId: null, approvalAttemptId: null, approvalCommand: null,
+test("reconciliation always downgrades to the last fully evidenced state", () => {
+  const missingApproval = buildReconciliationReport({
+    status: "published", approvedAt: new Date(), scheduledAt: new Date(), publishedAt: new Date(),
+    contentPostId: "post", approvalAttemptId: null, approvalCommand: "APPROVE & PUBLISH",
   });
-  assert.ok(report.issues.length >= 3);
-  assert.ok(report.repairs.every((repair) => ["status", "publisherState", "publishStatus"].includes(repair.field)));
+  assert.equal(missingApproval.repairs.find(({ field }) => field === "status")?.value, "ready_for_review");
+  const missingPost = buildReconciliationReport({
+    status: "published", approvedAt: new Date(), scheduledAt: new Date(), publishedAt: new Date(),
+    contentPostId: null, approvalAttemptId: "attempt", approvalCommand: "APPROVE & PUBLISH",
+  });
+  assert.equal(missingPost.repairs.find(({ field }) => field === "status")?.value, "scheduled");
+  assert.ok(missingPost.repairs.every((repair) => ["status", "publisherState", "publishStatus"].includes(repair.field)));
 });
 
 test("publishing intelligence uses controlled window until ten comparable live Meta samples", () => {
@@ -108,8 +113,9 @@ test("publishing intelligence uses controlled window until ten comparable live M
   assert.match(recommendation.recommendedWindow, /WIB/);
 });
 
-test("metric windows become due once and velocity uses elapsed hours", () => {
+test("metric sync captures only the current due window and never backfills stale windows", () => {
   const publishedAt = new Date("2026-08-01T00:00:00.000Z");
+  assert.deepEqual(dueMetricWindows(publishedAt, new Date("2026-08-01T07:00:00.000Z"), new Set()), ["h6"]);
   assert.deepEqual(dueMetricWindows(publishedAt, new Date("2026-08-01T07:00:00.000Z"), new Set(["h1"])), ["h6"]);
   assert.deepEqual(dueMetricWindows(publishedAt, new Date("2026-08-08T00:00:00.000Z"), new Set(["h1", "h6", "h24", "h72"])), ["d7"]);
   assert.equal(computeEarlyVelocity(40, new Date("2026-08-01T06:00:00.000Z"), 10, new Date("2026-08-01T01:00:00.000Z")), 6);
@@ -185,6 +191,21 @@ test("publish-result service rejects stale approval attempts before any write", 
     error: "failed",
   }, client), /approved attempt/);
   assert.equal(writes, 0);
+});
+
+test("Meta sync routes cannot spoof capture time", () => {
+  for (const path of [
+    "../src/app/api/internal/meta/sync-due/route.ts",
+    "../src/app/api/internal/content-plan/[contentId]/meta-sync/route.ts",
+  ]) assert.doesNotMatch(readFileSync(new URL(path, import.meta.url), "utf8"), /searchParams|get\("now"\)|queryObject/);
+});
+
+test("operational lifecycle writes use conditional compare-and-set", () => {
+  for (const path of [
+    "../src/app/api/internal/content-plan/[contentId]/approve/route.ts",
+    "../src/app/api/internal/content-plan/[contentId]/artifacts/route.ts",
+    "../src/app/api/internal/content-plan/[contentId]/schedule/route.ts",
+  ]) assert.match(readFileSync(new URL(path, import.meta.url), "utf8"), /updateMany\(/, path);
 });
 
 test("every non-preview mutation route requires internal bearer authentication", () => {

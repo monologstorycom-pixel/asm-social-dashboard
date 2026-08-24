@@ -18,8 +18,13 @@ export async function POST(request: Request, context: Context) {
       if (current.status === "scheduled" && current.scheduledAt?.getTime() === scheduledAt.getTime()) return current;
       if (current.status !== "approved" || !current.approvedAt || !current.approvalAttemptId) throw new HttpError(409, "Scheduling requires an approved attempt");
       validateScheduledAt(scheduledAt, parsePublishWindow(current.testPublishWindow, current.date));
+      const updated = await tx.contentPlanItem.updateMany({
+        where: { id: current.id, status: "approved", approvalAttemptId: current.approvalAttemptId, approvalVersion: current.approvalVersion },
+        data: { status: "scheduled", scheduledAt, publisherState: "scheduled", publishStatus: "scheduled" },
+      });
+      if (updated.count !== 1) throw new HttpError(409, "Content schedule changed concurrently; retry with fresh data");
       await tx.contentPost.update({ where: { id: current.contentPostId! }, data: { status: "scheduled", scheduledAt } });
-      return tx.contentPlanItem.update({ where: { id: current.id }, data: { status: "scheduled", scheduledAt, publisherState: "scheduled", publishStatus: "scheduled" } });
+      return tx.contentPlanItem.findUniqueOrThrow({ where: { id: current.id } });
     });
     return Response.json({ item: contentPlanJson(item) });
   });

@@ -23,7 +23,12 @@ export async function recordPublishResult(contentId: string, body: PublishResult
     if (plan.approvalAttemptId !== body.approvalAttemptId) throw new HttpError(409, "Publish result does not match the approved attempt");
     if (!body.success) {
       if (plan.status === "published" || plan.status === "measuring") throw new HttpError(409, "Published result cannot be replaced by failure");
-      return tx.contentPlanItem.update({ where: { id: plan.id }, data: { publishStatus: "failed", publisherState: "failed", publisherError: body.error } });
+      const updated = await tx.contentPlanItem.updateMany({
+        where: { id: plan.id, approvalAttemptId: body.approvalAttemptId, status: { notIn: ["published", "measuring"] } },
+        data: { publishStatus: "failed", publisherState: "failed", publisherError: body.error },
+      });
+      if (updated.count !== 1) throw new HttpError(409, "Publish state changed concurrently; retry with fresh data");
+      return tx.contentPlanItem.findUniqueOrThrow({ where: { id: plan.id } });
     }
     if (plan.contentPost?.instagramMediaId) {
       if (plan.contentPost.instagramMediaId !== body.instagramMediaId) throw new HttpError(409, "A different publication is already recorded");
@@ -32,16 +37,19 @@ export async function recordPublishResult(contentId: string, body: PublishResult
     if (plan.status !== "scheduled" || !plan.approvedAt || !plan.scheduledAt || !plan.contentPostId) throw new HttpError(409, "Publish success requires a scheduled approved plan with a linked post");
     const publishedAt = new Date(body.publishedAt);
     if (publishedAt < plan.scheduledAt) throw new HttpError(409, "publishedAt cannot precede scheduledAt");
+    const updated = await tx.contentPlanItem.updateMany({
+      where: { id: plan.id, status: "scheduled", approvalAttemptId: body.approvalAttemptId, approvalVersion: plan.approvalVersion },
+      data: { status: "published", publishedAt, publishStatus: "published", publisherState: "published", publisherError: null },
+    });
+    if (updated.count !== 1) throw new HttpError(409, "Publish state changed concurrently; retry with fresh data");
     await tx.contentPost.update({ where: { id: plan.contentPostId }, data: {
       status: "published", source: "live", instagramMediaId: body.instagramMediaId, permalink: body.permalink, publicUrl: body.publicUrl ?? body.permalink, publishedAt,
     } });
     for (const asset of body.assetPublicUrls ?? []) await tx.contentPlanAsset.updateMany({
       where: { contentPlanId: plan.id, slideNumber: asset.slideNumber }, data: { publicUrl: asset.publicUrl },
     });
-    return tx.contentPlanItem.update({
-      where: { id: plan.id },
-      data: { status: "published", publishedAt, publishStatus: "published", publisherState: "published", publisherError: null },
-      include: { contentPost: true, assets: { orderBy: { slideNumber: "asc" } } },
+    return tx.contentPlanItem.findUniqueOrThrow({
+      where: { id: plan.id }, include: { contentPost: true, assets: { orderBy: { slideNumber: "asc" } } },
     });
   });
 }

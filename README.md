@@ -28,7 +28,7 @@ Operational routes:
 - `POST /api/internal/content-plan/:contentId/schedule` — enforce the controlled publish window.
 - `GET /api/internal/publisher/due` — due jobs for the existing publisher.
 - `POST /api/internal/content-plan/:contentId/publish-result` — idempotent success/failure callback tied to the approved attempt.
-- `POST /api/internal/meta/sync-due` and `POST /api/internal/content-plan/:contentId/meta-sync` — read-only Meta metric sync.
+- `POST /api/internal/meta/sync-due` and `POST /api/internal/content-plan/:contentId/meta-sync` — read-only Meta metric sync using server time only; missed windows are never backfilled with current metrics.
 - `GET /api/internal/reconciliation` — read-only drift report. The bounded repair helper is not exposed or auto-run.
 - `GET /api/content-plan/:contentId/publishing-intelligence` — controlled fallback or account-evidence recommendation.
 

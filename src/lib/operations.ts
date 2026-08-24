@@ -119,10 +119,13 @@ type ReconciliationState = {
 export function buildReconciliationReport(state: ReconciliationState) {
   const issues: string[] = [];
   const rank = ["planned", "approved_for_creation", "creating", "ready_for_review", "approved", "scheduled", "published", "measuring"].indexOf(state.status);
-  if (rank >= 4 && (!state.approvedAt || !state.approvalAttemptId || state.approvalCommand !== APPROVAL_COMMAND)) issues.push("approval evidence is incomplete");
-  if (rank >= 5 && !state.scheduledAt) issues.push("schedule evidence is incomplete");
-  if (rank >= 6 && (!state.publishedAt || !state.contentPostId)) issues.push("publication evidence is incomplete");
-  const safeStatus = !state.approvedAt ? "ready_for_review" : !state.scheduledAt ? "approved" : !state.publishedAt ? "scheduled" : state.status;
+  const approved = Boolean(state.approvedAt && state.approvalAttemptId && state.approvalCommand === APPROVAL_COMMAND);
+  const scheduled = approved && Boolean(state.scheduledAt);
+  const published = scheduled && Boolean(state.publishedAt && state.contentPostId);
+  if (rank >= 4 && !approved) issues.push("approval evidence is incomplete");
+  if (rank >= 5 && !scheduled) issues.push("schedule evidence is incomplete");
+  if (rank >= 6 && !published) issues.push("publication evidence is incomplete");
+  const safeStatus = !approved ? "ready_for_review" : !scheduled ? "approved" : !published ? "scheduled" : state.status;
   return {
     issues,
     repairs: issues.length ? [
@@ -165,7 +168,8 @@ export function publishingRecommendation(input: { testPublishWindow: string; com
 const WINDOW_HOURS: Record<MetricWindow, number> = { h1: 1, h6: 6, h24: 24, h72: 72, d7: 168 };
 export function dueMetricWindows(publishedAt: Date, now: Date, completed: Set<string>): MetricWindow[] {
   const ageHours = (now.getTime() - publishedAt.getTime()) / 3_600_000;
-  return META_WINDOWS.filter((window) => ageHours >= WINDOW_HOURS[window] && !completed.has(window));
+  const current = META_WINDOWS.filter((window) => ageHours >= WINDOW_HOURS[window]).at(-1);
+  return current && !completed.has(current) ? [current] : [];
 }
 
 export function computeEarlyVelocity(current: number, capturedAt: Date, previous: number, previousAt: Date) {

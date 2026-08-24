@@ -124,6 +124,7 @@ Internal routes require a bearer token and are for Staff/publisher jobs, not bro
 - `POST /api/internal/content-plan/:contentId/publish-result`
 - `POST /api/internal/meta/sync-due`
 - `POST /api/internal/content-plan/:contentId/meta-sync`
+  - Uses server capture time only; no caller-supplied `now` and no stale-window backfill.
 - `GET /api/internal/reconciliation` (read-only)
 
 Internal authentication is fail-closed: an unset server `INTERNAL_API_TOKEN` returns 503, and invalid/missing `Authorization: Bearer …` returns 401 using constant-time comparison. Responses never expose Meta or internal tokens.

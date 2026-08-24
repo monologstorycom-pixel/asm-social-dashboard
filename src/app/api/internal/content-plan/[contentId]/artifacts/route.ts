@@ -42,11 +42,12 @@ export async function POST(request: Request, context: Context) {
         update: { assetType: asset.mimeType.toLowerCase().startsWith("video/") ? "video" : "image", assetUrl: asset.publicUrl ?? asset.localPath! },
       });
       const ready = body.qaStatus === "passed" && body.assets.every((asset) => asset.final);
-      return tx.contentPlanItem.update({
-        where: { id: plan.id },
+      const updated = await tx.contentPlanItem.updateMany({
+        where: { id: plan.id, status: plan.status, approvalVersion: plan.approvalVersion },
         data: { contentPostId: post.id, finalCaption: body.caption, finalBrief: body.finalBrief, qaStatus: body.qaStatus, qaResult: body.qaResult, qaNotes: body.qaNotes, status: ready ? "ready_for_review" : "creating" },
-        include: { assets: { orderBy: { slideNumber: "asc" } }, contentPost: true },
       });
+      if (updated.count !== 1) throw new HttpError(409, "Content artifacts changed concurrently; retry with fresh data");
+      return tx.contentPlanItem.findUniqueOrThrow({ where: { id: plan.id }, include: { assets: { orderBy: { slideNumber: "asc" } }, contentPost: true } });
     });
     return Response.json({ item: contentPlanJson(item) });
   });

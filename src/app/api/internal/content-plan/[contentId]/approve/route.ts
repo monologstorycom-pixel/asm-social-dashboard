@@ -23,11 +23,12 @@ export async function POST(request: Request, context: Context) {
       }
       if (current.status !== "ready_for_review") throw new HttpError(409, "Approval requires ready_for_review");
       if (current.qaStatus !== "passed" || !current.contentPostId || !current.finalCaption || !current.assets.length || !current.assets.every((asset) => asset.isFinal)) throw new HttpError(409, "Approval requires passed QA, a linked post, caption, and final assets");
-      return tx.contentPlanItem.update({
-        where: { id: current.id },
+      const updated = await tx.contentPlanItem.updateMany({
+        where: { id: current.id, status: "ready_for_review", approvalVersion: current.approvalVersion },
         data: { status: "approved", approvedAt: new Date(), approvalCommand: APPROVAL_COMMAND, approvalReference: body.reference, approvalAttemptId: randomUUID(), approvalVersion: { increment: 1 }, approvalStatus: "approved", publisherState: "ready", publisherError: null },
-        include: { assets: { orderBy: { slideNumber: "asc" } }, contentPost: true },
       });
+      if (updated.count !== 1) throw new HttpError(409, "Content approval changed concurrently; retry with fresh data");
+      return tx.contentPlanItem.findUniqueOrThrow({ where: { id: current.id }, include: { assets: { orderBy: { slideNumber: "asc" } }, contentPost: true } });
     });
     return Response.json({ item: contentPlanJson(item) });
   });
