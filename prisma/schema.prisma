@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum SocialPlatform {
+  instagram
+  facebook
+  tiktok
+  linkedin
+  x
+}
+
+enum ContentType {
+  image
+  carousel
+  reel
+  story
+  video
+  text
+}
+
+enum PostStatus {
+  idea
+  draft
+  review
+  approved
+  scheduled
+  published
+  failed
+}
+
+enum ContentPillar {
+  education
+  product
+  comparison
+  inspiration
+  promotion
+  brand
+}
+
+enum CreativeStyle {
+  editorial_no_box
+  editorial_magazine
+  infographic
+  architectural
+  product_photography
+}
+
+enum AssetType {
+  image
+  video
+  thumbnail
+}
+
+enum ExperimentStatus {
+  draft
+  running
+  completed
+  cancelled
+}
+
+model SocialAccount {
+  id                String         @id @default(uuid()) @db.Char(36)
+  platform          SocialPlatform
+  accountName       String         @map("account_name") @db.VarChar(150)
+  username          String         @db.VarChar(100)
+  platformAccountId String         @map("platform_account_id") @db.VarChar(191)
+  active            Boolean        @default(true)
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+  posts             ContentPost[]
+
+  @@unique([platform, platformAccountId])
+  @@unique([platform, username])
+  @@map("social_accounts")
+}
+
+model ContentPost {
+  id               String           @id @default(uuid()) @db.Char(36)
+  socialAccountId  String           @map("social_account_id") @db.Char(36)
+  title            String           @db.VarChar(191)
+  caption          String           @db.Text
+  contentPillar    ContentPillar    @map("content_pillar")
+  topic            String           @db.VarChar(120)
+  contentType      ContentType      @map("content_type")
+  creativeStyle    CreativeStyle    @map("creative_style")
+  slideCount       Int              @default(1) @map("slide_count") @db.UnsignedInt
+  status           PostStatus       @default(idea)
+  instagramMediaId String?          @map("instagram_media_id") @db.VarChar(191)
+  publicUrl        String?          @map("public_url") @db.Text
+  publishedAt      DateTime?        @map("published_at")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  socialAccount    SocialAccount    @relation(fields: [socialAccountId], references: [id], onDelete: Restrict)
+  assets           PostAsset[]
+  metrics          PostMetric[]
+  calendarEntry    ContentCalendar?
+  experiments      ExperimentPost[]
+
+  @@index([socialAccountId, status, publishedAt])
+  @@index([contentPillar, creativeStyle, contentType])
+  @@index([topic])
+  @@map("content_posts")
+}
+
+model PostAsset {
+  id            String      @id @default(uuid()) @db.Char(36)
+  contentPostId String      @map("content_post_id") @db.Char(36)
+  assetType     AssetType   @map("asset_type")
+  slideNumber   Int         @map("slide_number") @db.UnsignedInt
+  assetUrl      String      @map("asset_url") @db.Text
+  createdAt     DateTime    @default(now()) @map("created_at")
+  contentPost   ContentPost @relation(fields: [contentPostId], references: [id], onDelete: Cascade)
+
+  @@unique([contentPostId, slideNumber])
+  @@map("post_assets")
+}
+
+model PostMetric {
+  id              String      @id @default(uuid()) @db.Char(36)
+  contentPostId   String      @map("content_post_id") @db.Char(36)
+  capturedAt      DateTime    @map("captured_at")
+  reach           Int         @default(0) @db.UnsignedInt
+  impressions     Int         @default(0) @db.UnsignedInt
+  views           Int         @default(0) @db.UnsignedInt
+  likes           Int         @default(0) @db.UnsignedInt
+  comments        Int         @default(0) @db.UnsignedInt
+  saves           Int         @default(0) @db.UnsignedInt
+  shares          Int         @default(0) @db.UnsignedInt
+  engagementTotal Int         @map("engagement_total") @db.UnsignedInt
+  engagementRate  Decimal     @map("engagement_rate") @db.Decimal(10, 4)
+  contentPost     ContentPost @relation(fields: [contentPostId], references: [id], onDelete: Cascade)
+
+  @@unique([contentPostId, capturedAt])
+  @@index([capturedAt])
+  @@map("post_metrics")
+}
+
+model ContentCalendar {
+  id            String      @id @default(uuid()) @db.Char(36)
+  contentPostId String      @unique @map("content_post_id") @db.Char(36)
+  plannedAt     DateTime    @map("planned_at")
+  status        PostStatus  @default(scheduled)
+  notes         String?     @db.Text
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  contentPost   ContentPost @relation(fields: [contentPostId], references: [id], onDelete: Cascade)
+
+  @@index([plannedAt])
+  @@map("content_calendar")
+}
+
+model ContentExperiment {
+  id             String           @id @default(uuid()) @db.Char(36)
+  name           String           @db.VarChar(191)
+  hypothesis     String           @db.Text
+  experimentType String           @map("experiment_type") @db.VarChar(100)
+  startedAt      DateTime?        @map("started_at")
+  endedAt        DateTime?        @map("ended_at")
+  status         ExperimentStatus @default(draft)
+  notes          String?          @db.Text
+  posts          ExperimentPost[]
+
+  @@map("content_experiments")
+}
+
+model ExperimentPost {
+  experimentId  String            @map("experiment_id") @db.Char(36)
+  contentPostId String            @map("content_post_id") @db.Char(36)
+  experiment    ContentExperiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  contentPost   ContentPost       @relation(fields: [contentPostId], references: [id], onDelete: Cascade)
+
+  @@id([experimentId, contentPostId])
+  @@index([contentPostId])
+  @@map("experiment_posts")
+}
