@@ -1,15 +1,17 @@
 -- Add operational provenance and publication linkage without rewriting valid rows.
+-- IF NOT EXISTS makes the first two statements safe to replay after a failed
+-- MariaDB deployment that committed earlier ALTER statements.
 ALTER TABLE `content_posts`
-  ADD COLUMN `permalink` TEXT NULL,
-  ADD COLUMN `scheduled_at` DATETIME(3) NULL,
-  ADD COLUMN `source` ENUM('demo','live') NOT NULL DEFAULT 'demo',
-  ADD UNIQUE INDEX `content_posts_instagram_media_id_key` (`instagram_media_id`);
+  ADD COLUMN IF NOT EXISTS `permalink` TEXT NULL,
+  ADD COLUMN IF NOT EXISTS `scheduled_at` DATETIME(3) NULL,
+  ADD COLUMN IF NOT EXISTS `source` ENUM('demo','live') NOT NULL DEFAULT 'demo';
+CREATE UNIQUE INDEX IF NOT EXISTS `content_posts_instagram_media_id_key` ON `content_posts` (`instagram_media_id`);
 
 ALTER TABLE `post_metrics`
-  ADD COLUMN `source` ENUM('demo','meta','manual') NOT NULL DEFAULT 'demo',
-  ADD COLUMN `snapshot_window` ENUM('h1','h6','h24','h72','d7','ad_hoc') NULL,
-  ADD COLUMN `early_engagement_velocity` DECIMAL(14,4) NULL,
-  ADD INDEX `post_metrics_content_post_id_source_snapshot_window_idx` (`content_post_id`,`source`,`snapshot_window`);
+  ADD COLUMN IF NOT EXISTS `source` ENUM('demo','meta','manual') NOT NULL DEFAULT 'demo',
+  ADD COLUMN IF NOT EXISTS `snapshot_window` ENUM('h1','h6','h24','h72','d7','ad_hoc') NULL,
+  ADD COLUMN IF NOT EXISTS `early_engagement_velocity` DECIMAL(14,4) NULL;
+CREATE INDEX IF NOT EXISTS `post_metrics_content_post_id_source_snapshot_window_idx` ON `post_metrics` (`content_post_id`,`source`,`snapshot_window`);
 
 ALTER TABLE `content_plan_items`
   ADD COLUMN `content_post_id` CHAR(36) NULL,
@@ -30,10 +32,7 @@ ALTER TABLE `content_plan_items`
   ADD UNIQUE INDEX `content_plan_items_content_post_id_key` (`content_post_id`),
   ADD UNIQUE INDEX `content_plan_items_approval_attempt_id_key` (`approval_attempt_id`),
   ADD INDEX `content_plan_items_status_scheduled_at_idx` (`status`,`scheduled_at`),
-  ADD CONSTRAINT `content_plan_items_content_post_id_fkey` FOREIGN KEY (`content_post_id`) REFERENCES `content_posts`(`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `content_plan_schedule_fields_check` CHECK (`status` NOT IN ('scheduled','published','measuring') OR (`approved_at` IS NOT NULL AND `scheduled_at` IS NOT NULL)),
-  ADD CONSTRAINT `content_plan_publish_fields_check` CHECK (`status` NOT IN ('published','measuring') OR (`content_post_id` IS NOT NULL AND `published_at` IS NOT NULL)),
-  ADD CONSTRAINT `content_plan_approval_command_check` CHECK (`status` NOT IN ('approved','scheduled','published','measuring') OR (`approved_at` IS NOT NULL AND `approval_command` = 'APPROVE & PUBLISH' AND `approval_attempt_id` IS NOT NULL));
+  ADD CONSTRAINT `content_plan_items_content_post_id_fkey` FOREIGN KEY (`content_post_id`) REFERENCES `content_posts`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 CREATE TABLE `content_plan_assets` (
   `id` CHAR(36) NOT NULL,

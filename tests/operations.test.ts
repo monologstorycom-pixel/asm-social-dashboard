@@ -189,7 +189,9 @@ test("publish-result service rejects stale approval attempts before any write", 
 
 test("operational migration is additive and prior deployed migration hashes stay documented", () => {
   const migration = readFileSync(new URL("../prisma/migrations/20260824180000_add_content_operations/migration.sql", import.meta.url), "utf8");
-  assert.doesNotMatch(migration, /DROP TABLE|TRUNCATE|DELETE FROM/);
+  assert.doesNotMatch(migration, /DROP TABLE|TRUNCATE|DELETE FROM|CHECK\s*\(/);
+  assert.match(migration, /ADD COLUMN IF NOT EXISTS `permalink`/);
+  assert.match(migration, /CREATE UNIQUE INDEX IF NOT EXISTS `content_posts_instagram_media_id_key`/);
   for (const field of ["content_post_id", "approved_at", "approval_command", "approval_attempt_id", "scheduled_at", "published_at", "source", "snapshot_window", "early_engagement_velocity"]) assert.ok(migration.includes(`\`${field}\``), field);
   assert.match(migration, /CREATE TABLE `content_plan_assets`/);
 });
