@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { bestMetricIds, buildApiQuery, friendlyLabel, toggleSelection } from "../src/lib/frontend";
+import { bestMetricIds, buildApiQuery, duplicateReasonLabel, friendlyLabel, importSummaryItems, nextContentPlanStatus, planDateLabel, toggleSelection } from "../src/lib/frontend";
 
 const ids = ["a", "b", "c", "d", "e", "f"];
 
@@ -22,4 +22,24 @@ test("best metric detection marks fair ties and ignores missing metrics", () => 
 
 test("enum labels are human readable", () => {
   assert.equal(friendlyLabel("editorial_no_box"), "Editorial No Box");
+});
+
+test("content plan workflow exposes only the adjacent action and stops at measuring", () => {
+  assert.deepEqual(nextContentPlanStatus("planned"), { status: "approved_for_creation", label: "Advance to Approved for Creation" });
+  assert.deepEqual(nextContentPlanStatus("published"), { status: "measuring", label: "Advance to Measuring" });
+  assert.equal(nextContentPlanStatus("measuring"), null);
+});
+
+test("import preview summary and duplicate reasons use clear operational labels", () => {
+  assert.deepEqual(importSummaryItems({ total: 7, valid: 6, invalid: 1, duplicates: 2, insertable: 4 }), [
+    ["Total", 7], ["Valid", 6], ["Invalid", 1], ["Duplicates", 2], ["Insertable", 4],
+  ]);
+  assert.equal(duplicateReasonLabel("within_file"), "Duplicate within file");
+  assert.equal(duplicateReasonLabel("existing_database"), "Already in content plan");
+  assert.equal(duplicateReasonLabel(null), "—");
+});
+
+test("content plan ISO dates render without UTC timezone drift", () => {
+  assert.equal(planDateLabel("2026-08-25"), "25 Aug 2026");
+  assert.equal(planDateLabel(""), "—");
 });

@@ -57,7 +57,8 @@ export const ModelName = {
   PostMetric: 'PostMetric',
   ContentCalendar: 'ContentCalendar',
   ContentExperiment: 'ContentExperiment',
-  ExperimentPost: 'ExperimentPost'
+  ExperimentPost: 'ExperimentPost',
+  ContentPlanItem: 'ContentPlanItem'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -176,6 +177,46 @@ export const ExperimentPostScalarFieldEnum = {
 export type ExperimentPostScalarFieldEnum = (typeof ExperimentPostScalarFieldEnum)[keyof typeof ExperimentPostScalarFieldEnum]
 
 
+export const ContentPlanItemScalarFieldEnum = {
+  id: 'id',
+  contentId: 'contentId',
+  date: 'date',
+  day: 'day',
+  testPublishWindow: 'testPublishWindow',
+  pillar: 'pillar',
+  goal: 'goal',
+  format: 'format',
+  creativeStyle: 'creativeStyle',
+  audience: 'audience',
+  topicTag: 'topicTag',
+  workingTitle: 'workingTitle',
+  hook: 'hook',
+  coreAngle: 'coreAngle',
+  slide1: 'slide1',
+  slide2: 'slide2',
+  slide3: 'slide3',
+  slide45: 'slide45',
+  visualDirection: 'visualDirection',
+  cta: 'cta',
+  captionBrief: 'captionBrief',
+  primaryMetric: 'primaryMetric',
+  secondaryMetric: 'secondaryMetric',
+  engagementMechanic: 'engagementMechanic',
+  storyCompanion: 'storyCompanion',
+  experimentTag: 'experimentTag',
+  productFocus: 'productFocus',
+  claimGuardrail: 'claimGuardrail',
+  assetsNeeded: 'assetsNeeded',
+  status: 'status',
+  approvalStatus: 'approvalStatus',
+  publishStatus: 'publishStatus',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ContentPlanItemScalarFieldEnum = (typeof ContentPlanItemScalarFieldEnum)[keyof typeof ContentPlanItemScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -258,4 +299,40 @@ export const ExperimentPostOrderByRelevanceFieldEnum = {
 } as const
 
 export type ExperimentPostOrderByRelevanceFieldEnum = (typeof ExperimentPostOrderByRelevanceFieldEnum)[keyof typeof ExperimentPostOrderByRelevanceFieldEnum]
+
+
+export const ContentPlanItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  contentId: 'contentId',
+  day: 'day',
+  testPublishWindow: 'testPublishWindow',
+  pillar: 'pillar',
+  goal: 'goal',
+  format: 'format',
+  creativeStyle: 'creativeStyle',
+  audience: 'audience',
+  topicTag: 'topicTag',
+  workingTitle: 'workingTitle',
+  hook: 'hook',
+  coreAngle: 'coreAngle',
+  slide1: 'slide1',
+  slide2: 'slide2',
+  slide3: 'slide3',
+  slide45: 'slide45',
+  visualDirection: 'visualDirection',
+  cta: 'cta',
+  captionBrief: 'captionBrief',
+  primaryMetric: 'primaryMetric',
+  secondaryMetric: 'secondaryMetric',
+  engagementMechanic: 'engagementMechanic',
+  storyCompanion: 'storyCompanion',
+  experimentTag: 'experimentTag',
+  productFocus: 'productFocus',
+  claimGuardrail: 'claimGuardrail',
+  assetsNeeded: 'assetsNeeded',
+  approvalStatus: 'approvalStatus',
+  publishStatus: 'publishStatus'
+} as const
+
+export type ContentPlanItemOrderByRelevanceFieldEnum = (typeof ContentPlanItemOrderByRelevanceFieldEnum)[keyof typeof ContentPlanItemOrderByRelevanceFieldEnum]
 

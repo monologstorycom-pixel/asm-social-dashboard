@@ -403,7 +403,8 @@ export const ModelName = {
   PostMetric: 'PostMetric',
   ContentCalendar: 'ContentCalendar',
   ContentExperiment: 'ContentExperiment',
-  ExperimentPost: 'ExperimentPost'
+  ExperimentPost: 'ExperimentPost',
+  ContentPlanItem: 'ContentPlanItem'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "socialAccount" | "contentPost" | "postAsset" | "postMetric" | "contentCalendar" | "contentExperiment" | "experimentPost"
+    modelProps: "socialAccount" | "contentPost" | "postAsset" | "postMetric" | "contentCalendar" | "contentExperiment" | "experimentPost" | "contentPlanItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -885,6 +886,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ContentPlanItem: {
+      payload: Prisma.$ContentPlanItemPayload<ExtArgs>
+      fields: Prisma.ContentPlanItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ContentPlanItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ContentPlanItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanItemPayload>
+        }
+        findFirst: {
+          args: Prisma.ContentPlanItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ContentPlanItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanItemPayload>
+        }
+        findMany: {
+          args: Prisma.ContentPlanItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanItemPayload>[]
+        }
+        create: {
+          args: Prisma.ContentPlanItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanItemPayload>
+        }
+        createMany: {
+          args: Prisma.ContentPlanItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.ContentPlanItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanItemPayload>
+        }
+        update: {
+          args: Prisma.ContentPlanItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.ContentPlanItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ContentPlanItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.ContentPlanItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanItemPayload>
+        }
+        aggregate: {
+          args: Prisma.ContentPlanItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateContentPlanItem>
+        }
+        groupBy: {
+          args: Prisma.ContentPlanItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContentPlanItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ContentPlanItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContentPlanItemCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1024,6 +1091,46 @@ export const ExperimentPostScalarFieldEnum = {
 export type ExperimentPostScalarFieldEnum = (typeof ExperimentPostScalarFieldEnum)[keyof typeof ExperimentPostScalarFieldEnum]
 
 
+export const ContentPlanItemScalarFieldEnum = {
+  id: 'id',
+  contentId: 'contentId',
+  date: 'date',
+  day: 'day',
+  testPublishWindow: 'testPublishWindow',
+  pillar: 'pillar',
+  goal: 'goal',
+  format: 'format',
+  creativeStyle: 'creativeStyle',
+  audience: 'audience',
+  topicTag: 'topicTag',
+  workingTitle: 'workingTitle',
+  hook: 'hook',
+  coreAngle: 'coreAngle',
+  slide1: 'slide1',
+  slide2: 'slide2',
+  slide3: 'slide3',
+  slide45: 'slide45',
+  visualDirection: 'visualDirection',
+  cta: 'cta',
+  captionBrief: 'captionBrief',
+  primaryMetric: 'primaryMetric',
+  secondaryMetric: 'secondaryMetric',
+  engagementMechanic: 'engagementMechanic',
+  storyCompanion: 'storyCompanion',
+  experimentTag: 'experimentTag',
+  productFocus: 'productFocus',
+  claimGuardrail: 'claimGuardrail',
+  assetsNeeded: 'assetsNeeded',
+  status: 'status',
+  approvalStatus: 'approvalStatus',
+  publishStatus: 'publishStatus',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ContentPlanItemScalarFieldEnum = (typeof ContentPlanItemScalarFieldEnum)[keyof typeof ContentPlanItemScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1106,6 +1213,42 @@ export const ExperimentPostOrderByRelevanceFieldEnum = {
 } as const
 
 export type ExperimentPostOrderByRelevanceFieldEnum = (typeof ExperimentPostOrderByRelevanceFieldEnum)[keyof typeof ExperimentPostOrderByRelevanceFieldEnum]
+
+
+export const ContentPlanItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  contentId: 'contentId',
+  day: 'day',
+  testPublishWindow: 'testPublishWindow',
+  pillar: 'pillar',
+  goal: 'goal',
+  format: 'format',
+  creativeStyle: 'creativeStyle',
+  audience: 'audience',
+  topicTag: 'topicTag',
+  workingTitle: 'workingTitle',
+  hook: 'hook',
+  coreAngle: 'coreAngle',
+  slide1: 'slide1',
+  slide2: 'slide2',
+  slide3: 'slide3',
+  slide45: 'slide45',
+  visualDirection: 'visualDirection',
+  cta: 'cta',
+  captionBrief: 'captionBrief',
+  primaryMetric: 'primaryMetric',
+  secondaryMetric: 'secondaryMetric',
+  engagementMechanic: 'engagementMechanic',
+  storyCompanion: 'storyCompanion',
+  experimentTag: 'experimentTag',
+  productFocus: 'productFocus',
+  claimGuardrail: 'claimGuardrail',
+  assetsNeeded: 'assetsNeeded',
+  approvalStatus: 'approvalStatus',
+  publishStatus: 'publishStatus'
+} as const
+
+export type ContentPlanItemOrderByRelevanceFieldEnum = (typeof ContentPlanItemOrderByRelevanceFieldEnum)[keyof typeof ContentPlanItemOrderByRelevanceFieldEnum]
 
 
 
@@ -1195,6 +1338,13 @@ export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
  * Reference to a field of type 'ExperimentStatus'
  */
 export type EnumExperimentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExperimentStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ContentPlanStatus'
+ */
+export type EnumContentPlanStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContentPlanStatus'>
     
 
 
@@ -1362,6 +1512,7 @@ export type GlobalOmitConfig = {
   contentCalendar?: Prisma.ContentCalendarOmit
   contentExperiment?: Prisma.ContentExperimentOmit
   experimentPost?: Prisma.ExperimentPostOmit
+  contentPlanItem?: Prisma.ContentPlanItemOmit
 }
 
 /* Types for Logging */

@@ -64,6 +64,17 @@ enum ExperimentStatus {
   cancelled
 }
 
+enum ContentPlanStatus {
+  planned
+  approved_for_creation
+  creating
+  ready_for_review
+  approved
+  scheduled
+  published
+  measuring
+}
+
 model SocialAccount {
   id                String         @id @default(uuid()) @db.Char(36)
   platform          SocialPlatform
@@ -178,4 +189,46 @@ model ExperimentPost {
   @@id([experimentId, contentPostId])
   @@index([contentPostId])
   @@map("experiment_posts")
+}
+
+model ContentPlanItem {
+  id                 String            @id @default(uuid()) @db.Char(36)
+  contentId          String            @unique @map("content_id") @db.VarChar(191)
+  date               DateTime          @db.Date
+  day                String            @db.VarChar(20)
+  testPublishWindow  String            @map("test_publish_window") @db.VarChar(50)
+  pillar             String            @db.VarChar(100)
+  goal               String            @db.VarChar(100)
+  format             String            @db.VarChar(100)
+  creativeStyle      String            @map("creative_style") @db.VarChar(100)
+  audience           String            @db.Text
+  topicTag           String            @map("topic_tag") @db.VarChar(120)
+  workingTitle       String            @map("working_title") @db.VarChar(255)
+  hook               String            @db.Text
+  coreAngle          String            @map("core_angle") @db.Text
+  slide1             String            @map("slide_1") @db.Text
+  slide2             String            @map("slide_2") @db.Text
+  slide3             String            @map("slide_3") @db.Text
+  slide45            String            @map("slide_4_5") @db.Text
+  visualDirection    String            @map("visual_direction") @db.Text
+  cta                String            @db.Text
+  captionBrief       String            @map("caption_brief") @db.Text
+  primaryMetric      String            @map("primary_metric") @db.VarChar(100)
+  secondaryMetric    String            @map("secondary_metric") @db.VarChar(191)
+  engagementMechanic String            @map("engagement_mechanic") @db.Text
+  storyCompanion     String            @map("story_companion") @db.Text
+  experimentTag      String            @map("experiment_tag") @db.VarChar(255)
+  productFocus       String            @map("product_focus") @db.VarChar(255)
+  claimGuardrail     String            @map("claim_guardrail") @db.Text
+  assetsNeeded       String            @map("assets_needed") @db.Text
+  status             ContentPlanStatus @default(planned)
+  approvalStatus     String            @map("approval_status") @db.VarChar(50)
+  publishStatus      String            @map("publish_status") @db.VarChar(50)
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+
+  @@index([date, status])
+  @@index([pillar])
+  @@index([topicTag])
+  @@map("content_plan_items")
 }

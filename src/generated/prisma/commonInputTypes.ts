@@ -321,6 +321,23 @@ export type EnumExperimentStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumExperimentStatusFilter<$PrismaModel>
 }
 
+export type EnumContentPlanStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ContentPlanStatus | Prisma.EnumContentPlanStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ContentPlanStatus[]
+  notIn?: $Enums.ContentPlanStatus[]
+  not?: Prisma.NestedEnumContentPlanStatusFilter<$PrismaModel> | $Enums.ContentPlanStatus
+}
+
+export type EnumContentPlanStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ContentPlanStatus | Prisma.EnumContentPlanStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ContentPlanStatus[]
+  notIn?: $Enums.ContentPlanStatus[]
+  not?: Prisma.NestedEnumContentPlanStatusWithAggregatesFilter<$PrismaModel> | $Enums.ContentPlanStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumContentPlanStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumContentPlanStatusFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[]
@@ -643,6 +660,23 @@ export type NestedEnumExperimentStatusWithAggregatesFilter<$PrismaModel = never>
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumExperimentStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumExperimentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumContentPlanStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.ContentPlanStatus | Prisma.EnumContentPlanStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ContentPlanStatus[]
+  notIn?: $Enums.ContentPlanStatus[]
+  not?: Prisma.NestedEnumContentPlanStatusFilter<$PrismaModel> | $Enums.ContentPlanStatus
+}
+
+export type NestedEnumContentPlanStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ContentPlanStatus | Prisma.EnumContentPlanStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.ContentPlanStatus[]
+  notIn?: $Enums.ContentPlanStatus[]
+  not?: Prisma.NestedEnumContentPlanStatusWithAggregatesFilter<$PrismaModel> | $Enums.ContentPlanStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumContentPlanStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumContentPlanStatusFilter<$PrismaModel>
 }
 
 

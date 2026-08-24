@@ -8,6 +8,7 @@ const nav = [
   { href: "/", label: "Overview", icon: "⌁" },
   { href: "/posts", label: "Posts", icon: "▦" },
   { href: "/compare", label: "Compare", icon: "⇄" },
+  { href: "/content-plan", label: "Content Plan", icon: "▤" },
 ];
 
 export default function AppShell({ children }: { children: ReactNode }) {

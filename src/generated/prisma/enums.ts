@@ -85,3 +85,17 @@ export const ExperimentStatus = {
 } as const
 
 export type ExperimentStatus = (typeof ExperimentStatus)[keyof typeof ExperimentStatus]
+
+
+export const ContentPlanStatus = {
+  planned: 'planned',
+  approved_for_creation: 'approved_for_creation',
+  creating: 'creating',
+  ready_for_review: 'ready_for_review',
+  approved: 'approved',
+  scheduled: 'scheduled',
+  published: 'published',
+  measuring: 'measuring'
+} as const
+
+export type ContentPlanStatus = (typeof ContentPlanStatus)[keyof typeof ContentPlanStatus]
