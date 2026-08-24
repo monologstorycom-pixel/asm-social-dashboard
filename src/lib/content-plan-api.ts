@@ -71,7 +71,7 @@ export async function readCsvPayload(request: Request): Promise<string> {
 type PlanRecord = Record<string, unknown> & { contentId: string; date: Date };
 
 export function contentPlanJson(item: PlanRecord) {
-  const { id, contentId, date, day, testPublishWindow, pillar, goal, format, creativeStyle, audience, topicTag, workingTitle, hook, coreAngle, slide1, slide2, slide3, slide45, visualDirection, cta, captionBrief, primaryMetric, secondaryMetric, engagementMechanic, storyCompanion, experimentTag, productFocus, claimGuardrail, assetsNeeded, status, approvalStatus, publishStatus, createdAt, updatedAt } = item;
+  const { id, contentId, date, day, testPublishWindow, pillar, goal, format, creativeStyle, audience, topicTag, workingTitle, hook, coreAngle, slide1, slide2, slide3, slide45, visualDirection, cta, captionBrief, primaryMetric, secondaryMetric, engagementMechanic, storyCompanion, experimentTag, productFocus, claimGuardrail, assetsNeeded, status, approvalStatus, publishStatus, contentPostId, finalCaption, finalBrief, qaStatus, qaResult, qaNotes, approvedAt, approvalCommand, approvalReference, approvalAttemptId, approvalVersion, scheduledAt, publishedAt, publisherState, publisherError, assets, contentPost, createdAt, updatedAt } = item;
   return {
     id,
     Content_ID: contentId,
@@ -106,6 +106,23 @@ export function contentPlanJson(item: PlanRecord) {
     approval_status: approvalStatus,
     publish_status: publishStatus,
     publishing_mode: publishStatus,
+    content_post_id: contentPostId,
+    final_caption: finalCaption,
+    final_brief: finalBrief,
+    qa_status: qaStatus,
+    qa_result: qaResult,
+    qa_notes: qaNotes,
+    approved_at: approvedAt instanceof Date ? approvedAt.toISOString() : approvedAt,
+    approval_command: approvalCommand,
+    approval_reference: approvalReference,
+    approval_attempt_id: approvalAttemptId,
+    approval_version: approvalVersion,
+    scheduled_at: scheduledAt instanceof Date ? scheduledAt.toISOString() : scheduledAt,
+    published_at: publishedAt instanceof Date ? publishedAt.toISOString() : publishedAt,
+    publisher_state: publisherState,
+    publisher_error: publisherError,
+    assets,
+    content_post: contentPost,
     created_at: createdAt instanceof Date ? createdAt.toISOString() : createdAt,
     updated_at: updatedAt instanceof Date ? updatedAt.toISOString() : updatedAt,
   };

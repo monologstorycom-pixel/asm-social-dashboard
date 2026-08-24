@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { safeRoute, queryObject } from "@/lib/http";
 import { buildPostWhere, metricJson } from "@/lib/post-query";
+import { analyticsWhere, resolveAnalyticsMode } from "@/lib/operations-db";
 import { overviewFiltersSchema } from "@/lib/validation";
 
 type Totals = { posts: number; reach: number; engagement: number; saves: number; shares: number };
@@ -8,9 +9,11 @@ type Totals = { posts: number; reach: number; engagement: number; saves: number;
 export async function GET(request: Request) {
   return safeRoute(async () => {
     const filters = overviewFiltersSchema.parse(queryObject(request));
+    const mode = await resolveAnalyticsMode(filters.dataMode, filters.account);
+    const sources = analyticsWhere(mode.dataMode);
     const posts = await db.contentPost.findMany({
-      where: buildPostWhere(filters),
-      include: { socialAccount: true, assets: { orderBy: { slideNumber: "asc" } }, metrics: { orderBy: { capturedAt: "asc" } } },
+      where: { AND: [buildPostWhere(filters), sources.post] },
+      include: { socialAccount: true, assets: { orderBy: { slideNumber: "asc" } }, metrics: { where: sources.metric, orderBy: { capturedAt: "asc" } } },
       orderBy: { publishedAt: "desc" },
     });
     const latest = posts.map((post) => ({ post, metric: post.metrics.at(-1) ?? null }));
@@ -60,6 +63,9 @@ export async function GET(request: Request) {
     const accounts = [...new Map(posts.map((post) => [post.socialAccount.id, post.socialAccount])).values()];
     const unique = <T,>(values: T[]) => [...new Set(values)].sort();
     return Response.json({
+      dataMode: mode.dataMode,
+      source: mode.dataMode === "demo" ? "demo" : mode.dataMode === "live" ? "meta" : "mixed",
+      asOf: new Date().toISOString(),
       totals,
       selectedMetric: filters.metric,
       performanceOverTime,

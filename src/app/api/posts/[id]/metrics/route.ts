@@ -1,17 +1,22 @@
 import { db } from "@/lib/db";
-import { HttpError, readJson, safeRoute } from "@/lib/http";
+import { HttpError, queryObject, readJson, safeRoute } from "@/lib/http";
+import { analyticsWhere, resolveAnalyticsMode } from "@/lib/operations-db";
 import { metricJson } from "@/lib/post-query";
-import { idSchema, metricSchema } from "@/lib/validation";
+import { analyticsModeSchema, idSchema, metricSchema } from "@/lib/validation";
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function GET(_request: Request, context: Context) {
+export async function GET(request: Request, context: Context) {
   return safeRoute(async () => {
     const contentPostId = idSchema.parse((await context.params).id);
-    const exists = await db.contentPost.count({ where: { id: contentPostId } });
-    if (!exists) throw new HttpError(404, "Post not found");
-    const items = await db.postMetric.findMany({ where: { contentPostId }, orderBy: { capturedAt: "asc" } });
-    return Response.json({ items: items.map(metricJson) });
+    const target = await db.contentPost.findUnique({ where: { id: contentPostId }, select: { socialAccountId: true } });
+    if (!target) throw new HttpError(404, "Post not found");
+    const mode = await resolveAnalyticsMode(analyticsModeSchema.parse(queryObject(request).dataMode), target.socialAccountId);
+    const sources = analyticsWhere(mode.dataMode);
+    const visible = await db.contentPost.count({ where: { id: contentPostId, ...sources.post } });
+    if (!visible) throw new HttpError(404, "Post not found in selected data mode");
+    const items = await db.postMetric.findMany({ where: { contentPostId, ...sources.metric }, orderBy: { capturedAt: "asc" } });
+    return Response.json({ dataMode: mode.dataMode, source: mode.dataMode === "demo" ? "demo" : mode.dataMode === "live" ? "meta" : "mixed", items: items.map(metricJson) });
   });
 }
 

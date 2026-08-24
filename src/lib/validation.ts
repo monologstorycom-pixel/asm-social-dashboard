@@ -7,9 +7,11 @@ const creativeStyles = ["editorial_no_box", "editorial_magazine", "infographic",
 const contentTypes = ["image", "carousel", "reel", "story", "video", "text"] as const;
 const sortFields = ["publishDate", "reach", "engagementRate", "saves", "shares"] as const;
 const performanceMetrics = ["reach", "engagement", "saves", "shares"] as const;
+export const analyticsModeSchema = z.enum(["auto", "demo", "live", "all"]).default("auto");
 
 const sharedFilters = {
   account: z.uuid().optional(),
+  dataMode: analyticsModeSchema,
   dateFrom: dateOnly.optional(),
   dateTo: dateOnly.optional(),
   topic: z.string().trim().min(1).max(120).optional(),
@@ -39,6 +41,7 @@ export const compareQuerySchema = z.object({
     .transform((value) => value.split(",").map((id) => id.trim()).filter(Boolean))
     .pipe(z.array(z.uuid()).min(2).max(5))
     .refine((ids) => new Set(ids).size === ids.length, "ids must be unique"),
+  dataMode: analyticsModeSchema,
 });
 
 const postBase = z.object({

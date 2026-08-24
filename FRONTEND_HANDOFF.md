@@ -4,14 +4,14 @@ All list endpoints return JSON and all errors use `{ "error": string, "issues"?:
 
 ## Routes
 
-- `GET /api/dashboard/overview` — totals, top-five `rankings.byReach`, top-five `rankings.byEngagement`, account summaries.
-- `GET /api/posts` — `{ items, pagination }`; each item has account, ordered assets, and `metrics[0]` as latest snapshot.
+- `GET /api/dashboard/overview` — totals, performance timeline, top posts/topics/styles, accounts, and filter options.
+- `GET /api/posts` — `{ dataMode, source, items, pagination, sort }`; each item has account, ordered assets, and `latestMetric`.
 - `POST /api/posts` — create a post; returns `{ item }`, HTTP 201.
 - `GET /api/posts/:id` — full post, ordered assets, chronological metric history, calendar entry, experiments.
 - `PATCH /api/posts/:id` — partial post update; metrics are not accepted here.
 - `GET /api/posts/:id/metrics` — immutable snapshots oldest-first.
 - `POST /api/posts/:id/metrics` — append one snapshot; duplicate `(postId,capturedAt)` returns 409.
-- `GET /api/compare?ids=id1,id2` — requires 2–5 unique UUIDs; preserves requested order and returns history plus `latestMetric`, `engagement`, and `engagementRate`.
+- `GET /api/compare?ids=id1,id2` — requires 2–5 unique UUIDs; preserves requested order and returns metric history plus `latestMetric`.
 - `GET /api/health` — liveness only, no database check.
 
 ## Content Plan API
@@ -102,6 +102,30 @@ Content_ID,Date,Hari,Test_Publish_Window,Pillar,Goal,Format,Creative_Style,Audie
 
 ## Shared filters
 
-`accountId`, `dateFrom`, `dateTo`, `topic`, `pillar`, `style`, `type`, `status`; posts also accept `page` (default 1) and `pageSize` (default 20, max 100). Dates are UTC `YYYY-MM-DD`; dashboard/post date filters target `publishedAt`.
+`account`, `dataMode`, `dateFrom`, `dateTo`, `topic`, `pillar`, `style`, `type`, `status`; posts also accept `search`, `sort`, `order`, `page` (default 1), and `pageSize` (default 20, max 100). Dates are UTC `YYYY-MM-DD`; dashboard/post date filters target `publishedAt`.
 
 Enums are generated in `src/generated/prisma/enums.ts`. Dummy content exists only in `prisma/seed.ts`. Recharts is installed but unused. Replace `src/app/page.tsx`; do not embed seed data in React.
+
+## Operational and analytics contract
+
+All dashboard/post read endpoints accept `dataMode=auto|demo|live|all` and return top-level `dataMode` plus `source` (`demo`, `meta`, or `mixed`). Never combine demo and Meta series in one chart unless the operator explicitly selected `all`. `auto` stays visibly demo-labelled until the selected account/post set has at least one Meta snapshot, then selects live.
+
+- `GET /api/content-plan/:contentId/publishing-intelligence` returns `{ Content_ID, recommendation }`. Recommendation fields are `recommendedWindow`, `basis`, `confidence`, `sampleCount`, `evidence`, and `caveat`. `basis=controlled_test_window` is not an “optimal time”; `basis=account_performance` requires at least 10 comparable same-account LIVE Meta samples.
+- Plan detail responses may also include `content_post_id`, final caption/brief, QA fields, approval evidence, schedule/publication timestamps, publisher state/error, ordered assets, and linked post.
+- General `PATCH .../status` cannot enter `approved`; approval is internal and requires the exact fresh literal `APPROVE & PUBLISH`.
+
+Internal routes require a bearer token and are for Staff/publisher jobs, not browser UI:
+
+- `GET|POST /api/internal/agent/due`
+- `POST /api/internal/content-plan/:contentId/artifacts`
+- `POST /api/internal/content-plan/:contentId/approve`
+- `POST /api/internal/content-plan/:contentId/schedule`
+- `GET /api/internal/publisher/due`
+- `POST /api/internal/content-plan/:contentId/publish-result`
+- `POST /api/internal/meta/sync-due`
+- `POST /api/internal/content-plan/:contentId/meta-sync`
+- `GET /api/internal/reconciliation` (read-only)
+
+Internal authentication is fail-closed: an unset server `INTERNAL_API_TOKEN` returns 503, and invalid/missing `Authorization: Bearer …` returns 401 using constant-time comparison. Responses never expose Meta or internal tokens.
+
+Publisher callbacks are tied to `approvalAttemptId`. A success must contain `instagramMediaId`, `publishedAt`, and either `permalink` or `publicUrl`. Meta sync is read-only; it never publishes or mutates Instagram content. It appends (never overwrites) one `source=meta` snapshot per H+1, H+6, H+24, H+72, and D+7 window, deduped by `(post, source, snapshotWindow)`; the first stored snapshot transactionally advances `published → measuring` and records early engagement velocity.

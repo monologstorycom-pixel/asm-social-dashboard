@@ -99,3 +99,52 @@ export const ContentPlanStatus = {
 } as const
 
 export type ContentPlanStatus = (typeof ContentPlanStatus)[keyof typeof ContentPlanStatus]
+
+
+export const PostSource = {
+  demo: 'demo',
+  live: 'live'
+} as const
+
+export type PostSource = (typeof PostSource)[keyof typeof PostSource]
+
+
+export const MetricSource = {
+  demo: 'demo',
+  meta: 'meta',
+  manual: 'manual'
+} as const
+
+export type MetricSource = (typeof MetricSource)[keyof typeof MetricSource]
+
+
+export const MetricWindow = {
+  h1: 'h1',
+  h6: 'h6',
+  h24: 'h24',
+  h72: 'h72',
+  d7: 'd7',
+  ad_hoc: 'ad_hoc'
+} as const
+
+export type MetricWindow = (typeof MetricWindow)[keyof typeof MetricWindow]
+
+
+export const QaStatus = {
+  pending: 'pending',
+  passed: 'passed',
+  failed: 'failed'
+} as const
+
+export type QaStatus = (typeof QaStatus)[keyof typeof QaStatus]
+
+
+export const PublisherState = {
+  idle: 'idle',
+  ready: 'ready',
+  scheduled: 'scheduled',
+  published: 'published',
+  failed: 'failed'
+} as const
+
+export type PublisherState = (typeof PublisherState)[keyof typeof PublisherState]

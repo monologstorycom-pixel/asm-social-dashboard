@@ -57,3 +57,8 @@ export type ExperimentPost = Prisma.ExperimentPostModel
  * 
  */
 export type ContentPlanItem = Prisma.ContentPlanItemModel
+/**
+ * Model ContentPlanAsset
+ * 
+ */
+export type ContentPlanAsset = Prisma.ContentPlanAssetModel

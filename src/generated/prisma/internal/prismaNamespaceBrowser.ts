@@ -58,7 +58,8 @@ export const ModelName = {
   ContentCalendar: 'ContentCalendar',
   ContentExperiment: 'ContentExperiment',
   ExperimentPost: 'ExperimentPost',
-  ContentPlanItem: 'ContentPlanItem'
+  ContentPlanItem: 'ContentPlanItem',
+  ContentPlanAsset: 'ContentPlanAsset'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -104,7 +105,10 @@ export const ContentPostScalarFieldEnum = {
   status: 'status',
   instagramMediaId: 'instagramMediaId',
   publicUrl: 'publicUrl',
+  permalink: 'permalink',
+  scheduledAt: 'scheduledAt',
   publishedAt: 'publishedAt',
+  source: 'source',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -136,7 +140,10 @@ export const PostMetricScalarFieldEnum = {
   saves: 'saves',
   shares: 'shares',
   engagementTotal: 'engagementTotal',
-  engagementRate: 'engagementRate'
+  engagementRate: 'engagementRate',
+  source: 'source',
+  snapshotWindow: 'snapshotWindow',
+  earlyEngagementVelocity: 'earlyEngagementVelocity'
 } as const
 
 export type PostMetricScalarFieldEnum = (typeof PostMetricScalarFieldEnum)[keyof typeof PostMetricScalarFieldEnum]
@@ -210,11 +217,42 @@ export const ContentPlanItemScalarFieldEnum = {
   status: 'status',
   approvalStatus: 'approvalStatus',
   publishStatus: 'publishStatus',
+  contentPostId: 'contentPostId',
+  finalCaption: 'finalCaption',
+  finalBrief: 'finalBrief',
+  qaStatus: 'qaStatus',
+  qaResult: 'qaResult',
+  qaNotes: 'qaNotes',
+  approvedAt: 'approvedAt',
+  approvalCommand: 'approvalCommand',
+  approvalReference: 'approvalReference',
+  approvalAttemptId: 'approvalAttemptId',
+  approvalVersion: 'approvalVersion',
+  scheduledAt: 'scheduledAt',
+  publishedAt: 'publishedAt',
+  publisherState: 'publisherState',
+  publisherError: 'publisherError',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ContentPlanItemScalarFieldEnum = (typeof ContentPlanItemScalarFieldEnum)[keyof typeof ContentPlanItemScalarFieldEnum]
+
+
+export const ContentPlanAssetScalarFieldEnum = {
+  id: 'id',
+  contentPlanId: 'contentPlanId',
+  slideNumber: 'slideNumber',
+  localPath: 'localPath',
+  publicUrl: 'publicUrl',
+  sha256: 'sha256',
+  mimeType: 'mimeType',
+  assetRole: 'assetRole',
+  isFinal: 'isFinal',
+  createdAt: 'createdAt'
+} as const
+
+export type ContentPlanAssetScalarFieldEnum = (typeof ContentPlanAssetScalarFieldEnum)[keyof typeof ContentPlanAssetScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -250,7 +288,8 @@ export const ContentPostOrderByRelevanceFieldEnum = {
   caption: 'caption',
   topic: 'topic',
   instagramMediaId: 'instagramMediaId',
-  publicUrl: 'publicUrl'
+  publicUrl: 'publicUrl',
+  permalink: 'permalink'
 } as const
 
 export type ContentPostOrderByRelevanceFieldEnum = (typeof ContentPostOrderByRelevanceFieldEnum)[keyof typeof ContentPostOrderByRelevanceFieldEnum]
@@ -331,8 +370,30 @@ export const ContentPlanItemOrderByRelevanceFieldEnum = {
   claimGuardrail: 'claimGuardrail',
   assetsNeeded: 'assetsNeeded',
   approvalStatus: 'approvalStatus',
-  publishStatus: 'publishStatus'
+  publishStatus: 'publishStatus',
+  contentPostId: 'contentPostId',
+  finalCaption: 'finalCaption',
+  finalBrief: 'finalBrief',
+  qaResult: 'qaResult',
+  qaNotes: 'qaNotes',
+  approvalCommand: 'approvalCommand',
+  approvalReference: 'approvalReference',
+  approvalAttemptId: 'approvalAttemptId',
+  publisherError: 'publisherError'
 } as const
 
 export type ContentPlanItemOrderByRelevanceFieldEnum = (typeof ContentPlanItemOrderByRelevanceFieldEnum)[keyof typeof ContentPlanItemOrderByRelevanceFieldEnum]
+
+
+export const ContentPlanAssetOrderByRelevanceFieldEnum = {
+  id: 'id',
+  contentPlanId: 'contentPlanId',
+  localPath: 'localPath',
+  publicUrl: 'publicUrl',
+  sha256: 'sha256',
+  mimeType: 'mimeType',
+  assetRole: 'assetRole'
+} as const
+
+export type ContentPlanAssetOrderByRelevanceFieldEnum = (typeof ContentPlanAssetOrderByRelevanceFieldEnum)[keyof typeof ContentPlanAssetOrderByRelevanceFieldEnum]
 

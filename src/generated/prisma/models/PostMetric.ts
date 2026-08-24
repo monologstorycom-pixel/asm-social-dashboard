@@ -36,6 +36,7 @@ export type PostMetricAvgAggregateOutputType = {
   shares: number | null
   engagementTotal: number | null
   engagementRate: runtime.Decimal | null
+  earlyEngagementVelocity: runtime.Decimal | null
 }
 
 export type PostMetricSumAggregateOutputType = {
@@ -48,6 +49,7 @@ export type PostMetricSumAggregateOutputType = {
   shares: number | null
   engagementTotal: number | null
   engagementRate: runtime.Decimal | null
+  earlyEngagementVelocity: runtime.Decimal | null
 }
 
 export type PostMetricMinAggregateOutputType = {
@@ -63,6 +65,9 @@ export type PostMetricMinAggregateOutputType = {
   shares: number | null
   engagementTotal: number | null
   engagementRate: runtime.Decimal | null
+  source: $Enums.MetricSource | null
+  snapshotWindow: $Enums.MetricWindow | null
+  earlyEngagementVelocity: runtime.Decimal | null
 }
 
 export type PostMetricMaxAggregateOutputType = {
@@ -78,6 +83,9 @@ export type PostMetricMaxAggregateOutputType = {
   shares: number | null
   engagementTotal: number | null
   engagementRate: runtime.Decimal | null
+  source: $Enums.MetricSource | null
+  snapshotWindow: $Enums.MetricWindow | null
+  earlyEngagementVelocity: runtime.Decimal | null
 }
 
 export type PostMetricCountAggregateOutputType = {
@@ -93,6 +101,9 @@ export type PostMetricCountAggregateOutputType = {
   shares: number
   engagementTotal: number
   engagementRate: number
+  source: number
+  snapshotWindow: number
+  earlyEngagementVelocity: number
   _all: number
 }
 
@@ -107,6 +118,7 @@ export type PostMetricAvgAggregateInputType = {
   shares?: true
   engagementTotal?: true
   engagementRate?: true
+  earlyEngagementVelocity?: true
 }
 
 export type PostMetricSumAggregateInputType = {
@@ -119,6 +131,7 @@ export type PostMetricSumAggregateInputType = {
   shares?: true
   engagementTotal?: true
   engagementRate?: true
+  earlyEngagementVelocity?: true
 }
 
 export type PostMetricMinAggregateInputType = {
@@ -134,6 +147,9 @@ export type PostMetricMinAggregateInputType = {
   shares?: true
   engagementTotal?: true
   engagementRate?: true
+  source?: true
+  snapshotWindow?: true
+  earlyEngagementVelocity?: true
 }
 
 export type PostMetricMaxAggregateInputType = {
@@ -149,6 +165,9 @@ export type PostMetricMaxAggregateInputType = {
   shares?: true
   engagementTotal?: true
   engagementRate?: true
+  source?: true
+  snapshotWindow?: true
+  earlyEngagementVelocity?: true
 }
 
 export type PostMetricCountAggregateInputType = {
@@ -164,6 +183,9 @@ export type PostMetricCountAggregateInputType = {
   shares?: true
   engagementTotal?: true
   engagementRate?: true
+  source?: true
+  snapshotWindow?: true
+  earlyEngagementVelocity?: true
   _all?: true
 }
 
@@ -266,6 +288,9 @@ export type PostMetricGroupByOutputType = {
   shares: number
   engagementTotal: number
   engagementRate: runtime.Decimal
+  source: $Enums.MetricSource
+  snapshotWindow: $Enums.MetricWindow | null
+  earlyEngagementVelocity: runtime.Decimal | null
   _count: PostMetricCountAggregateOutputType | null
   _avg: PostMetricAvgAggregateOutputType | null
   _sum: PostMetricSumAggregateOutputType | null
@@ -304,6 +329,9 @@ export type PostMetricWhereInput = {
   shares?: Prisma.IntFilter<"PostMetric"> | number
   engagementTotal?: Prisma.IntFilter<"PostMetric"> | number
   engagementRate?: Prisma.DecimalFilter<"PostMetric"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: Prisma.EnumMetricSourceFilter<"PostMetric"> | $Enums.MetricSource
+  snapshotWindow?: Prisma.EnumMetricWindowNullableFilter<"PostMetric"> | $Enums.MetricWindow | null
+  earlyEngagementVelocity?: Prisma.DecimalNullableFilter<"PostMetric"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   contentPost?: Prisma.XOR<Prisma.ContentPostScalarRelationFilter, Prisma.ContentPostWhereInput>
 }
 
@@ -320,6 +348,9 @@ export type PostMetricOrderByWithRelationInput = {
   shares?: Prisma.SortOrder
   engagementTotal?: Prisma.SortOrder
   engagementRate?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  snapshotWindow?: Prisma.SortOrderInput | Prisma.SortOrder
+  earlyEngagementVelocity?: Prisma.SortOrderInput | Prisma.SortOrder
   contentPost?: Prisma.ContentPostOrderByWithRelationInput
   _relevance?: Prisma.PostMetricOrderByRelevanceInput
 }
@@ -327,6 +358,7 @@ export type PostMetricOrderByWithRelationInput = {
 export type PostMetricWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   contentPostId_capturedAt?: Prisma.PostMetricContentPostIdCapturedAtCompoundUniqueInput
+  contentPostId_source_snapshotWindow?: Prisma.PostMetricContentPostIdSourceSnapshotWindowCompoundUniqueInput
   AND?: Prisma.PostMetricWhereInput | Prisma.PostMetricWhereInput[]
   OR?: Prisma.PostMetricWhereInput[]
   NOT?: Prisma.PostMetricWhereInput | Prisma.PostMetricWhereInput[]
@@ -341,8 +373,11 @@ export type PostMetricWhereUniqueInput = Prisma.AtLeast<{
   shares?: Prisma.IntFilter<"PostMetric"> | number
   engagementTotal?: Prisma.IntFilter<"PostMetric"> | number
   engagementRate?: Prisma.DecimalFilter<"PostMetric"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: Prisma.EnumMetricSourceFilter<"PostMetric"> | $Enums.MetricSource
+  snapshotWindow?: Prisma.EnumMetricWindowNullableFilter<"PostMetric"> | $Enums.MetricWindow | null
+  earlyEngagementVelocity?: Prisma.DecimalNullableFilter<"PostMetric"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   contentPost?: Prisma.XOR<Prisma.ContentPostScalarRelationFilter, Prisma.ContentPostWhereInput>
-}, "id" | "contentPostId_capturedAt">
+}, "id" | "contentPostId_capturedAt" | "contentPostId_source_snapshotWindow">
 
 export type PostMetricOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -357,6 +392,9 @@ export type PostMetricOrderByWithAggregationInput = {
   shares?: Prisma.SortOrder
   engagementTotal?: Prisma.SortOrder
   engagementRate?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  snapshotWindow?: Prisma.SortOrderInput | Prisma.SortOrder
+  earlyEngagementVelocity?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PostMetricCountOrderByAggregateInput
   _avg?: Prisma.PostMetricAvgOrderByAggregateInput
   _max?: Prisma.PostMetricMaxOrderByAggregateInput
@@ -380,6 +418,9 @@ export type PostMetricScalarWhereWithAggregatesInput = {
   shares?: Prisma.IntWithAggregatesFilter<"PostMetric"> | number
   engagementTotal?: Prisma.IntWithAggregatesFilter<"PostMetric"> | number
   engagementRate?: Prisma.DecimalWithAggregatesFilter<"PostMetric"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: Prisma.EnumMetricSourceWithAggregatesFilter<"PostMetric"> | $Enums.MetricSource
+  snapshotWindow?: Prisma.EnumMetricWindowNullableWithAggregatesFilter<"PostMetric"> | $Enums.MetricWindow | null
+  earlyEngagementVelocity?: Prisma.DecimalNullableWithAggregatesFilter<"PostMetric"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricCreateInput = {
@@ -394,6 +435,9 @@ export type PostMetricCreateInput = {
   shares?: number
   engagementTotal: number
   engagementRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: $Enums.MetricSource
+  snapshotWindow?: $Enums.MetricWindow | null
+  earlyEngagementVelocity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   contentPost: Prisma.ContentPostCreateNestedOneWithoutMetricsInput
 }
 
@@ -410,6 +454,9 @@ export type PostMetricUncheckedCreateInput = {
   shares?: number
   engagementTotal: number
   engagementRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: $Enums.MetricSource
+  snapshotWindow?: $Enums.MetricWindow | null
+  earlyEngagementVelocity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricUpdateInput = {
@@ -424,6 +471,9 @@ export type PostMetricUpdateInput = {
   shares?: Prisma.IntFieldUpdateOperationsInput | number
   engagementTotal?: Prisma.IntFieldUpdateOperationsInput | number
   engagementRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: Prisma.EnumMetricSourceFieldUpdateOperationsInput | $Enums.MetricSource
+  snapshotWindow?: Prisma.NullableEnumMetricWindowFieldUpdateOperationsInput | $Enums.MetricWindow | null
+  earlyEngagementVelocity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   contentPost?: Prisma.ContentPostUpdateOneRequiredWithoutMetricsNestedInput
 }
 
@@ -440,6 +490,9 @@ export type PostMetricUncheckedUpdateInput = {
   shares?: Prisma.IntFieldUpdateOperationsInput | number
   engagementTotal?: Prisma.IntFieldUpdateOperationsInput | number
   engagementRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: Prisma.EnumMetricSourceFieldUpdateOperationsInput | $Enums.MetricSource
+  snapshotWindow?: Prisma.NullableEnumMetricWindowFieldUpdateOperationsInput | $Enums.MetricWindow | null
+  earlyEngagementVelocity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricCreateManyInput = {
@@ -455,6 +508,9 @@ export type PostMetricCreateManyInput = {
   shares?: number
   engagementTotal: number
   engagementRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: $Enums.MetricSource
+  snapshotWindow?: $Enums.MetricWindow | null
+  earlyEngagementVelocity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricUpdateManyMutationInput = {
@@ -469,6 +525,9 @@ export type PostMetricUpdateManyMutationInput = {
   shares?: Prisma.IntFieldUpdateOperationsInput | number
   engagementTotal?: Prisma.IntFieldUpdateOperationsInput | number
   engagementRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: Prisma.EnumMetricSourceFieldUpdateOperationsInput | $Enums.MetricSource
+  snapshotWindow?: Prisma.NullableEnumMetricWindowFieldUpdateOperationsInput | $Enums.MetricWindow | null
+  earlyEngagementVelocity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricUncheckedUpdateManyInput = {
@@ -484,6 +543,9 @@ export type PostMetricUncheckedUpdateManyInput = {
   shares?: Prisma.IntFieldUpdateOperationsInput | number
   engagementTotal?: Prisma.IntFieldUpdateOperationsInput | number
   engagementRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: Prisma.EnumMetricSourceFieldUpdateOperationsInput | $Enums.MetricSource
+  snapshotWindow?: Prisma.NullableEnumMetricWindowFieldUpdateOperationsInput | $Enums.MetricWindow | null
+  earlyEngagementVelocity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricListRelationFilter = {
@@ -507,6 +569,12 @@ export type PostMetricContentPostIdCapturedAtCompoundUniqueInput = {
   capturedAt: Date | string
 }
 
+export type PostMetricContentPostIdSourceSnapshotWindowCompoundUniqueInput = {
+  contentPostId: string
+  source: $Enums.MetricSource
+  snapshotWindow: $Enums.MetricWindow
+}
+
 export type PostMetricCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   contentPostId?: Prisma.SortOrder
@@ -520,6 +588,9 @@ export type PostMetricCountOrderByAggregateInput = {
   shares?: Prisma.SortOrder
   engagementTotal?: Prisma.SortOrder
   engagementRate?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  snapshotWindow?: Prisma.SortOrder
+  earlyEngagementVelocity?: Prisma.SortOrder
 }
 
 export type PostMetricAvgOrderByAggregateInput = {
@@ -532,6 +603,7 @@ export type PostMetricAvgOrderByAggregateInput = {
   shares?: Prisma.SortOrder
   engagementTotal?: Prisma.SortOrder
   engagementRate?: Prisma.SortOrder
+  earlyEngagementVelocity?: Prisma.SortOrder
 }
 
 export type PostMetricMaxOrderByAggregateInput = {
@@ -547,6 +619,9 @@ export type PostMetricMaxOrderByAggregateInput = {
   shares?: Prisma.SortOrder
   engagementTotal?: Prisma.SortOrder
   engagementRate?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  snapshotWindow?: Prisma.SortOrder
+  earlyEngagementVelocity?: Prisma.SortOrder
 }
 
 export type PostMetricMinOrderByAggregateInput = {
@@ -562,6 +637,9 @@ export type PostMetricMinOrderByAggregateInput = {
   shares?: Prisma.SortOrder
   engagementTotal?: Prisma.SortOrder
   engagementRate?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  snapshotWindow?: Prisma.SortOrder
+  earlyEngagementVelocity?: Prisma.SortOrder
 }
 
 export type PostMetricSumOrderByAggregateInput = {
@@ -574,6 +652,7 @@ export type PostMetricSumOrderByAggregateInput = {
   shares?: Prisma.SortOrder
   engagementTotal?: Prisma.SortOrder
   engagementRate?: Prisma.SortOrder
+  earlyEngagementVelocity?: Prisma.SortOrder
 }
 
 export type PostMetricCreateNestedManyWithoutContentPostInput = {
@@ -626,6 +705,22 @@ export type DecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
+export type EnumMetricSourceFieldUpdateOperationsInput = {
+  set?: $Enums.MetricSource
+}
+
+export type NullableEnumMetricWindowFieldUpdateOperationsInput = {
+  set?: $Enums.MetricWindow | null
+}
+
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
 export type PostMetricCreateWithoutContentPostInput = {
   id?: string
   capturedAt: Date | string
@@ -638,6 +733,9 @@ export type PostMetricCreateWithoutContentPostInput = {
   shares?: number
   engagementTotal: number
   engagementRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: $Enums.MetricSource
+  snapshotWindow?: $Enums.MetricWindow | null
+  earlyEngagementVelocity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricUncheckedCreateWithoutContentPostInput = {
@@ -652,6 +750,9 @@ export type PostMetricUncheckedCreateWithoutContentPostInput = {
   shares?: number
   engagementTotal: number
   engagementRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: $Enums.MetricSource
+  snapshotWindow?: $Enums.MetricWindow | null
+  earlyEngagementVelocity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricCreateOrConnectWithoutContentPostInput = {
@@ -696,6 +797,9 @@ export type PostMetricScalarWhereInput = {
   shares?: Prisma.IntFilter<"PostMetric"> | number
   engagementTotal?: Prisma.IntFilter<"PostMetric"> | number
   engagementRate?: Prisma.DecimalFilter<"PostMetric"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: Prisma.EnumMetricSourceFilter<"PostMetric"> | $Enums.MetricSource
+  snapshotWindow?: Prisma.EnumMetricWindowNullableFilter<"PostMetric"> | $Enums.MetricWindow | null
+  earlyEngagementVelocity?: Prisma.DecimalNullableFilter<"PostMetric"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricCreateManyContentPostInput = {
@@ -710,6 +814,9 @@ export type PostMetricCreateManyContentPostInput = {
   shares?: number
   engagementTotal: number
   engagementRate: runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: $Enums.MetricSource
+  snapshotWindow?: $Enums.MetricWindow | null
+  earlyEngagementVelocity?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricUpdateWithoutContentPostInput = {
@@ -724,6 +831,9 @@ export type PostMetricUpdateWithoutContentPostInput = {
   shares?: Prisma.IntFieldUpdateOperationsInput | number
   engagementTotal?: Prisma.IntFieldUpdateOperationsInput | number
   engagementRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: Prisma.EnumMetricSourceFieldUpdateOperationsInput | $Enums.MetricSource
+  snapshotWindow?: Prisma.NullableEnumMetricWindowFieldUpdateOperationsInput | $Enums.MetricWindow | null
+  earlyEngagementVelocity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricUncheckedUpdateWithoutContentPostInput = {
@@ -738,6 +848,9 @@ export type PostMetricUncheckedUpdateWithoutContentPostInput = {
   shares?: Prisma.IntFieldUpdateOperationsInput | number
   engagementTotal?: Prisma.IntFieldUpdateOperationsInput | number
   engagementRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: Prisma.EnumMetricSourceFieldUpdateOperationsInput | $Enums.MetricSource
+  snapshotWindow?: Prisma.NullableEnumMetricWindowFieldUpdateOperationsInput | $Enums.MetricWindow | null
+  earlyEngagementVelocity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type PostMetricUncheckedUpdateManyWithoutContentPostInput = {
@@ -752,6 +865,9 @@ export type PostMetricUncheckedUpdateManyWithoutContentPostInput = {
   shares?: Prisma.IntFieldUpdateOperationsInput | number
   engagementTotal?: Prisma.IntFieldUpdateOperationsInput | number
   engagementRate?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  source?: Prisma.EnumMetricSourceFieldUpdateOperationsInput | $Enums.MetricSource
+  snapshotWindow?: Prisma.NullableEnumMetricWindowFieldUpdateOperationsInput | $Enums.MetricWindow | null
+  earlyEngagementVelocity?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 
@@ -769,6 +885,9 @@ export type PostMetricSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   shares?: boolean
   engagementTotal?: boolean
   engagementRate?: boolean
+  source?: boolean
+  snapshotWindow?: boolean
+  earlyEngagementVelocity?: boolean
   contentPost?: boolean | Prisma.ContentPostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["postMetric"]>
 
@@ -787,9 +906,12 @@ export type PostMetricSelectScalar = {
   shares?: boolean
   engagementTotal?: boolean
   engagementRate?: boolean
+  source?: boolean
+  snapshotWindow?: boolean
+  earlyEngagementVelocity?: boolean
 }
 
-export type PostMetricOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contentPostId" | "capturedAt" | "reach" | "impressions" | "views" | "likes" | "comments" | "saves" | "shares" | "engagementTotal" | "engagementRate", ExtArgs["result"]["postMetric"]>
+export type PostMetricOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contentPostId" | "capturedAt" | "reach" | "impressions" | "views" | "likes" | "comments" | "saves" | "shares" | "engagementTotal" | "engagementRate" | "source" | "snapshotWindow" | "earlyEngagementVelocity", ExtArgs["result"]["postMetric"]>
 export type PostMetricInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   contentPost?: boolean | Prisma.ContentPostDefaultArgs<ExtArgs>
 }
@@ -812,6 +934,9 @@ export type $PostMetricPayload<ExtArgs extends runtime.Types.Extensions.Internal
     shares: number
     engagementTotal: number
     engagementRate: runtime.Decimal
+    source: $Enums.MetricSource
+    snapshotWindow: $Enums.MetricWindow | null
+    earlyEngagementVelocity: runtime.Decimal | null
   }, ExtArgs["result"]["postMetric"]>
   composites: {}
 }
@@ -1194,6 +1319,9 @@ export interface PostMetricFieldRefs {
   readonly shares: Prisma.FieldRef<"PostMetric", 'Int'>
   readonly engagementTotal: Prisma.FieldRef<"PostMetric", 'Int'>
   readonly engagementRate: Prisma.FieldRef<"PostMetric", 'Decimal'>
+  readonly source: Prisma.FieldRef<"PostMetric", 'MetricSource'>
+  readonly snapshotWindow: Prisma.FieldRef<"PostMetric", 'MetricWindow'>
+  readonly earlyEngagementVelocity: Prisma.FieldRef<"PostMetric", 'Decimal'>
 }
     
 

@@ -1,17 +1,20 @@
 import { db } from "@/lib/db";
 import { safeRoute, queryObject, readJson } from "@/lib/http";
 import { buildPostWhere, metricJson, sortPosts } from "@/lib/post-query";
+import { analyticsWhere, resolveAnalyticsMode } from "@/lib/operations-db";
 import { createPostSchema, postFiltersSchema } from "@/lib/validation";
 
 export async function GET(request: Request) {
   return safeRoute(async () => {
     const filters = postFiltersSchema.parse(queryObject(request));
+    const mode = await resolveAnalyticsMode(filters.dataMode, filters.account);
+    const sources = analyticsWhere(mode.dataMode);
     const candidates = await db.contentPost.findMany({
-      where: buildPostWhere(filters),
+      where: { AND: [buildPostWhere(filters), sources.post] },
       include: {
         socialAccount: true,
         assets: { orderBy: { slideNumber: "asc" } },
-        metrics: { orderBy: { capturedAt: "desc" }, take: 1 },
+        metrics: { where: sources.metric, orderBy: { capturedAt: "desc" }, take: 1 },
       },
     });
     // ponytail: metric sorting is in-memory for V1; use a latest-metric SQL view when pagination volume outgrows one process.
@@ -21,7 +24,7 @@ export async function GET(request: Request) {
       ...post,
       latestMetric: metrics[0] ? metricJson(metrics[0]) : null,
     }));
-    return Response.json({ items, pagination: { page: filters.page, pageSize: filters.pageSize, total: candidates.length }, sort: { field: filters.sort, order: filters.order } });
+    return Response.json({ dataMode: mode.dataMode, source: mode.dataMode === "demo" ? "demo" : mode.dataMode === "live" ? "meta" : "mixed", items, pagination: { page: filters.page, pageSize: filters.pageSize, total: candidates.length }, sort: { field: filters.sort, order: filters.order } });
   });
 }
 

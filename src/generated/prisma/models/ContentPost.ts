@@ -47,7 +47,10 @@ export type ContentPostMinAggregateOutputType = {
   status: $Enums.PostStatus | null
   instagramMediaId: string | null
   publicUrl: string | null
+  permalink: string | null
+  scheduledAt: Date | null
   publishedAt: Date | null
+  source: $Enums.PostSource | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -65,7 +68,10 @@ export type ContentPostMaxAggregateOutputType = {
   status: $Enums.PostStatus | null
   instagramMediaId: string | null
   publicUrl: string | null
+  permalink: string | null
+  scheduledAt: Date | null
   publishedAt: Date | null
+  source: $Enums.PostSource | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -83,7 +89,10 @@ export type ContentPostCountAggregateOutputType = {
   status: number
   instagramMediaId: number
   publicUrl: number
+  permalink: number
+  scheduledAt: number
   publishedAt: number
+  source: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -111,7 +120,10 @@ export type ContentPostMinAggregateInputType = {
   status?: true
   instagramMediaId?: true
   publicUrl?: true
+  permalink?: true
+  scheduledAt?: true
   publishedAt?: true
+  source?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -129,7 +141,10 @@ export type ContentPostMaxAggregateInputType = {
   status?: true
   instagramMediaId?: true
   publicUrl?: true
+  permalink?: true
+  scheduledAt?: true
   publishedAt?: true
+  source?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -147,7 +162,10 @@ export type ContentPostCountAggregateInputType = {
   status?: true
   instagramMediaId?: true
   publicUrl?: true
+  permalink?: true
+  scheduledAt?: true
   publishedAt?: true
+  source?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -252,7 +270,10 @@ export type ContentPostGroupByOutputType = {
   status: $Enums.PostStatus
   instagramMediaId: string | null
   publicUrl: string | null
+  permalink: string | null
+  scheduledAt: Date | null
   publishedAt: Date | null
+  source: $Enums.PostSource
   createdAt: Date
   updatedAt: Date
   _count: ContentPostCountAggregateOutputType | null
@@ -293,7 +314,10 @@ export type ContentPostWhereInput = {
   status?: Prisma.EnumPostStatusFilter<"ContentPost"> | $Enums.PostStatus
   instagramMediaId?: Prisma.StringNullableFilter<"ContentPost"> | string | null
   publicUrl?: Prisma.StringNullableFilter<"ContentPost"> | string | null
+  permalink?: Prisma.StringNullableFilter<"ContentPost"> | string | null
+  scheduledAt?: Prisma.DateTimeNullableFilter<"ContentPost"> | Date | string | null
   publishedAt?: Prisma.DateTimeNullableFilter<"ContentPost"> | Date | string | null
+  source?: Prisma.EnumPostSourceFilter<"ContentPost"> | $Enums.PostSource
   createdAt?: Prisma.DateTimeFilter<"ContentPost"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ContentPost"> | Date | string
   socialAccount?: Prisma.XOR<Prisma.SocialAccountScalarRelationFilter, Prisma.SocialAccountWhereInput>
@@ -301,6 +325,7 @@ export type ContentPostWhereInput = {
   metrics?: Prisma.PostMetricListRelationFilter
   calendarEntry?: Prisma.XOR<Prisma.ContentCalendarNullableScalarRelationFilter, Prisma.ContentCalendarWhereInput> | null
   experiments?: Prisma.ExperimentPostListRelationFilter
+  contentPlan?: Prisma.XOR<Prisma.ContentPlanItemNullableScalarRelationFilter, Prisma.ContentPlanItemWhereInput> | null
 }
 
 export type ContentPostOrderByWithRelationInput = {
@@ -316,7 +341,10 @@ export type ContentPostOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   instagramMediaId?: Prisma.SortOrderInput | Prisma.SortOrder
   publicUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  permalink?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   socialAccount?: Prisma.SocialAccountOrderByWithRelationInput
@@ -324,11 +352,13 @@ export type ContentPostOrderByWithRelationInput = {
   metrics?: Prisma.PostMetricOrderByRelationAggregateInput
   calendarEntry?: Prisma.ContentCalendarOrderByWithRelationInput
   experiments?: Prisma.ExperimentPostOrderByRelationAggregateInput
+  contentPlan?: Prisma.ContentPlanItemOrderByWithRelationInput
   _relevance?: Prisma.ContentPostOrderByRelevanceInput
 }
 
 export type ContentPostWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  instagramMediaId?: string
   AND?: Prisma.ContentPostWhereInput | Prisma.ContentPostWhereInput[]
   OR?: Prisma.ContentPostWhereInput[]
   NOT?: Prisma.ContentPostWhereInput | Prisma.ContentPostWhereInput[]
@@ -341,9 +371,11 @@ export type ContentPostWhereUniqueInput = Prisma.AtLeast<{
   creativeStyle?: Prisma.EnumCreativeStyleFilter<"ContentPost"> | $Enums.CreativeStyle
   slideCount?: Prisma.IntFilter<"ContentPost"> | number
   status?: Prisma.EnumPostStatusFilter<"ContentPost"> | $Enums.PostStatus
-  instagramMediaId?: Prisma.StringNullableFilter<"ContentPost"> | string | null
   publicUrl?: Prisma.StringNullableFilter<"ContentPost"> | string | null
+  permalink?: Prisma.StringNullableFilter<"ContentPost"> | string | null
+  scheduledAt?: Prisma.DateTimeNullableFilter<"ContentPost"> | Date | string | null
   publishedAt?: Prisma.DateTimeNullableFilter<"ContentPost"> | Date | string | null
+  source?: Prisma.EnumPostSourceFilter<"ContentPost"> | $Enums.PostSource
   createdAt?: Prisma.DateTimeFilter<"ContentPost"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ContentPost"> | Date | string
   socialAccount?: Prisma.XOR<Prisma.SocialAccountScalarRelationFilter, Prisma.SocialAccountWhereInput>
@@ -351,7 +383,8 @@ export type ContentPostWhereUniqueInput = Prisma.AtLeast<{
   metrics?: Prisma.PostMetricListRelationFilter
   calendarEntry?: Prisma.XOR<Prisma.ContentCalendarNullableScalarRelationFilter, Prisma.ContentCalendarWhereInput> | null
   experiments?: Prisma.ExperimentPostListRelationFilter
-}, "id">
+  contentPlan?: Prisma.XOR<Prisma.ContentPlanItemNullableScalarRelationFilter, Prisma.ContentPlanItemWhereInput> | null
+}, "id" | "instagramMediaId">
 
 export type ContentPostOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -366,7 +399,10 @@ export type ContentPostOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   instagramMediaId?: Prisma.SortOrderInput | Prisma.SortOrder
   publicUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  permalink?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduledAt?: Prisma.SortOrderInput | Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ContentPostCountOrderByAggregateInput
@@ -392,7 +428,10 @@ export type ContentPostScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumPostStatusWithAggregatesFilter<"ContentPost"> | $Enums.PostStatus
   instagramMediaId?: Prisma.StringNullableWithAggregatesFilter<"ContentPost"> | string | null
   publicUrl?: Prisma.StringNullableWithAggregatesFilter<"ContentPost"> | string | null
+  permalink?: Prisma.StringNullableWithAggregatesFilter<"ContentPost"> | string | null
+  scheduledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ContentPost"> | Date | string | null
   publishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ContentPost"> | Date | string | null
+  source?: Prisma.EnumPostSourceWithAggregatesFilter<"ContentPost"> | $Enums.PostSource
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ContentPost"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ContentPost"> | Date | string
 }
@@ -409,7 +448,10 @@ export type ContentPostCreateInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   socialAccount: Prisma.SocialAccountCreateNestedOneWithoutPostsInput
@@ -417,6 +459,7 @@ export type ContentPostCreateInput = {
   metrics?: Prisma.PostMetricCreateNestedManyWithoutContentPostInput
   calendarEntry?: Prisma.ContentCalendarCreateNestedOneWithoutContentPostInput
   experiments?: Prisma.ExperimentPostCreateNestedManyWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostUncheckedCreateInput = {
@@ -432,13 +475,17 @@ export type ContentPostUncheckedCreateInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.PostAssetUncheckedCreateNestedManyWithoutContentPostInput
   metrics?: Prisma.PostMetricUncheckedCreateNestedManyWithoutContentPostInput
   calendarEntry?: Prisma.ContentCalendarUncheckedCreateNestedOneWithoutContentPostInput
   experiments?: Prisma.ExperimentPostUncheckedCreateNestedManyWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostUpdateInput = {
@@ -453,7 +500,10 @@ export type ContentPostUpdateInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   socialAccount?: Prisma.SocialAccountUpdateOneRequiredWithoutPostsNestedInput
@@ -461,6 +511,7 @@ export type ContentPostUpdateInput = {
   metrics?: Prisma.PostMetricUpdateManyWithoutContentPostNestedInput
   calendarEntry?: Prisma.ContentCalendarUpdateOneWithoutContentPostNestedInput
   experiments?: Prisma.ExperimentPostUpdateManyWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUpdateOneWithoutContentPostNestedInput
 }
 
 export type ContentPostUncheckedUpdateInput = {
@@ -476,13 +527,17 @@ export type ContentPostUncheckedUpdateInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.PostAssetUncheckedUpdateManyWithoutContentPostNestedInput
   metrics?: Prisma.PostMetricUncheckedUpdateManyWithoutContentPostNestedInput
   calendarEntry?: Prisma.ContentCalendarUncheckedUpdateOneWithoutContentPostNestedInput
   experiments?: Prisma.ExperimentPostUncheckedUpdateManyWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedUpdateOneWithoutContentPostNestedInput
 }
 
 export type ContentPostCreateManyInput = {
@@ -498,7 +553,10 @@ export type ContentPostCreateManyInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -515,7 +573,10 @@ export type ContentPostUpdateManyMutationInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -533,7 +594,10 @@ export type ContentPostUncheckedUpdateManyInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -567,7 +631,10 @@ export type ContentPostCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   instagramMediaId?: Prisma.SortOrder
   publicUrl?: Prisma.SortOrder
+  permalink?: Prisma.SortOrder
+  scheduledAt?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -589,7 +656,10 @@ export type ContentPostMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   instagramMediaId?: Prisma.SortOrder
   publicUrl?: Prisma.SortOrder
+  permalink?: Prisma.SortOrder
+  scheduledAt?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -607,7 +677,10 @@ export type ContentPostMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   instagramMediaId?: Prisma.SortOrder
   publicUrl?: Prisma.SortOrder
+  permalink?: Prisma.SortOrder
+  scheduledAt?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -619,6 +692,11 @@ export type ContentPostSumOrderByAggregateInput = {
 export type ContentPostScalarRelationFilter = {
   is?: Prisma.ContentPostWhereInput
   isNot?: Prisma.ContentPostWhereInput
+}
+
+export type ContentPostNullableScalarRelationFilter = {
+  is?: Prisma.ContentPostWhereInput | null
+  isNot?: Prisma.ContentPostWhereInput | null
 }
 
 export type ContentPostCreateNestedManyWithoutSocialAccountInput = {
@@ -695,6 +773,10 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
 }
 
+export type EnumPostSourceFieldUpdateOperationsInput = {
+  set?: $Enums.PostSource
+}
+
 export type ContentPostCreateNestedOneWithoutAssetsInput = {
   create?: Prisma.XOR<Prisma.ContentPostCreateWithoutAssetsInput, Prisma.ContentPostUncheckedCreateWithoutAssetsInput>
   connectOrCreate?: Prisma.ContentPostCreateOrConnectWithoutAssetsInput
@@ -751,6 +833,22 @@ export type ContentPostUpdateOneRequiredWithoutExperimentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ContentPostUpdateToOneWithWhereWithoutExperimentsInput, Prisma.ContentPostUpdateWithoutExperimentsInput>, Prisma.ContentPostUncheckedUpdateWithoutExperimentsInput>
 }
 
+export type ContentPostCreateNestedOneWithoutContentPlanInput = {
+  create?: Prisma.XOR<Prisma.ContentPostCreateWithoutContentPlanInput, Prisma.ContentPostUncheckedCreateWithoutContentPlanInput>
+  connectOrCreate?: Prisma.ContentPostCreateOrConnectWithoutContentPlanInput
+  connect?: Prisma.ContentPostWhereUniqueInput
+}
+
+export type ContentPostUpdateOneWithoutContentPlanNestedInput = {
+  create?: Prisma.XOR<Prisma.ContentPostCreateWithoutContentPlanInput, Prisma.ContentPostUncheckedCreateWithoutContentPlanInput>
+  connectOrCreate?: Prisma.ContentPostCreateOrConnectWithoutContentPlanInput
+  upsert?: Prisma.ContentPostUpsertWithoutContentPlanInput
+  disconnect?: Prisma.ContentPostWhereInput | boolean
+  delete?: Prisma.ContentPostWhereInput | boolean
+  connect?: Prisma.ContentPostWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ContentPostUpdateToOneWithWhereWithoutContentPlanInput, Prisma.ContentPostUpdateWithoutContentPlanInput>, Prisma.ContentPostUncheckedUpdateWithoutContentPlanInput>
+}
+
 export type ContentPostCreateWithoutSocialAccountInput = {
   id?: string
   title: string
@@ -763,13 +861,17 @@ export type ContentPostCreateWithoutSocialAccountInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.PostAssetCreateNestedManyWithoutContentPostInput
   metrics?: Prisma.PostMetricCreateNestedManyWithoutContentPostInput
   calendarEntry?: Prisma.ContentCalendarCreateNestedOneWithoutContentPostInput
   experiments?: Prisma.ExperimentPostCreateNestedManyWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostUncheckedCreateWithoutSocialAccountInput = {
@@ -784,13 +886,17 @@ export type ContentPostUncheckedCreateWithoutSocialAccountInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.PostAssetUncheckedCreateNestedManyWithoutContentPostInput
   metrics?: Prisma.PostMetricUncheckedCreateNestedManyWithoutContentPostInput
   calendarEntry?: Prisma.ContentCalendarUncheckedCreateNestedOneWithoutContentPostInput
   experiments?: Prisma.ExperimentPostUncheckedCreateNestedManyWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostCreateOrConnectWithoutSocialAccountInput = {
@@ -835,7 +941,10 @@ export type ContentPostScalarWhereInput = {
   status?: Prisma.EnumPostStatusFilter<"ContentPost"> | $Enums.PostStatus
   instagramMediaId?: Prisma.StringNullableFilter<"ContentPost"> | string | null
   publicUrl?: Prisma.StringNullableFilter<"ContentPost"> | string | null
+  permalink?: Prisma.StringNullableFilter<"ContentPost"> | string | null
+  scheduledAt?: Prisma.DateTimeNullableFilter<"ContentPost"> | Date | string | null
   publishedAt?: Prisma.DateTimeNullableFilter<"ContentPost"> | Date | string | null
+  source?: Prisma.EnumPostSourceFilter<"ContentPost"> | $Enums.PostSource
   createdAt?: Prisma.DateTimeFilter<"ContentPost"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ContentPost"> | Date | string
 }
@@ -852,13 +961,17 @@ export type ContentPostCreateWithoutAssetsInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   socialAccount: Prisma.SocialAccountCreateNestedOneWithoutPostsInput
   metrics?: Prisma.PostMetricCreateNestedManyWithoutContentPostInput
   calendarEntry?: Prisma.ContentCalendarCreateNestedOneWithoutContentPostInput
   experiments?: Prisma.ExperimentPostCreateNestedManyWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostUncheckedCreateWithoutAssetsInput = {
@@ -874,12 +987,16 @@ export type ContentPostUncheckedCreateWithoutAssetsInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   metrics?: Prisma.PostMetricUncheckedCreateNestedManyWithoutContentPostInput
   calendarEntry?: Prisma.ContentCalendarUncheckedCreateNestedOneWithoutContentPostInput
   experiments?: Prisma.ExperimentPostUncheckedCreateNestedManyWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostCreateOrConnectWithoutAssetsInput = {
@@ -910,13 +1027,17 @@ export type ContentPostUpdateWithoutAssetsInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   socialAccount?: Prisma.SocialAccountUpdateOneRequiredWithoutPostsNestedInput
   metrics?: Prisma.PostMetricUpdateManyWithoutContentPostNestedInput
   calendarEntry?: Prisma.ContentCalendarUpdateOneWithoutContentPostNestedInput
   experiments?: Prisma.ExperimentPostUpdateManyWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUpdateOneWithoutContentPostNestedInput
 }
 
 export type ContentPostUncheckedUpdateWithoutAssetsInput = {
@@ -932,12 +1053,16 @@ export type ContentPostUncheckedUpdateWithoutAssetsInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   metrics?: Prisma.PostMetricUncheckedUpdateManyWithoutContentPostNestedInput
   calendarEntry?: Prisma.ContentCalendarUncheckedUpdateOneWithoutContentPostNestedInput
   experiments?: Prisma.ExperimentPostUncheckedUpdateManyWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedUpdateOneWithoutContentPostNestedInput
 }
 
 export type ContentPostCreateWithoutMetricsInput = {
@@ -952,13 +1077,17 @@ export type ContentPostCreateWithoutMetricsInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   socialAccount: Prisma.SocialAccountCreateNestedOneWithoutPostsInput
   assets?: Prisma.PostAssetCreateNestedManyWithoutContentPostInput
   calendarEntry?: Prisma.ContentCalendarCreateNestedOneWithoutContentPostInput
   experiments?: Prisma.ExperimentPostCreateNestedManyWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostUncheckedCreateWithoutMetricsInput = {
@@ -974,12 +1103,16 @@ export type ContentPostUncheckedCreateWithoutMetricsInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.PostAssetUncheckedCreateNestedManyWithoutContentPostInput
   calendarEntry?: Prisma.ContentCalendarUncheckedCreateNestedOneWithoutContentPostInput
   experiments?: Prisma.ExperimentPostUncheckedCreateNestedManyWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostCreateOrConnectWithoutMetricsInput = {
@@ -1010,13 +1143,17 @@ export type ContentPostUpdateWithoutMetricsInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   socialAccount?: Prisma.SocialAccountUpdateOneRequiredWithoutPostsNestedInput
   assets?: Prisma.PostAssetUpdateManyWithoutContentPostNestedInput
   calendarEntry?: Prisma.ContentCalendarUpdateOneWithoutContentPostNestedInput
   experiments?: Prisma.ExperimentPostUpdateManyWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUpdateOneWithoutContentPostNestedInput
 }
 
 export type ContentPostUncheckedUpdateWithoutMetricsInput = {
@@ -1032,12 +1169,16 @@ export type ContentPostUncheckedUpdateWithoutMetricsInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.PostAssetUncheckedUpdateManyWithoutContentPostNestedInput
   calendarEntry?: Prisma.ContentCalendarUncheckedUpdateOneWithoutContentPostNestedInput
   experiments?: Prisma.ExperimentPostUncheckedUpdateManyWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedUpdateOneWithoutContentPostNestedInput
 }
 
 export type ContentPostCreateWithoutCalendarEntryInput = {
@@ -1052,13 +1193,17 @@ export type ContentPostCreateWithoutCalendarEntryInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   socialAccount: Prisma.SocialAccountCreateNestedOneWithoutPostsInput
   assets?: Prisma.PostAssetCreateNestedManyWithoutContentPostInput
   metrics?: Prisma.PostMetricCreateNestedManyWithoutContentPostInput
   experiments?: Prisma.ExperimentPostCreateNestedManyWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostUncheckedCreateWithoutCalendarEntryInput = {
@@ -1074,12 +1219,16 @@ export type ContentPostUncheckedCreateWithoutCalendarEntryInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.PostAssetUncheckedCreateNestedManyWithoutContentPostInput
   metrics?: Prisma.PostMetricUncheckedCreateNestedManyWithoutContentPostInput
   experiments?: Prisma.ExperimentPostUncheckedCreateNestedManyWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostCreateOrConnectWithoutCalendarEntryInput = {
@@ -1110,13 +1259,17 @@ export type ContentPostUpdateWithoutCalendarEntryInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   socialAccount?: Prisma.SocialAccountUpdateOneRequiredWithoutPostsNestedInput
   assets?: Prisma.PostAssetUpdateManyWithoutContentPostNestedInput
   metrics?: Prisma.PostMetricUpdateManyWithoutContentPostNestedInput
   experiments?: Prisma.ExperimentPostUpdateManyWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUpdateOneWithoutContentPostNestedInput
 }
 
 export type ContentPostUncheckedUpdateWithoutCalendarEntryInput = {
@@ -1132,12 +1285,16 @@ export type ContentPostUncheckedUpdateWithoutCalendarEntryInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.PostAssetUncheckedUpdateManyWithoutContentPostNestedInput
   metrics?: Prisma.PostMetricUncheckedUpdateManyWithoutContentPostNestedInput
   experiments?: Prisma.ExperimentPostUncheckedUpdateManyWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedUpdateOneWithoutContentPostNestedInput
 }
 
 export type ContentPostCreateWithoutExperimentsInput = {
@@ -1152,13 +1309,17 @@ export type ContentPostCreateWithoutExperimentsInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   socialAccount: Prisma.SocialAccountCreateNestedOneWithoutPostsInput
   assets?: Prisma.PostAssetCreateNestedManyWithoutContentPostInput
   metrics?: Prisma.PostMetricCreateNestedManyWithoutContentPostInput
   calendarEntry?: Prisma.ContentCalendarCreateNestedOneWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostUncheckedCreateWithoutExperimentsInput = {
@@ -1174,12 +1335,16 @@ export type ContentPostUncheckedCreateWithoutExperimentsInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.PostAssetUncheckedCreateNestedManyWithoutContentPostInput
   metrics?: Prisma.PostMetricUncheckedCreateNestedManyWithoutContentPostInput
   calendarEntry?: Prisma.ContentCalendarUncheckedCreateNestedOneWithoutContentPostInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedCreateNestedOneWithoutContentPostInput
 }
 
 export type ContentPostCreateOrConnectWithoutExperimentsInput = {
@@ -1210,13 +1375,17 @@ export type ContentPostUpdateWithoutExperimentsInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   socialAccount?: Prisma.SocialAccountUpdateOneRequiredWithoutPostsNestedInput
   assets?: Prisma.PostAssetUpdateManyWithoutContentPostNestedInput
   metrics?: Prisma.PostMetricUpdateManyWithoutContentPostNestedInput
   calendarEntry?: Prisma.ContentCalendarUpdateOneWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUpdateOneWithoutContentPostNestedInput
 }
 
 export type ContentPostUncheckedUpdateWithoutExperimentsInput = {
@@ -1232,12 +1401,132 @@ export type ContentPostUncheckedUpdateWithoutExperimentsInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.PostAssetUncheckedUpdateManyWithoutContentPostNestedInput
   metrics?: Prisma.PostMetricUncheckedUpdateManyWithoutContentPostNestedInput
   calendarEntry?: Prisma.ContentCalendarUncheckedUpdateOneWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedUpdateOneWithoutContentPostNestedInput
+}
+
+export type ContentPostCreateWithoutContentPlanInput = {
+  id?: string
+  title: string
+  caption: string
+  contentPillar: $Enums.ContentPillar
+  topic: string
+  contentType: $Enums.ContentType
+  creativeStyle: $Enums.CreativeStyle
+  slideCount?: number
+  status?: $Enums.PostStatus
+  instagramMediaId?: string | null
+  publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
+  publishedAt?: Date | string | null
+  source?: $Enums.PostSource
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  socialAccount: Prisma.SocialAccountCreateNestedOneWithoutPostsInput
+  assets?: Prisma.PostAssetCreateNestedManyWithoutContentPostInput
+  metrics?: Prisma.PostMetricCreateNestedManyWithoutContentPostInput
+  calendarEntry?: Prisma.ContentCalendarCreateNestedOneWithoutContentPostInput
+  experiments?: Prisma.ExperimentPostCreateNestedManyWithoutContentPostInput
+}
+
+export type ContentPostUncheckedCreateWithoutContentPlanInput = {
+  id?: string
+  socialAccountId: string
+  title: string
+  caption: string
+  contentPillar: $Enums.ContentPillar
+  topic: string
+  contentType: $Enums.ContentType
+  creativeStyle: $Enums.CreativeStyle
+  slideCount?: number
+  status?: $Enums.PostStatus
+  instagramMediaId?: string | null
+  publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
+  publishedAt?: Date | string | null
+  source?: $Enums.PostSource
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assets?: Prisma.PostAssetUncheckedCreateNestedManyWithoutContentPostInput
+  metrics?: Prisma.PostMetricUncheckedCreateNestedManyWithoutContentPostInput
+  calendarEntry?: Prisma.ContentCalendarUncheckedCreateNestedOneWithoutContentPostInput
+  experiments?: Prisma.ExperimentPostUncheckedCreateNestedManyWithoutContentPostInput
+}
+
+export type ContentPostCreateOrConnectWithoutContentPlanInput = {
+  where: Prisma.ContentPostWhereUniqueInput
+  create: Prisma.XOR<Prisma.ContentPostCreateWithoutContentPlanInput, Prisma.ContentPostUncheckedCreateWithoutContentPlanInput>
+}
+
+export type ContentPostUpsertWithoutContentPlanInput = {
+  update: Prisma.XOR<Prisma.ContentPostUpdateWithoutContentPlanInput, Prisma.ContentPostUncheckedUpdateWithoutContentPlanInput>
+  create: Prisma.XOR<Prisma.ContentPostCreateWithoutContentPlanInput, Prisma.ContentPostUncheckedCreateWithoutContentPlanInput>
+  where?: Prisma.ContentPostWhereInput
+}
+
+export type ContentPostUpdateToOneWithWhereWithoutContentPlanInput = {
+  where?: Prisma.ContentPostWhereInput
+  data: Prisma.XOR<Prisma.ContentPostUpdateWithoutContentPlanInput, Prisma.ContentPostUncheckedUpdateWithoutContentPlanInput>
+}
+
+export type ContentPostUpdateWithoutContentPlanInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  caption?: Prisma.StringFieldUpdateOperationsInput | string
+  contentPillar?: Prisma.EnumContentPillarFieldUpdateOperationsInput | $Enums.ContentPillar
+  topic?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
+  creativeStyle?: Prisma.EnumCreativeStyleFieldUpdateOperationsInput | $Enums.CreativeStyle
+  slideCount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
+  instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  socialAccount?: Prisma.SocialAccountUpdateOneRequiredWithoutPostsNestedInput
+  assets?: Prisma.PostAssetUpdateManyWithoutContentPostNestedInput
+  metrics?: Prisma.PostMetricUpdateManyWithoutContentPostNestedInput
+  calendarEntry?: Prisma.ContentCalendarUpdateOneWithoutContentPostNestedInput
+  experiments?: Prisma.ExperimentPostUpdateManyWithoutContentPostNestedInput
+}
+
+export type ContentPostUncheckedUpdateWithoutContentPlanInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  socialAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  caption?: Prisma.StringFieldUpdateOperationsInput | string
+  contentPillar?: Prisma.EnumContentPillarFieldUpdateOperationsInput | $Enums.ContentPillar
+  topic?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.EnumContentTypeFieldUpdateOperationsInput | $Enums.ContentType
+  creativeStyle?: Prisma.EnumCreativeStyleFieldUpdateOperationsInput | $Enums.CreativeStyle
+  slideCount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
+  instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.PostAssetUncheckedUpdateManyWithoutContentPostNestedInput
+  metrics?: Prisma.PostMetricUncheckedUpdateManyWithoutContentPostNestedInput
+  calendarEntry?: Prisma.ContentCalendarUncheckedUpdateOneWithoutContentPostNestedInput
+  experiments?: Prisma.ExperimentPostUncheckedUpdateManyWithoutContentPostNestedInput
 }
 
 export type ContentPostCreateManySocialAccountInput = {
@@ -1252,7 +1541,10 @@ export type ContentPostCreateManySocialAccountInput = {
   status?: $Enums.PostStatus
   instagramMediaId?: string | null
   publicUrl?: string | null
+  permalink?: string | null
+  scheduledAt?: Date | string | null
   publishedAt?: Date | string | null
+  source?: $Enums.PostSource
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1269,13 +1561,17 @@ export type ContentPostUpdateWithoutSocialAccountInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.PostAssetUpdateManyWithoutContentPostNestedInput
   metrics?: Prisma.PostMetricUpdateManyWithoutContentPostNestedInput
   calendarEntry?: Prisma.ContentCalendarUpdateOneWithoutContentPostNestedInput
   experiments?: Prisma.ExperimentPostUpdateManyWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUpdateOneWithoutContentPostNestedInput
 }
 
 export type ContentPostUncheckedUpdateWithoutSocialAccountInput = {
@@ -1290,13 +1586,17 @@ export type ContentPostUncheckedUpdateWithoutSocialAccountInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.PostAssetUncheckedUpdateManyWithoutContentPostNestedInput
   metrics?: Prisma.PostMetricUncheckedUpdateManyWithoutContentPostNestedInput
   calendarEntry?: Prisma.ContentCalendarUncheckedUpdateOneWithoutContentPostNestedInput
   experiments?: Prisma.ExperimentPostUncheckedUpdateManyWithoutContentPostNestedInput
+  contentPlan?: Prisma.ContentPlanItemUncheckedUpdateOneWithoutContentPostNestedInput
 }
 
 export type ContentPostUncheckedUpdateManyWithoutSocialAccountInput = {
@@ -1311,7 +1611,10 @@ export type ContentPostUncheckedUpdateManyWithoutSocialAccountInput = {
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   instagramMediaId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  permalink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  source?: Prisma.EnumPostSourceFieldUpdateOperationsInput | $Enums.PostSource
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1378,7 +1681,10 @@ export type ContentPostSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   status?: boolean
   instagramMediaId?: boolean
   publicUrl?: boolean
+  permalink?: boolean
+  scheduledAt?: boolean
   publishedAt?: boolean
+  source?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   socialAccount?: boolean | Prisma.SocialAccountDefaultArgs<ExtArgs>
@@ -1386,6 +1692,7 @@ export type ContentPostSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   metrics?: boolean | Prisma.ContentPost$metricsArgs<ExtArgs>
   calendarEntry?: boolean | Prisma.ContentPost$calendarEntryArgs<ExtArgs>
   experiments?: boolean | Prisma.ContentPost$experimentsArgs<ExtArgs>
+  contentPlan?: boolean | Prisma.ContentPost$contentPlanArgs<ExtArgs>
   _count?: boolean | Prisma.ContentPostCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["contentPost"]>
 
@@ -1404,18 +1711,22 @@ export type ContentPostSelectScalar = {
   status?: boolean
   instagramMediaId?: boolean
   publicUrl?: boolean
+  permalink?: boolean
+  scheduledAt?: boolean
   publishedAt?: boolean
+  source?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ContentPostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "socialAccountId" | "title" | "caption" | "contentPillar" | "topic" | "contentType" | "creativeStyle" | "slideCount" | "status" | "instagramMediaId" | "publicUrl" | "publishedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["contentPost"]>
+export type ContentPostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "socialAccountId" | "title" | "caption" | "contentPillar" | "topic" | "contentType" | "creativeStyle" | "slideCount" | "status" | "instagramMediaId" | "publicUrl" | "permalink" | "scheduledAt" | "publishedAt" | "source" | "createdAt" | "updatedAt", ExtArgs["result"]["contentPost"]>
 export type ContentPostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   socialAccount?: boolean | Prisma.SocialAccountDefaultArgs<ExtArgs>
   assets?: boolean | Prisma.ContentPost$assetsArgs<ExtArgs>
   metrics?: boolean | Prisma.ContentPost$metricsArgs<ExtArgs>
   calendarEntry?: boolean | Prisma.ContentPost$calendarEntryArgs<ExtArgs>
   experiments?: boolean | Prisma.ContentPost$experimentsArgs<ExtArgs>
+  contentPlan?: boolean | Prisma.ContentPost$contentPlanArgs<ExtArgs>
   _count?: boolean | Prisma.ContentPostCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1427,6 +1738,7 @@ export type $ContentPostPayload<ExtArgs extends runtime.Types.Extensions.Interna
     metrics: Prisma.$PostMetricPayload<ExtArgs>[]
     calendarEntry: Prisma.$ContentCalendarPayload<ExtArgs> | null
     experiments: Prisma.$ExperimentPostPayload<ExtArgs>[]
+    contentPlan: Prisma.$ContentPlanItemPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1441,7 +1753,10 @@ export type $ContentPostPayload<ExtArgs extends runtime.Types.Extensions.Interna
     status: $Enums.PostStatus
     instagramMediaId: string | null
     publicUrl: string | null
+    permalink: string | null
+    scheduledAt: Date | null
     publishedAt: Date | null
+    source: $Enums.PostSource
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["contentPost"]>
@@ -1789,6 +2104,7 @@ export interface Prisma__ContentPostClient<T, Null = never, ExtArgs extends runt
   metrics<T extends Prisma.ContentPost$metricsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ContentPost$metricsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostMetricPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   calendarEntry<T extends Prisma.ContentPost$calendarEntryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ContentPost$calendarEntryArgs<ExtArgs>>): Prisma.Prisma__ContentCalendarClient<runtime.Types.Result.GetResult<Prisma.$ContentCalendarPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   experiments<T extends Prisma.ContentPost$experimentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ContentPost$experimentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExperimentPostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  contentPlan<T extends Prisma.ContentPost$contentPlanArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ContentPost$contentPlanArgs<ExtArgs>>): Prisma.Prisma__ContentPlanItemClient<runtime.Types.Result.GetResult<Prisma.$ContentPlanItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1830,7 +2146,10 @@ export interface ContentPostFieldRefs {
   readonly status: Prisma.FieldRef<"ContentPost", 'PostStatus'>
   readonly instagramMediaId: Prisma.FieldRef<"ContentPost", 'String'>
   readonly publicUrl: Prisma.FieldRef<"ContentPost", 'String'>
+  readonly permalink: Prisma.FieldRef<"ContentPost", 'String'>
+  readonly scheduledAt: Prisma.FieldRef<"ContentPost", 'DateTime'>
   readonly publishedAt: Prisma.FieldRef<"ContentPost", 'DateTime'>
+  readonly source: Prisma.FieldRef<"ContentPost", 'PostSource'>
   readonly createdAt: Prisma.FieldRef<"ContentPost", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ContentPost", 'DateTime'>
 }
@@ -2269,6 +2588,25 @@ export type ContentPost$experimentsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.ExperimentPostScalarFieldEnum | Prisma.ExperimentPostScalarFieldEnum[]
+}
+
+/**
+ * ContentPost.contentPlan
+ */
+export type ContentPost$contentPlanArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ContentPlanItem
+   */
+  select?: Prisma.ContentPlanItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ContentPlanItem
+   */
+  omit?: Prisma.ContentPlanItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanItemInclude<ExtArgs> | null
+  where?: Prisma.ContentPlanItemWhereInput
 }
 
 /**

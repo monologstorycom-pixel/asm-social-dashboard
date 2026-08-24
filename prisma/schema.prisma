@@ -75,6 +75,40 @@ enum ContentPlanStatus {
   measuring
 }
 
+enum PostSource {
+  demo
+  live
+}
+
+enum MetricSource {
+  demo
+  meta
+  manual
+}
+
+enum MetricWindow {
+  h1
+  h6
+  h24
+  h72
+  d7
+  ad_hoc
+}
+
+enum QaStatus {
+  pending
+  passed
+  failed
+}
+
+enum PublisherState {
+  idle
+  ready
+  scheduled
+  published
+  failed
+}
+
 model SocialAccount {
   id                String         @id @default(uuid()) @db.Char(36)
   platform          SocialPlatform
@@ -102,9 +136,12 @@ model ContentPost {
   creativeStyle    CreativeStyle    @map("creative_style")
   slideCount       Int              @default(1) @map("slide_count") @db.UnsignedInt
   status           PostStatus       @default(idea)
-  instagramMediaId String?          @map("instagram_media_id") @db.VarChar(191)
+  instagramMediaId String?          @unique @map("instagram_media_id") @db.VarChar(191)
   publicUrl        String?          @map("public_url") @db.Text
+  permalink        String?          @db.Text
+  scheduledAt      DateTime?        @map("scheduled_at")
   publishedAt      DateTime?        @map("published_at")
+  source           PostSource       @default(demo)
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
   socialAccount    SocialAccount    @relation(fields: [socialAccountId], references: [id], onDelete: Restrict)
@@ -112,6 +149,7 @@ model ContentPost {
   metrics          PostMetric[]
   calendarEntry    ContentCalendar?
   experiments      ExperimentPost[]
+  contentPlan      ContentPlanItem?
 
   @@index([socialAccountId, status, publishedAt])
   @@index([contentPillar, creativeStyle, contentType])
@@ -133,22 +171,27 @@ model PostAsset {
 }
 
 model PostMetric {
-  id              String      @id @default(uuid()) @db.Char(36)
-  contentPostId   String      @map("content_post_id") @db.Char(36)
-  capturedAt      DateTime    @map("captured_at")
-  reach           Int         @default(0) @db.UnsignedInt
-  impressions     Int         @default(0) @db.UnsignedInt
-  views           Int         @default(0) @db.UnsignedInt
-  likes           Int         @default(0) @db.UnsignedInt
-  comments        Int         @default(0) @db.UnsignedInt
-  saves           Int         @default(0) @db.UnsignedInt
-  shares          Int         @default(0) @db.UnsignedInt
-  engagementTotal Int         @map("engagement_total") @db.UnsignedInt
-  engagementRate  Decimal     @map("engagement_rate") @db.Decimal(10, 4)
-  contentPost     ContentPost @relation(fields: [contentPostId], references: [id], onDelete: Cascade)
+  id                      String        @id @default(uuid()) @db.Char(36)
+  contentPostId           String        @map("content_post_id") @db.Char(36)
+  capturedAt              DateTime      @map("captured_at")
+  reach                   Int           @default(0) @db.UnsignedInt
+  impressions             Int           @default(0) @db.UnsignedInt
+  views                   Int           @default(0) @db.UnsignedInt
+  likes                   Int           @default(0) @db.UnsignedInt
+  comments                Int           @default(0) @db.UnsignedInt
+  saves                   Int           @default(0) @db.UnsignedInt
+  shares                  Int           @default(0) @db.UnsignedInt
+  engagementTotal         Int           @map("engagement_total") @db.UnsignedInt
+  engagementRate          Decimal       @map("engagement_rate") @db.Decimal(10, 4)
+  source                  MetricSource  @default(demo)
+  snapshotWindow          MetricWindow? @map("snapshot_window")
+  earlyEngagementVelocity Decimal?      @map("early_engagement_velocity") @db.Decimal(14, 4)
+  contentPost             ContentPost   @relation(fields: [contentPostId], references: [id], onDelete: Cascade)
 
   @@unique([contentPostId, capturedAt])
+  @@unique([contentPostId, source, snapshotWindow])
   @@index([capturedAt])
+  @@index([contentPostId, source, snapshotWindow])
   @@map("post_metrics")
 }
 
@@ -192,43 +235,79 @@ model ExperimentPost {
 }
 
 model ContentPlanItem {
-  id                 String            @id @default(uuid()) @db.Char(36)
-  contentId          String            @unique @map("content_id") @db.VarChar(191)
-  date               DateTime          @db.Date
-  day                String            @db.VarChar(20)
-  testPublishWindow  String            @map("test_publish_window") @db.VarChar(50)
-  pillar             String            @db.VarChar(100)
-  goal               String            @db.VarChar(100)
-  format             String            @db.VarChar(100)
-  creativeStyle      String            @map("creative_style") @db.VarChar(100)
-  audience           String            @db.Text
-  topicTag           String            @map("topic_tag") @db.VarChar(120)
-  workingTitle       String            @map("working_title") @db.VarChar(255)
-  hook               String            @db.Text
-  coreAngle          String            @map("core_angle") @db.Text
-  slide1             String            @map("slide_1") @db.Text
-  slide2             String            @map("slide_2") @db.Text
-  slide3             String            @map("slide_3") @db.Text
-  slide45            String            @map("slide_4_5") @db.Text
-  visualDirection    String            @map("visual_direction") @db.Text
-  cta                String            @db.Text
-  captionBrief       String            @map("caption_brief") @db.Text
-  primaryMetric      String            @map("primary_metric") @db.VarChar(100)
-  secondaryMetric    String            @map("secondary_metric") @db.VarChar(191)
-  engagementMechanic String            @map("engagement_mechanic") @db.Text
-  storyCompanion     String            @map("story_companion") @db.Text
-  experimentTag      String            @map("experiment_tag") @db.VarChar(255)
-  productFocus       String            @map("product_focus") @db.VarChar(255)
-  claimGuardrail     String            @map("claim_guardrail") @db.Text
-  assetsNeeded       String            @map("assets_needed") @db.Text
-  status             ContentPlanStatus @default(planned)
-  approvalStatus     String            @map("approval_status") @db.VarChar(50)
-  publishStatus      String            @map("publish_status") @db.VarChar(50)
-  createdAt          DateTime          @default(now()) @map("created_at")
-  updatedAt          DateTime          @updatedAt @map("updated_at")
+  id                 String             @id @default(uuid()) @db.Char(36)
+  contentId          String             @unique @map("content_id") @db.VarChar(191)
+  date               DateTime           @db.Date
+  day                String             @db.VarChar(20)
+  testPublishWindow  String             @map("test_publish_window") @db.VarChar(50)
+  pillar             String             @db.VarChar(100)
+  goal               String             @db.VarChar(100)
+  format             String             @db.VarChar(100)
+  creativeStyle      String             @map("creative_style") @db.VarChar(100)
+  audience           String             @db.Text
+  topicTag           String             @map("topic_tag") @db.VarChar(120)
+  workingTitle       String             @map("working_title") @db.VarChar(255)
+  hook               String             @db.Text
+  coreAngle          String             @map("core_angle") @db.Text
+  slide1             String             @map("slide_1") @db.Text
+  slide2             String             @map("slide_2") @db.Text
+  slide3             String             @map("slide_3") @db.Text
+  slide45            String             @map("slide_4_5") @db.Text
+  visualDirection    String             @map("visual_direction") @db.Text
+  cta                String             @db.Text
+  captionBrief       String             @map("caption_brief") @db.Text
+  primaryMetric      String             @map("primary_metric") @db.VarChar(100)
+  secondaryMetric    String             @map("secondary_metric") @db.VarChar(191)
+  engagementMechanic String             @map("engagement_mechanic") @db.Text
+  storyCompanion     String             @map("story_companion") @db.Text
+  experimentTag      String             @map("experiment_tag") @db.VarChar(255)
+  productFocus       String             @map("product_focus") @db.VarChar(255)
+  claimGuardrail     String             @map("claim_guardrail") @db.Text
+  assetsNeeded       String             @map("assets_needed") @db.Text
+  status             ContentPlanStatus  @default(planned)
+  approvalStatus     String             @map("approval_status") @db.VarChar(50)
+  publishStatus      String             @map("publish_status") @db.VarChar(50)
+  contentPostId      String?            @unique @map("content_post_id") @db.Char(36)
+  finalCaption       String?            @map("final_caption") @db.Text
+  finalBrief         String?            @map("final_brief") @db.Text
+  qaStatus           QaStatus           @default(pending) @map("qa_status")
+  qaResult           String?            @map("qa_result") @db.VarChar(191)
+  qaNotes            String?            @map("qa_notes") @db.Text
+  approvedAt         DateTime?          @map("approved_at")
+  approvalCommand    String?            @map("approval_command") @db.VarChar(50)
+  approvalReference  String?            @map("approval_reference") @db.VarChar(191)
+  approvalAttemptId  String?            @unique @map("approval_attempt_id") @db.Char(36)
+  approvalVersion    Int                @default(0) @map("approval_version") @db.UnsignedInt
+  scheduledAt        DateTime?          @map("scheduled_at")
+  publishedAt        DateTime?          @map("published_at")
+  publisherState     PublisherState     @default(idle) @map("publisher_state")
+  publisherError     String?            @map("publisher_error") @db.Text
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+  contentPost        ContentPost?       @relation(fields: [contentPostId], references: [id], onDelete: SetNull)
+  assets             ContentPlanAsset[]
 
   @@index([date, status])
   @@index([pillar])
   @@index([topicTag])
+  @@index([status, scheduledAt])
   @@map("content_plan_items")
+}
+
+model ContentPlanAsset {
+  id            String          @id @default(uuid()) @db.Char(36)
+  contentPlanId String          @map("content_plan_id") @db.Char(36)
+  slideNumber   Int             @map("slide_number") @db.UnsignedInt
+  localPath     String?         @map("local_path") @db.Text
+  publicUrl     String?         @map("public_url") @db.Text
+  sha256        String          @db.Char(64)
+  mimeType      String          @map("mime_type") @db.VarChar(100)
+  assetRole     String          @map("asset_role") @db.VarChar(50)
+  isFinal       Boolean         @default(true) @map("is_final")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  contentPlan   ContentPlanItem @relation(fields: [contentPlanId], references: [id], onDelete: Cascade)
+
+  @@unique([contentPlanId, slideNumber])
+  @@index([sha256])
+  @@map("content_plan_assets")
 }

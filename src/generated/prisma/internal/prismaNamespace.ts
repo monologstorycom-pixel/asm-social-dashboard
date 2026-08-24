@@ -404,7 +404,8 @@ export const ModelName = {
   ContentCalendar: 'ContentCalendar',
   ContentExperiment: 'ContentExperiment',
   ExperimentPost: 'ExperimentPost',
-  ContentPlanItem: 'ContentPlanItem'
+  ContentPlanItem: 'ContentPlanItem',
+  ContentPlanAsset: 'ContentPlanAsset'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -420,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "socialAccount" | "contentPost" | "postAsset" | "postMetric" | "contentCalendar" | "contentExperiment" | "experimentPost" | "contentPlanItem"
+    modelProps: "socialAccount" | "contentPost" | "postAsset" | "postMetric" | "contentCalendar" | "contentExperiment" | "experimentPost" | "contentPlanItem" | "contentPlanAsset"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -952,6 +953,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ContentPlanAsset: {
+      payload: Prisma.$ContentPlanAssetPayload<ExtArgs>
+      fields: Prisma.ContentPlanAssetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ContentPlanAssetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanAssetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ContentPlanAssetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanAssetPayload>
+        }
+        findFirst: {
+          args: Prisma.ContentPlanAssetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanAssetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ContentPlanAssetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanAssetPayload>
+        }
+        findMany: {
+          args: Prisma.ContentPlanAssetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanAssetPayload>[]
+        }
+        create: {
+          args: Prisma.ContentPlanAssetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanAssetPayload>
+        }
+        createMany: {
+          args: Prisma.ContentPlanAssetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.ContentPlanAssetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanAssetPayload>
+        }
+        update: {
+          args: Prisma.ContentPlanAssetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanAssetPayload>
+        }
+        deleteMany: {
+          args: Prisma.ContentPlanAssetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ContentPlanAssetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.ContentPlanAssetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContentPlanAssetPayload>
+        }
+        aggregate: {
+          args: Prisma.ContentPlanAssetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateContentPlanAsset>
+        }
+        groupBy: {
+          args: Prisma.ContentPlanAssetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContentPlanAssetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ContentPlanAssetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContentPlanAssetCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1018,7 +1085,10 @@ export const ContentPostScalarFieldEnum = {
   status: 'status',
   instagramMediaId: 'instagramMediaId',
   publicUrl: 'publicUrl',
+  permalink: 'permalink',
+  scheduledAt: 'scheduledAt',
   publishedAt: 'publishedAt',
+  source: 'source',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1050,7 +1120,10 @@ export const PostMetricScalarFieldEnum = {
   saves: 'saves',
   shares: 'shares',
   engagementTotal: 'engagementTotal',
-  engagementRate: 'engagementRate'
+  engagementRate: 'engagementRate',
+  source: 'source',
+  snapshotWindow: 'snapshotWindow',
+  earlyEngagementVelocity: 'earlyEngagementVelocity'
 } as const
 
 export type PostMetricScalarFieldEnum = (typeof PostMetricScalarFieldEnum)[keyof typeof PostMetricScalarFieldEnum]
@@ -1124,11 +1197,42 @@ export const ContentPlanItemScalarFieldEnum = {
   status: 'status',
   approvalStatus: 'approvalStatus',
   publishStatus: 'publishStatus',
+  contentPostId: 'contentPostId',
+  finalCaption: 'finalCaption',
+  finalBrief: 'finalBrief',
+  qaStatus: 'qaStatus',
+  qaResult: 'qaResult',
+  qaNotes: 'qaNotes',
+  approvedAt: 'approvedAt',
+  approvalCommand: 'approvalCommand',
+  approvalReference: 'approvalReference',
+  approvalAttemptId: 'approvalAttemptId',
+  approvalVersion: 'approvalVersion',
+  scheduledAt: 'scheduledAt',
+  publishedAt: 'publishedAt',
+  publisherState: 'publisherState',
+  publisherError: 'publisherError',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ContentPlanItemScalarFieldEnum = (typeof ContentPlanItemScalarFieldEnum)[keyof typeof ContentPlanItemScalarFieldEnum]
+
+
+export const ContentPlanAssetScalarFieldEnum = {
+  id: 'id',
+  contentPlanId: 'contentPlanId',
+  slideNumber: 'slideNumber',
+  localPath: 'localPath',
+  publicUrl: 'publicUrl',
+  sha256: 'sha256',
+  mimeType: 'mimeType',
+  assetRole: 'assetRole',
+  isFinal: 'isFinal',
+  createdAt: 'createdAt'
+} as const
+
+export type ContentPlanAssetScalarFieldEnum = (typeof ContentPlanAssetScalarFieldEnum)[keyof typeof ContentPlanAssetScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1164,7 +1268,8 @@ export const ContentPostOrderByRelevanceFieldEnum = {
   caption: 'caption',
   topic: 'topic',
   instagramMediaId: 'instagramMediaId',
-  publicUrl: 'publicUrl'
+  publicUrl: 'publicUrl',
+  permalink: 'permalink'
 } as const
 
 export type ContentPostOrderByRelevanceFieldEnum = (typeof ContentPostOrderByRelevanceFieldEnum)[keyof typeof ContentPostOrderByRelevanceFieldEnum]
@@ -1245,10 +1350,32 @@ export const ContentPlanItemOrderByRelevanceFieldEnum = {
   claimGuardrail: 'claimGuardrail',
   assetsNeeded: 'assetsNeeded',
   approvalStatus: 'approvalStatus',
-  publishStatus: 'publishStatus'
+  publishStatus: 'publishStatus',
+  contentPostId: 'contentPostId',
+  finalCaption: 'finalCaption',
+  finalBrief: 'finalBrief',
+  qaResult: 'qaResult',
+  qaNotes: 'qaNotes',
+  approvalCommand: 'approvalCommand',
+  approvalReference: 'approvalReference',
+  approvalAttemptId: 'approvalAttemptId',
+  publisherError: 'publisherError'
 } as const
 
 export type ContentPlanItemOrderByRelevanceFieldEnum = (typeof ContentPlanItemOrderByRelevanceFieldEnum)[keyof typeof ContentPlanItemOrderByRelevanceFieldEnum]
+
+
+export const ContentPlanAssetOrderByRelevanceFieldEnum = {
+  id: 'id',
+  contentPlanId: 'contentPlanId',
+  localPath: 'localPath',
+  publicUrl: 'publicUrl',
+  sha256: 'sha256',
+  mimeType: 'mimeType',
+  assetRole: 'assetRole'
+} as const
+
+export type ContentPlanAssetOrderByRelevanceFieldEnum = (typeof ContentPlanAssetOrderByRelevanceFieldEnum)[keyof typeof ContentPlanAssetOrderByRelevanceFieldEnum]
 
 
 
@@ -1321,6 +1448,13 @@ export type EnumPostStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
 
 
 /**
+ * Reference to a field of type 'PostSource'
+ */
+export type EnumPostSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PostSource'>
+    
+
+
+/**
  * Reference to a field of type 'AssetType'
  */
 export type EnumAssetTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssetType'>
@@ -1335,6 +1469,20 @@ export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'MetricSource'
+ */
+export type EnumMetricSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MetricSource'>
+    
+
+
+/**
+ * Reference to a field of type 'MetricWindow'
+ */
+export type EnumMetricWindowFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MetricWindow'>
+    
+
+
+/**
  * Reference to a field of type 'ExperimentStatus'
  */
 export type EnumExperimentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExperimentStatus'>
@@ -1345,6 +1493,20 @@ export type EnumExperimentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
  * Reference to a field of type 'ContentPlanStatus'
  */
 export type EnumContentPlanStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContentPlanStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'QaStatus'
+ */
+export type EnumQaStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QaStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PublisherState'
+ */
+export type EnumPublisherStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PublisherState'>
     
 
 
@@ -1513,6 +1675,7 @@ export type GlobalOmitConfig = {
   contentExperiment?: Prisma.ContentExperimentOmit
   experimentPost?: Prisma.ExperimentPostOmit
   contentPlanItem?: Prisma.ContentPlanItemOmit
+  contentPlanAsset?: Prisma.ContentPlanAssetOmit
 }
 
 /* Types for Logging */

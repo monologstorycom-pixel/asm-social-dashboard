@@ -20,8 +20,18 @@ export type ContentPlanItemModel = runtime.Types.Result.DefaultSelection<Prisma.
 
 export type AggregateContentPlanItem = {
   _count: ContentPlanItemCountAggregateOutputType | null
+  _avg: ContentPlanItemAvgAggregateOutputType | null
+  _sum: ContentPlanItemSumAggregateOutputType | null
   _min: ContentPlanItemMinAggregateOutputType | null
   _max: ContentPlanItemMaxAggregateOutputType | null
+}
+
+export type ContentPlanItemAvgAggregateOutputType = {
+  approvalVersion: number | null
+}
+
+export type ContentPlanItemSumAggregateOutputType = {
+  approvalVersion: number | null
 }
 
 export type ContentPlanItemMinAggregateOutputType = {
@@ -57,6 +67,21 @@ export type ContentPlanItemMinAggregateOutputType = {
   status: $Enums.ContentPlanStatus | null
   approvalStatus: string | null
   publishStatus: string | null
+  contentPostId: string | null
+  finalCaption: string | null
+  finalBrief: string | null
+  qaStatus: $Enums.QaStatus | null
+  qaResult: string | null
+  qaNotes: string | null
+  approvedAt: Date | null
+  approvalCommand: string | null
+  approvalReference: string | null
+  approvalAttemptId: string | null
+  approvalVersion: number | null
+  scheduledAt: Date | null
+  publishedAt: Date | null
+  publisherState: $Enums.PublisherState | null
+  publisherError: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -94,6 +119,21 @@ export type ContentPlanItemMaxAggregateOutputType = {
   status: $Enums.ContentPlanStatus | null
   approvalStatus: string | null
   publishStatus: string | null
+  contentPostId: string | null
+  finalCaption: string | null
+  finalBrief: string | null
+  qaStatus: $Enums.QaStatus | null
+  qaResult: string | null
+  qaNotes: string | null
+  approvedAt: Date | null
+  approvalCommand: string | null
+  approvalReference: string | null
+  approvalAttemptId: string | null
+  approvalVersion: number | null
+  scheduledAt: Date | null
+  publishedAt: Date | null
+  publisherState: $Enums.PublisherState | null
+  publisherError: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -131,11 +171,34 @@ export type ContentPlanItemCountAggregateOutputType = {
   status: number
   approvalStatus: number
   publishStatus: number
+  contentPostId: number
+  finalCaption: number
+  finalBrief: number
+  qaStatus: number
+  qaResult: number
+  qaNotes: number
+  approvedAt: number
+  approvalCommand: number
+  approvalReference: number
+  approvalAttemptId: number
+  approvalVersion: number
+  scheduledAt: number
+  publishedAt: number
+  publisherState: number
+  publisherError: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type ContentPlanItemAvgAggregateInputType = {
+  approvalVersion?: true
+}
+
+export type ContentPlanItemSumAggregateInputType = {
+  approvalVersion?: true
+}
 
 export type ContentPlanItemMinAggregateInputType = {
   id?: true
@@ -170,6 +233,21 @@ export type ContentPlanItemMinAggregateInputType = {
   status?: true
   approvalStatus?: true
   publishStatus?: true
+  contentPostId?: true
+  finalCaption?: true
+  finalBrief?: true
+  qaStatus?: true
+  qaResult?: true
+  qaNotes?: true
+  approvedAt?: true
+  approvalCommand?: true
+  approvalReference?: true
+  approvalAttemptId?: true
+  approvalVersion?: true
+  scheduledAt?: true
+  publishedAt?: true
+  publisherState?: true
+  publisherError?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -207,6 +285,21 @@ export type ContentPlanItemMaxAggregateInputType = {
   status?: true
   approvalStatus?: true
   publishStatus?: true
+  contentPostId?: true
+  finalCaption?: true
+  finalBrief?: true
+  qaStatus?: true
+  qaResult?: true
+  qaNotes?: true
+  approvedAt?: true
+  approvalCommand?: true
+  approvalReference?: true
+  approvalAttemptId?: true
+  approvalVersion?: true
+  scheduledAt?: true
+  publishedAt?: true
+  publisherState?: true
+  publisherError?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -244,6 +337,21 @@ export type ContentPlanItemCountAggregateInputType = {
   status?: true
   approvalStatus?: true
   publishStatus?: true
+  contentPostId?: true
+  finalCaption?: true
+  finalBrief?: true
+  qaStatus?: true
+  qaResult?: true
+  qaNotes?: true
+  approvedAt?: true
+  approvalCommand?: true
+  approvalReference?: true
+  approvalAttemptId?: true
+  approvalVersion?: true
+  scheduledAt?: true
+  publishedAt?: true
+  publisherState?: true
+  publisherError?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -287,6 +395,18 @@ export type ContentPlanItemAggregateArgs<ExtArgs extends runtime.Types.Extension
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ContentPlanItemAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ContentPlanItemSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ContentPlanItemMinAggregateInputType
@@ -317,6 +437,8 @@ export type ContentPlanItemGroupByArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   _count?: ContentPlanItemCountAggregateInputType | true
+  _avg?: ContentPlanItemAvgAggregateInputType
+  _sum?: ContentPlanItemSumAggregateInputType
   _min?: ContentPlanItemMinAggregateInputType
   _max?: ContentPlanItemMaxAggregateInputType
 }
@@ -354,9 +476,26 @@ export type ContentPlanItemGroupByOutputType = {
   status: $Enums.ContentPlanStatus
   approvalStatus: string
   publishStatus: string
+  contentPostId: string | null
+  finalCaption: string | null
+  finalBrief: string | null
+  qaStatus: $Enums.QaStatus
+  qaResult: string | null
+  qaNotes: string | null
+  approvedAt: Date | null
+  approvalCommand: string | null
+  approvalReference: string | null
+  approvalAttemptId: string | null
+  approvalVersion: number
+  scheduledAt: Date | null
+  publishedAt: Date | null
+  publisherState: $Enums.PublisherState
+  publisherError: string | null
   createdAt: Date
   updatedAt: Date
   _count: ContentPlanItemCountAggregateOutputType | null
+  _avg: ContentPlanItemAvgAggregateOutputType | null
+  _sum: ContentPlanItemSumAggregateOutputType | null
   _min: ContentPlanItemMinAggregateOutputType | null
   _max: ContentPlanItemMaxAggregateOutputType | null
 }
@@ -412,8 +551,25 @@ export type ContentPlanItemWhereInput = {
   status?: Prisma.EnumContentPlanStatusFilter<"ContentPlanItem"> | $Enums.ContentPlanStatus
   approvalStatus?: Prisma.StringFilter<"ContentPlanItem"> | string
   publishStatus?: Prisma.StringFilter<"ContentPlanItem"> | string
+  contentPostId?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  finalCaption?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  finalBrief?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  qaStatus?: Prisma.EnumQaStatusFilter<"ContentPlanItem"> | $Enums.QaStatus
+  qaResult?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  qaNotes?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  approvedAt?: Prisma.DateTimeNullableFilter<"ContentPlanItem"> | Date | string | null
+  approvalCommand?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  approvalReference?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  approvalAttemptId?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  approvalVersion?: Prisma.IntFilter<"ContentPlanItem"> | number
+  scheduledAt?: Prisma.DateTimeNullableFilter<"ContentPlanItem"> | Date | string | null
+  publishedAt?: Prisma.DateTimeNullableFilter<"ContentPlanItem"> | Date | string | null
+  publisherState?: Prisma.EnumPublisherStateFilter<"ContentPlanItem"> | $Enums.PublisherState
+  publisherError?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ContentPlanItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ContentPlanItem"> | Date | string
+  contentPost?: Prisma.XOR<Prisma.ContentPostNullableScalarRelationFilter, Prisma.ContentPostWhereInput> | null
+  assets?: Prisma.ContentPlanAssetListRelationFilter
 }
 
 export type ContentPlanItemOrderByWithRelationInput = {
@@ -449,14 +605,33 @@ export type ContentPlanItemOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   approvalStatus?: Prisma.SortOrder
   publishStatus?: Prisma.SortOrder
+  contentPostId?: Prisma.SortOrderInput | Prisma.SortOrder
+  finalCaption?: Prisma.SortOrderInput | Prisma.SortOrder
+  finalBrief?: Prisma.SortOrderInput | Prisma.SortOrder
+  qaStatus?: Prisma.SortOrder
+  qaResult?: Prisma.SortOrderInput | Prisma.SortOrder
+  qaNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvalCommand?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvalReference?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvalAttemptId?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvalVersion?: Prisma.SortOrder
+  scheduledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  publisherState?: Prisma.SortOrder
+  publisherError?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  contentPost?: Prisma.ContentPostOrderByWithRelationInput
+  assets?: Prisma.ContentPlanAssetOrderByRelationAggregateInput
   _relevance?: Prisma.ContentPlanItemOrderByRelevanceInput
 }
 
 export type ContentPlanItemWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   contentId?: string
+  contentPostId?: string
+  approvalAttemptId?: string
   AND?: Prisma.ContentPlanItemWhereInput | Prisma.ContentPlanItemWhereInput[]
   OR?: Prisma.ContentPlanItemWhereInput[]
   NOT?: Prisma.ContentPlanItemWhereInput | Prisma.ContentPlanItemWhereInput[]
@@ -490,9 +665,24 @@ export type ContentPlanItemWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumContentPlanStatusFilter<"ContentPlanItem"> | $Enums.ContentPlanStatus
   approvalStatus?: Prisma.StringFilter<"ContentPlanItem"> | string
   publishStatus?: Prisma.StringFilter<"ContentPlanItem"> | string
+  finalCaption?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  finalBrief?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  qaStatus?: Prisma.EnumQaStatusFilter<"ContentPlanItem"> | $Enums.QaStatus
+  qaResult?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  qaNotes?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  approvedAt?: Prisma.DateTimeNullableFilter<"ContentPlanItem"> | Date | string | null
+  approvalCommand?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  approvalReference?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  approvalVersion?: Prisma.IntFilter<"ContentPlanItem"> | number
+  scheduledAt?: Prisma.DateTimeNullableFilter<"ContentPlanItem"> | Date | string | null
+  publishedAt?: Prisma.DateTimeNullableFilter<"ContentPlanItem"> | Date | string | null
+  publisherState?: Prisma.EnumPublisherStateFilter<"ContentPlanItem"> | $Enums.PublisherState
+  publisherError?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ContentPlanItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ContentPlanItem"> | Date | string
-}, "id" | "contentId">
+  contentPost?: Prisma.XOR<Prisma.ContentPostNullableScalarRelationFilter, Prisma.ContentPostWhereInput> | null
+  assets?: Prisma.ContentPlanAssetListRelationFilter
+}, "id" | "contentId" | "contentPostId" | "approvalAttemptId">
 
 export type ContentPlanItemOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -527,11 +717,28 @@ export type ContentPlanItemOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   approvalStatus?: Prisma.SortOrder
   publishStatus?: Prisma.SortOrder
+  contentPostId?: Prisma.SortOrderInput | Prisma.SortOrder
+  finalCaption?: Prisma.SortOrderInput | Prisma.SortOrder
+  finalBrief?: Prisma.SortOrderInput | Prisma.SortOrder
+  qaStatus?: Prisma.SortOrder
+  qaResult?: Prisma.SortOrderInput | Prisma.SortOrder
+  qaNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvalCommand?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvalReference?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvalAttemptId?: Prisma.SortOrderInput | Prisma.SortOrder
+  approvalVersion?: Prisma.SortOrder
+  scheduledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  publisherState?: Prisma.SortOrder
+  publisherError?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ContentPlanItemCountOrderByAggregateInput
+  _avg?: Prisma.ContentPlanItemAvgOrderByAggregateInput
   _max?: Prisma.ContentPlanItemMaxOrderByAggregateInput
   _min?: Prisma.ContentPlanItemMinOrderByAggregateInput
+  _sum?: Prisma.ContentPlanItemSumOrderByAggregateInput
 }
 
 export type ContentPlanItemScalarWhereWithAggregatesInput = {
@@ -570,6 +777,21 @@ export type ContentPlanItemScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumContentPlanStatusWithAggregatesFilter<"ContentPlanItem"> | $Enums.ContentPlanStatus
   approvalStatus?: Prisma.StringWithAggregatesFilter<"ContentPlanItem"> | string
   publishStatus?: Prisma.StringWithAggregatesFilter<"ContentPlanItem"> | string
+  contentPostId?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  finalCaption?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  finalBrief?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  qaStatus?: Prisma.EnumQaStatusWithAggregatesFilter<"ContentPlanItem"> | $Enums.QaStatus
+  qaResult?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  qaNotes?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  approvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ContentPlanItem"> | Date | string | null
+  approvalCommand?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  approvalReference?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  approvalAttemptId?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  approvalVersion?: Prisma.IntWithAggregatesFilter<"ContentPlanItem"> | number
+  scheduledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ContentPlanItem"> | Date | string | null
+  publishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ContentPlanItem"> | Date | string | null
+  publisherState?: Prisma.EnumPublisherStateWithAggregatesFilter<"ContentPlanItem"> | $Enums.PublisherState
+  publisherError?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ContentPlanItem"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ContentPlanItem"> | Date | string
 }
@@ -607,8 +829,24 @@ export type ContentPlanItemCreateInput = {
   status?: $Enums.ContentPlanStatus
   approvalStatus: string
   publishStatus: string
+  finalCaption?: string | null
+  finalBrief?: string | null
+  qaStatus?: $Enums.QaStatus
+  qaResult?: string | null
+  qaNotes?: string | null
+  approvedAt?: Date | string | null
+  approvalCommand?: string | null
+  approvalReference?: string | null
+  approvalAttemptId?: string | null
+  approvalVersion?: number
+  scheduledAt?: Date | string | null
+  publishedAt?: Date | string | null
+  publisherState?: $Enums.PublisherState
+  publisherError?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  contentPost?: Prisma.ContentPostCreateNestedOneWithoutContentPlanInput
+  assets?: Prisma.ContentPlanAssetCreateNestedManyWithoutContentPlanInput
 }
 
 export type ContentPlanItemUncheckedCreateInput = {
@@ -644,8 +882,24 @@ export type ContentPlanItemUncheckedCreateInput = {
   status?: $Enums.ContentPlanStatus
   approvalStatus: string
   publishStatus: string
+  contentPostId?: string | null
+  finalCaption?: string | null
+  finalBrief?: string | null
+  qaStatus?: $Enums.QaStatus
+  qaResult?: string | null
+  qaNotes?: string | null
+  approvedAt?: Date | string | null
+  approvalCommand?: string | null
+  approvalReference?: string | null
+  approvalAttemptId?: string | null
+  approvalVersion?: number
+  scheduledAt?: Date | string | null
+  publishedAt?: Date | string | null
+  publisherState?: $Enums.PublisherState
+  publisherError?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  assets?: Prisma.ContentPlanAssetUncheckedCreateNestedManyWithoutContentPlanInput
 }
 
 export type ContentPlanItemUpdateInput = {
@@ -681,8 +935,24 @@ export type ContentPlanItemUpdateInput = {
   status?: Prisma.EnumContentPlanStatusFieldUpdateOperationsInput | $Enums.ContentPlanStatus
   approvalStatus?: Prisma.StringFieldUpdateOperationsInput | string
   publishStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  finalCaption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalBrief?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaStatus?: Prisma.EnumQaStatusFieldUpdateOperationsInput | $Enums.QaStatus
+  qaResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
+  publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contentPost?: Prisma.ContentPostUpdateOneWithoutContentPlanNestedInput
+  assets?: Prisma.ContentPlanAssetUpdateManyWithoutContentPlanNestedInput
 }
 
 export type ContentPlanItemUncheckedUpdateInput = {
@@ -718,8 +988,24 @@ export type ContentPlanItemUncheckedUpdateInput = {
   status?: Prisma.EnumContentPlanStatusFieldUpdateOperationsInput | $Enums.ContentPlanStatus
   approvalStatus?: Prisma.StringFieldUpdateOperationsInput | string
   publishStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  contentPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalCaption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalBrief?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaStatus?: Prisma.EnumQaStatusFieldUpdateOperationsInput | $Enums.QaStatus
+  qaResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
+  publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.ContentPlanAssetUncheckedUpdateManyWithoutContentPlanNestedInput
 }
 
 export type ContentPlanItemCreateManyInput = {
@@ -755,6 +1041,21 @@ export type ContentPlanItemCreateManyInput = {
   status?: $Enums.ContentPlanStatus
   approvalStatus: string
   publishStatus: string
+  contentPostId?: string | null
+  finalCaption?: string | null
+  finalBrief?: string | null
+  qaStatus?: $Enums.QaStatus
+  qaResult?: string | null
+  qaNotes?: string | null
+  approvedAt?: Date | string | null
+  approvalCommand?: string | null
+  approvalReference?: string | null
+  approvalAttemptId?: string | null
+  approvalVersion?: number
+  scheduledAt?: Date | string | null
+  publishedAt?: Date | string | null
+  publisherState?: $Enums.PublisherState
+  publisherError?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -792,6 +1093,20 @@ export type ContentPlanItemUpdateManyMutationInput = {
   status?: Prisma.EnumContentPlanStatusFieldUpdateOperationsInput | $Enums.ContentPlanStatus
   approvalStatus?: Prisma.StringFieldUpdateOperationsInput | string
   publishStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  finalCaption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalBrief?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaStatus?: Prisma.EnumQaStatusFieldUpdateOperationsInput | $Enums.QaStatus
+  qaResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
+  publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -829,8 +1144,28 @@ export type ContentPlanItemUncheckedUpdateManyInput = {
   status?: Prisma.EnumContentPlanStatusFieldUpdateOperationsInput | $Enums.ContentPlanStatus
   approvalStatus?: Prisma.StringFieldUpdateOperationsInput | string
   publishStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  contentPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalCaption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalBrief?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaStatus?: Prisma.EnumQaStatusFieldUpdateOperationsInput | $Enums.QaStatus
+  qaResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
+  publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ContentPlanItemNullableScalarRelationFilter = {
+  is?: Prisma.ContentPlanItemWhereInput | null
+  isNot?: Prisma.ContentPlanItemWhereInput | null
 }
 
 export type ContentPlanItemOrderByRelevanceInput = {
@@ -872,8 +1207,27 @@ export type ContentPlanItemCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   approvalStatus?: Prisma.SortOrder
   publishStatus?: Prisma.SortOrder
+  contentPostId?: Prisma.SortOrder
+  finalCaption?: Prisma.SortOrder
+  finalBrief?: Prisma.SortOrder
+  qaStatus?: Prisma.SortOrder
+  qaResult?: Prisma.SortOrder
+  qaNotes?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrder
+  approvalCommand?: Prisma.SortOrder
+  approvalReference?: Prisma.SortOrder
+  approvalAttemptId?: Prisma.SortOrder
+  approvalVersion?: Prisma.SortOrder
+  scheduledAt?: Prisma.SortOrder
+  publishedAt?: Prisma.SortOrder
+  publisherState?: Prisma.SortOrder
+  publisherError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ContentPlanItemAvgOrderByAggregateInput = {
+  approvalVersion?: Prisma.SortOrder
 }
 
 export type ContentPlanItemMaxOrderByAggregateInput = {
@@ -909,6 +1263,21 @@ export type ContentPlanItemMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   approvalStatus?: Prisma.SortOrder
   publishStatus?: Prisma.SortOrder
+  contentPostId?: Prisma.SortOrder
+  finalCaption?: Prisma.SortOrder
+  finalBrief?: Prisma.SortOrder
+  qaStatus?: Prisma.SortOrder
+  qaResult?: Prisma.SortOrder
+  qaNotes?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrder
+  approvalCommand?: Prisma.SortOrder
+  approvalReference?: Prisma.SortOrder
+  approvalAttemptId?: Prisma.SortOrder
+  approvalVersion?: Prisma.SortOrder
+  scheduledAt?: Prisma.SortOrder
+  publishedAt?: Prisma.SortOrder
+  publisherState?: Prisma.SortOrder
+  publisherError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -946,14 +1315,569 @@ export type ContentPlanItemMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   approvalStatus?: Prisma.SortOrder
   publishStatus?: Prisma.SortOrder
+  contentPostId?: Prisma.SortOrder
+  finalCaption?: Prisma.SortOrder
+  finalBrief?: Prisma.SortOrder
+  qaStatus?: Prisma.SortOrder
+  qaResult?: Prisma.SortOrder
+  qaNotes?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrder
+  approvalCommand?: Prisma.SortOrder
+  approvalReference?: Prisma.SortOrder
+  approvalAttemptId?: Prisma.SortOrder
+  approvalVersion?: Prisma.SortOrder
+  scheduledAt?: Prisma.SortOrder
+  publishedAt?: Prisma.SortOrder
+  publisherState?: Prisma.SortOrder
+  publisherError?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ContentPlanItemSumOrderByAggregateInput = {
+  approvalVersion?: Prisma.SortOrder
+}
+
+export type ContentPlanItemScalarRelationFilter = {
+  is?: Prisma.ContentPlanItemWhereInput
+  isNot?: Prisma.ContentPlanItemWhereInput
+}
+
+export type ContentPlanItemCreateNestedOneWithoutContentPostInput = {
+  create?: Prisma.XOR<Prisma.ContentPlanItemCreateWithoutContentPostInput, Prisma.ContentPlanItemUncheckedCreateWithoutContentPostInput>
+  connectOrCreate?: Prisma.ContentPlanItemCreateOrConnectWithoutContentPostInput
+  connect?: Prisma.ContentPlanItemWhereUniqueInput
+}
+
+export type ContentPlanItemUncheckedCreateNestedOneWithoutContentPostInput = {
+  create?: Prisma.XOR<Prisma.ContentPlanItemCreateWithoutContentPostInput, Prisma.ContentPlanItemUncheckedCreateWithoutContentPostInput>
+  connectOrCreate?: Prisma.ContentPlanItemCreateOrConnectWithoutContentPostInput
+  connect?: Prisma.ContentPlanItemWhereUniqueInput
+}
+
+export type ContentPlanItemUpdateOneWithoutContentPostNestedInput = {
+  create?: Prisma.XOR<Prisma.ContentPlanItemCreateWithoutContentPostInput, Prisma.ContentPlanItemUncheckedCreateWithoutContentPostInput>
+  connectOrCreate?: Prisma.ContentPlanItemCreateOrConnectWithoutContentPostInput
+  upsert?: Prisma.ContentPlanItemUpsertWithoutContentPostInput
+  disconnect?: Prisma.ContentPlanItemWhereInput | boolean
+  delete?: Prisma.ContentPlanItemWhereInput | boolean
+  connect?: Prisma.ContentPlanItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ContentPlanItemUpdateToOneWithWhereWithoutContentPostInput, Prisma.ContentPlanItemUpdateWithoutContentPostInput>, Prisma.ContentPlanItemUncheckedUpdateWithoutContentPostInput>
+}
+
+export type ContentPlanItemUncheckedUpdateOneWithoutContentPostNestedInput = {
+  create?: Prisma.XOR<Prisma.ContentPlanItemCreateWithoutContentPostInput, Prisma.ContentPlanItemUncheckedCreateWithoutContentPostInput>
+  connectOrCreate?: Prisma.ContentPlanItemCreateOrConnectWithoutContentPostInput
+  upsert?: Prisma.ContentPlanItemUpsertWithoutContentPostInput
+  disconnect?: Prisma.ContentPlanItemWhereInput | boolean
+  delete?: Prisma.ContentPlanItemWhereInput | boolean
+  connect?: Prisma.ContentPlanItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ContentPlanItemUpdateToOneWithWhereWithoutContentPostInput, Prisma.ContentPlanItemUpdateWithoutContentPostInput>, Prisma.ContentPlanItemUncheckedUpdateWithoutContentPostInput>
 }
 
 export type EnumContentPlanStatusFieldUpdateOperationsInput = {
   set?: $Enums.ContentPlanStatus
 }
 
+export type EnumQaStatusFieldUpdateOperationsInput = {
+  set?: $Enums.QaStatus
+}
+
+export type EnumPublisherStateFieldUpdateOperationsInput = {
+  set?: $Enums.PublisherState
+}
+
+export type ContentPlanItemCreateNestedOneWithoutAssetsInput = {
+  create?: Prisma.XOR<Prisma.ContentPlanItemCreateWithoutAssetsInput, Prisma.ContentPlanItemUncheckedCreateWithoutAssetsInput>
+  connectOrCreate?: Prisma.ContentPlanItemCreateOrConnectWithoutAssetsInput
+  connect?: Prisma.ContentPlanItemWhereUniqueInput
+}
+
+export type ContentPlanItemUpdateOneRequiredWithoutAssetsNestedInput = {
+  create?: Prisma.XOR<Prisma.ContentPlanItemCreateWithoutAssetsInput, Prisma.ContentPlanItemUncheckedCreateWithoutAssetsInput>
+  connectOrCreate?: Prisma.ContentPlanItemCreateOrConnectWithoutAssetsInput
+  upsert?: Prisma.ContentPlanItemUpsertWithoutAssetsInput
+  connect?: Prisma.ContentPlanItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ContentPlanItemUpdateToOneWithWhereWithoutAssetsInput, Prisma.ContentPlanItemUpdateWithoutAssetsInput>, Prisma.ContentPlanItemUncheckedUpdateWithoutAssetsInput>
+}
+
+export type ContentPlanItemCreateWithoutContentPostInput = {
+  id?: string
+  contentId: string
+  date: Date | string
+  day: string
+  testPublishWindow: string
+  pillar: string
+  goal: string
+  format: string
+  creativeStyle: string
+  audience: string
+  topicTag: string
+  workingTitle: string
+  hook: string
+  coreAngle: string
+  slide1: string
+  slide2: string
+  slide3: string
+  slide45: string
+  visualDirection: string
+  cta: string
+  captionBrief: string
+  primaryMetric: string
+  secondaryMetric: string
+  engagementMechanic: string
+  storyCompanion: string
+  experimentTag: string
+  productFocus: string
+  claimGuardrail: string
+  assetsNeeded: string
+  status?: $Enums.ContentPlanStatus
+  approvalStatus: string
+  publishStatus: string
+  finalCaption?: string | null
+  finalBrief?: string | null
+  qaStatus?: $Enums.QaStatus
+  qaResult?: string | null
+  qaNotes?: string | null
+  approvedAt?: Date | string | null
+  approvalCommand?: string | null
+  approvalReference?: string | null
+  approvalAttemptId?: string | null
+  approvalVersion?: number
+  scheduledAt?: Date | string | null
+  publishedAt?: Date | string | null
+  publisherState?: $Enums.PublisherState
+  publisherError?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assets?: Prisma.ContentPlanAssetCreateNestedManyWithoutContentPlanInput
+}
+
+export type ContentPlanItemUncheckedCreateWithoutContentPostInput = {
+  id?: string
+  contentId: string
+  date: Date | string
+  day: string
+  testPublishWindow: string
+  pillar: string
+  goal: string
+  format: string
+  creativeStyle: string
+  audience: string
+  topicTag: string
+  workingTitle: string
+  hook: string
+  coreAngle: string
+  slide1: string
+  slide2: string
+  slide3: string
+  slide45: string
+  visualDirection: string
+  cta: string
+  captionBrief: string
+  primaryMetric: string
+  secondaryMetric: string
+  engagementMechanic: string
+  storyCompanion: string
+  experimentTag: string
+  productFocus: string
+  claimGuardrail: string
+  assetsNeeded: string
+  status?: $Enums.ContentPlanStatus
+  approvalStatus: string
+  publishStatus: string
+  finalCaption?: string | null
+  finalBrief?: string | null
+  qaStatus?: $Enums.QaStatus
+  qaResult?: string | null
+  qaNotes?: string | null
+  approvedAt?: Date | string | null
+  approvalCommand?: string | null
+  approvalReference?: string | null
+  approvalAttemptId?: string | null
+  approvalVersion?: number
+  scheduledAt?: Date | string | null
+  publishedAt?: Date | string | null
+  publisherState?: $Enums.PublisherState
+  publisherError?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  assets?: Prisma.ContentPlanAssetUncheckedCreateNestedManyWithoutContentPlanInput
+}
+
+export type ContentPlanItemCreateOrConnectWithoutContentPostInput = {
+  where: Prisma.ContentPlanItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ContentPlanItemCreateWithoutContentPostInput, Prisma.ContentPlanItemUncheckedCreateWithoutContentPostInput>
+}
+
+export type ContentPlanItemUpsertWithoutContentPostInput = {
+  update: Prisma.XOR<Prisma.ContentPlanItemUpdateWithoutContentPostInput, Prisma.ContentPlanItemUncheckedUpdateWithoutContentPostInput>
+  create: Prisma.XOR<Prisma.ContentPlanItemCreateWithoutContentPostInput, Prisma.ContentPlanItemUncheckedCreateWithoutContentPostInput>
+  where?: Prisma.ContentPlanItemWhereInput
+}
+
+export type ContentPlanItemUpdateToOneWithWhereWithoutContentPostInput = {
+  where?: Prisma.ContentPlanItemWhereInput
+  data: Prisma.XOR<Prisma.ContentPlanItemUpdateWithoutContentPostInput, Prisma.ContentPlanItemUncheckedUpdateWithoutContentPostInput>
+}
+
+export type ContentPlanItemUpdateWithoutContentPostInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contentId?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  day?: Prisma.StringFieldUpdateOperationsInput | string
+  testPublishWindow?: Prisma.StringFieldUpdateOperationsInput | string
+  pillar?: Prisma.StringFieldUpdateOperationsInput | string
+  goal?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.StringFieldUpdateOperationsInput | string
+  creativeStyle?: Prisma.StringFieldUpdateOperationsInput | string
+  audience?: Prisma.StringFieldUpdateOperationsInput | string
+  topicTag?: Prisma.StringFieldUpdateOperationsInput | string
+  workingTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  hook?: Prisma.StringFieldUpdateOperationsInput | string
+  coreAngle?: Prisma.StringFieldUpdateOperationsInput | string
+  slide1?: Prisma.StringFieldUpdateOperationsInput | string
+  slide2?: Prisma.StringFieldUpdateOperationsInput | string
+  slide3?: Prisma.StringFieldUpdateOperationsInput | string
+  slide45?: Prisma.StringFieldUpdateOperationsInput | string
+  visualDirection?: Prisma.StringFieldUpdateOperationsInput | string
+  cta?: Prisma.StringFieldUpdateOperationsInput | string
+  captionBrief?: Prisma.StringFieldUpdateOperationsInput | string
+  primaryMetric?: Prisma.StringFieldUpdateOperationsInput | string
+  secondaryMetric?: Prisma.StringFieldUpdateOperationsInput | string
+  engagementMechanic?: Prisma.StringFieldUpdateOperationsInput | string
+  storyCompanion?: Prisma.StringFieldUpdateOperationsInput | string
+  experimentTag?: Prisma.StringFieldUpdateOperationsInput | string
+  productFocus?: Prisma.StringFieldUpdateOperationsInput | string
+  claimGuardrail?: Prisma.StringFieldUpdateOperationsInput | string
+  assetsNeeded?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContentPlanStatusFieldUpdateOperationsInput | $Enums.ContentPlanStatus
+  approvalStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  publishStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  finalCaption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalBrief?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaStatus?: Prisma.EnumQaStatusFieldUpdateOperationsInput | $Enums.QaStatus
+  qaResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
+  publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.ContentPlanAssetUpdateManyWithoutContentPlanNestedInput
+}
+
+export type ContentPlanItemUncheckedUpdateWithoutContentPostInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contentId?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  day?: Prisma.StringFieldUpdateOperationsInput | string
+  testPublishWindow?: Prisma.StringFieldUpdateOperationsInput | string
+  pillar?: Prisma.StringFieldUpdateOperationsInput | string
+  goal?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.StringFieldUpdateOperationsInput | string
+  creativeStyle?: Prisma.StringFieldUpdateOperationsInput | string
+  audience?: Prisma.StringFieldUpdateOperationsInput | string
+  topicTag?: Prisma.StringFieldUpdateOperationsInput | string
+  workingTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  hook?: Prisma.StringFieldUpdateOperationsInput | string
+  coreAngle?: Prisma.StringFieldUpdateOperationsInput | string
+  slide1?: Prisma.StringFieldUpdateOperationsInput | string
+  slide2?: Prisma.StringFieldUpdateOperationsInput | string
+  slide3?: Prisma.StringFieldUpdateOperationsInput | string
+  slide45?: Prisma.StringFieldUpdateOperationsInput | string
+  visualDirection?: Prisma.StringFieldUpdateOperationsInput | string
+  cta?: Prisma.StringFieldUpdateOperationsInput | string
+  captionBrief?: Prisma.StringFieldUpdateOperationsInput | string
+  primaryMetric?: Prisma.StringFieldUpdateOperationsInput | string
+  secondaryMetric?: Prisma.StringFieldUpdateOperationsInput | string
+  engagementMechanic?: Prisma.StringFieldUpdateOperationsInput | string
+  storyCompanion?: Prisma.StringFieldUpdateOperationsInput | string
+  experimentTag?: Prisma.StringFieldUpdateOperationsInput | string
+  productFocus?: Prisma.StringFieldUpdateOperationsInput | string
+  claimGuardrail?: Prisma.StringFieldUpdateOperationsInput | string
+  assetsNeeded?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContentPlanStatusFieldUpdateOperationsInput | $Enums.ContentPlanStatus
+  approvalStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  publishStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  finalCaption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalBrief?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaStatus?: Prisma.EnumQaStatusFieldUpdateOperationsInput | $Enums.QaStatus
+  qaResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
+  publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  assets?: Prisma.ContentPlanAssetUncheckedUpdateManyWithoutContentPlanNestedInput
+}
+
+export type ContentPlanItemCreateWithoutAssetsInput = {
+  id?: string
+  contentId: string
+  date: Date | string
+  day: string
+  testPublishWindow: string
+  pillar: string
+  goal: string
+  format: string
+  creativeStyle: string
+  audience: string
+  topicTag: string
+  workingTitle: string
+  hook: string
+  coreAngle: string
+  slide1: string
+  slide2: string
+  slide3: string
+  slide45: string
+  visualDirection: string
+  cta: string
+  captionBrief: string
+  primaryMetric: string
+  secondaryMetric: string
+  engagementMechanic: string
+  storyCompanion: string
+  experimentTag: string
+  productFocus: string
+  claimGuardrail: string
+  assetsNeeded: string
+  status?: $Enums.ContentPlanStatus
+  approvalStatus: string
+  publishStatus: string
+  finalCaption?: string | null
+  finalBrief?: string | null
+  qaStatus?: $Enums.QaStatus
+  qaResult?: string | null
+  qaNotes?: string | null
+  approvedAt?: Date | string | null
+  approvalCommand?: string | null
+  approvalReference?: string | null
+  approvalAttemptId?: string | null
+  approvalVersion?: number
+  scheduledAt?: Date | string | null
+  publishedAt?: Date | string | null
+  publisherState?: $Enums.PublisherState
+  publisherError?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  contentPost?: Prisma.ContentPostCreateNestedOneWithoutContentPlanInput
+}
+
+export type ContentPlanItemUncheckedCreateWithoutAssetsInput = {
+  id?: string
+  contentId: string
+  date: Date | string
+  day: string
+  testPublishWindow: string
+  pillar: string
+  goal: string
+  format: string
+  creativeStyle: string
+  audience: string
+  topicTag: string
+  workingTitle: string
+  hook: string
+  coreAngle: string
+  slide1: string
+  slide2: string
+  slide3: string
+  slide45: string
+  visualDirection: string
+  cta: string
+  captionBrief: string
+  primaryMetric: string
+  secondaryMetric: string
+  engagementMechanic: string
+  storyCompanion: string
+  experimentTag: string
+  productFocus: string
+  claimGuardrail: string
+  assetsNeeded: string
+  status?: $Enums.ContentPlanStatus
+  approvalStatus: string
+  publishStatus: string
+  contentPostId?: string | null
+  finalCaption?: string | null
+  finalBrief?: string | null
+  qaStatus?: $Enums.QaStatus
+  qaResult?: string | null
+  qaNotes?: string | null
+  approvedAt?: Date | string | null
+  approvalCommand?: string | null
+  approvalReference?: string | null
+  approvalAttemptId?: string | null
+  approvalVersion?: number
+  scheduledAt?: Date | string | null
+  publishedAt?: Date | string | null
+  publisherState?: $Enums.PublisherState
+  publisherError?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ContentPlanItemCreateOrConnectWithoutAssetsInput = {
+  where: Prisma.ContentPlanItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ContentPlanItemCreateWithoutAssetsInput, Prisma.ContentPlanItemUncheckedCreateWithoutAssetsInput>
+}
+
+export type ContentPlanItemUpsertWithoutAssetsInput = {
+  update: Prisma.XOR<Prisma.ContentPlanItemUpdateWithoutAssetsInput, Prisma.ContentPlanItemUncheckedUpdateWithoutAssetsInput>
+  create: Prisma.XOR<Prisma.ContentPlanItemCreateWithoutAssetsInput, Prisma.ContentPlanItemUncheckedCreateWithoutAssetsInput>
+  where?: Prisma.ContentPlanItemWhereInput
+}
+
+export type ContentPlanItemUpdateToOneWithWhereWithoutAssetsInput = {
+  where?: Prisma.ContentPlanItemWhereInput
+  data: Prisma.XOR<Prisma.ContentPlanItemUpdateWithoutAssetsInput, Prisma.ContentPlanItemUncheckedUpdateWithoutAssetsInput>
+}
+
+export type ContentPlanItemUpdateWithoutAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contentId?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  day?: Prisma.StringFieldUpdateOperationsInput | string
+  testPublishWindow?: Prisma.StringFieldUpdateOperationsInput | string
+  pillar?: Prisma.StringFieldUpdateOperationsInput | string
+  goal?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.StringFieldUpdateOperationsInput | string
+  creativeStyle?: Prisma.StringFieldUpdateOperationsInput | string
+  audience?: Prisma.StringFieldUpdateOperationsInput | string
+  topicTag?: Prisma.StringFieldUpdateOperationsInput | string
+  workingTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  hook?: Prisma.StringFieldUpdateOperationsInput | string
+  coreAngle?: Prisma.StringFieldUpdateOperationsInput | string
+  slide1?: Prisma.StringFieldUpdateOperationsInput | string
+  slide2?: Prisma.StringFieldUpdateOperationsInput | string
+  slide3?: Prisma.StringFieldUpdateOperationsInput | string
+  slide45?: Prisma.StringFieldUpdateOperationsInput | string
+  visualDirection?: Prisma.StringFieldUpdateOperationsInput | string
+  cta?: Prisma.StringFieldUpdateOperationsInput | string
+  captionBrief?: Prisma.StringFieldUpdateOperationsInput | string
+  primaryMetric?: Prisma.StringFieldUpdateOperationsInput | string
+  secondaryMetric?: Prisma.StringFieldUpdateOperationsInput | string
+  engagementMechanic?: Prisma.StringFieldUpdateOperationsInput | string
+  storyCompanion?: Prisma.StringFieldUpdateOperationsInput | string
+  experimentTag?: Prisma.StringFieldUpdateOperationsInput | string
+  productFocus?: Prisma.StringFieldUpdateOperationsInput | string
+  claimGuardrail?: Prisma.StringFieldUpdateOperationsInput | string
+  assetsNeeded?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContentPlanStatusFieldUpdateOperationsInput | $Enums.ContentPlanStatus
+  approvalStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  publishStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  finalCaption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalBrief?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaStatus?: Prisma.EnumQaStatusFieldUpdateOperationsInput | $Enums.QaStatus
+  qaResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
+  publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contentPost?: Prisma.ContentPostUpdateOneWithoutContentPlanNestedInput
+}
+
+export type ContentPlanItemUncheckedUpdateWithoutAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contentId?: Prisma.StringFieldUpdateOperationsInput | string
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  day?: Prisma.StringFieldUpdateOperationsInput | string
+  testPublishWindow?: Prisma.StringFieldUpdateOperationsInput | string
+  pillar?: Prisma.StringFieldUpdateOperationsInput | string
+  goal?: Prisma.StringFieldUpdateOperationsInput | string
+  format?: Prisma.StringFieldUpdateOperationsInput | string
+  creativeStyle?: Prisma.StringFieldUpdateOperationsInput | string
+  audience?: Prisma.StringFieldUpdateOperationsInput | string
+  topicTag?: Prisma.StringFieldUpdateOperationsInput | string
+  workingTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  hook?: Prisma.StringFieldUpdateOperationsInput | string
+  coreAngle?: Prisma.StringFieldUpdateOperationsInput | string
+  slide1?: Prisma.StringFieldUpdateOperationsInput | string
+  slide2?: Prisma.StringFieldUpdateOperationsInput | string
+  slide3?: Prisma.StringFieldUpdateOperationsInput | string
+  slide45?: Prisma.StringFieldUpdateOperationsInput | string
+  visualDirection?: Prisma.StringFieldUpdateOperationsInput | string
+  cta?: Prisma.StringFieldUpdateOperationsInput | string
+  captionBrief?: Prisma.StringFieldUpdateOperationsInput | string
+  primaryMetric?: Prisma.StringFieldUpdateOperationsInput | string
+  secondaryMetric?: Prisma.StringFieldUpdateOperationsInput | string
+  engagementMechanic?: Prisma.StringFieldUpdateOperationsInput | string
+  storyCompanion?: Prisma.StringFieldUpdateOperationsInput | string
+  experimentTag?: Prisma.StringFieldUpdateOperationsInput | string
+  productFocus?: Prisma.StringFieldUpdateOperationsInput | string
+  claimGuardrail?: Prisma.StringFieldUpdateOperationsInput | string
+  assetsNeeded?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumContentPlanStatusFieldUpdateOperationsInput | $Enums.ContentPlanStatus
+  approvalStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  publishStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  contentPostId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalCaption?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  finalBrief?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaStatus?: Prisma.EnumQaStatusFieldUpdateOperationsInput | $Enums.QaStatus
+  qaResult?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qaNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  approvalCommand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalReference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approvalVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
+  publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type ContentPlanItemCountOutputType
+ */
+
+export type ContentPlanItemCountOutputType = {
+  assets: number
+}
+
+export type ContentPlanItemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assets?: boolean | ContentPlanItemCountOutputTypeCountAssetsArgs
+}
+
+/**
+ * ContentPlanItemCountOutputType without action
+ */
+export type ContentPlanItemCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ContentPlanItemCountOutputType
+   */
+  select?: Prisma.ContentPlanItemCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ContentPlanItemCountOutputType without action
+ */
+export type ContentPlanItemCountOutputTypeCountAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ContentPlanAssetWhereInput
+}
 
 
 export type ContentPlanItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -989,8 +1913,26 @@ export type ContentPlanItemSelect<ExtArgs extends runtime.Types.Extensions.Inter
   status?: boolean
   approvalStatus?: boolean
   publishStatus?: boolean
+  contentPostId?: boolean
+  finalCaption?: boolean
+  finalBrief?: boolean
+  qaStatus?: boolean
+  qaResult?: boolean
+  qaNotes?: boolean
+  approvedAt?: boolean
+  approvalCommand?: boolean
+  approvalReference?: boolean
+  approvalAttemptId?: boolean
+  approvalVersion?: boolean
+  scheduledAt?: boolean
+  publishedAt?: boolean
+  publisherState?: boolean
+  publisherError?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  contentPost?: boolean | Prisma.ContentPlanItem$contentPostArgs<ExtArgs>
+  assets?: boolean | Prisma.ContentPlanItem$assetsArgs<ExtArgs>
+  _count?: boolean | Prisma.ContentPlanItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["contentPlanItem"]>
 
 
@@ -1028,15 +1970,38 @@ export type ContentPlanItemSelectScalar = {
   status?: boolean
   approvalStatus?: boolean
   publishStatus?: boolean
+  contentPostId?: boolean
+  finalCaption?: boolean
+  finalBrief?: boolean
+  qaStatus?: boolean
+  qaResult?: boolean
+  qaNotes?: boolean
+  approvedAt?: boolean
+  approvalCommand?: boolean
+  approvalReference?: boolean
+  approvalAttemptId?: boolean
+  approvalVersion?: boolean
+  scheduledAt?: boolean
+  publishedAt?: boolean
+  publisherState?: boolean
+  publisherError?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ContentPlanItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contentId" | "date" | "day" | "testPublishWindow" | "pillar" | "goal" | "format" | "creativeStyle" | "audience" | "topicTag" | "workingTitle" | "hook" | "coreAngle" | "slide1" | "slide2" | "slide3" | "slide45" | "visualDirection" | "cta" | "captionBrief" | "primaryMetric" | "secondaryMetric" | "engagementMechanic" | "storyCompanion" | "experimentTag" | "productFocus" | "claimGuardrail" | "assetsNeeded" | "status" | "approvalStatus" | "publishStatus" | "createdAt" | "updatedAt", ExtArgs["result"]["contentPlanItem"]>
+export type ContentPlanItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contentId" | "date" | "day" | "testPublishWindow" | "pillar" | "goal" | "format" | "creativeStyle" | "audience" | "topicTag" | "workingTitle" | "hook" | "coreAngle" | "slide1" | "slide2" | "slide3" | "slide45" | "visualDirection" | "cta" | "captionBrief" | "primaryMetric" | "secondaryMetric" | "engagementMechanic" | "storyCompanion" | "experimentTag" | "productFocus" | "claimGuardrail" | "assetsNeeded" | "status" | "approvalStatus" | "publishStatus" | "contentPostId" | "finalCaption" | "finalBrief" | "qaStatus" | "qaResult" | "qaNotes" | "approvedAt" | "approvalCommand" | "approvalReference" | "approvalAttemptId" | "approvalVersion" | "scheduledAt" | "publishedAt" | "publisherState" | "publisherError" | "createdAt" | "updatedAt", ExtArgs["result"]["contentPlanItem"]>
+export type ContentPlanItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contentPost?: boolean | Prisma.ContentPlanItem$contentPostArgs<ExtArgs>
+  assets?: boolean | Prisma.ContentPlanItem$assetsArgs<ExtArgs>
+  _count?: boolean | Prisma.ContentPlanItemCountOutputTypeDefaultArgs<ExtArgs>
+}
 
 export type $ContentPlanItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ContentPlanItem"
-  objects: {}
+  objects: {
+    contentPost: Prisma.$ContentPostPayload<ExtArgs> | null
+    assets: Prisma.$ContentPlanAssetPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     contentId: string
@@ -1070,6 +2035,21 @@ export type $ContentPlanItemPayload<ExtArgs extends runtime.Types.Extensions.Int
     status: $Enums.ContentPlanStatus
     approvalStatus: string
     publishStatus: string
+    contentPostId: string | null
+    finalCaption: string | null
+    finalBrief: string | null
+    qaStatus: $Enums.QaStatus
+    qaResult: string | null
+    qaNotes: string | null
+    approvedAt: Date | null
+    approvalCommand: string | null
+    approvalReference: string | null
+    approvalAttemptId: string | null
+    approvalVersion: number
+    scheduledAt: Date | null
+    publishedAt: Date | null
+    publisherState: $Enums.PublisherState
+    publisherError: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["contentPlanItem"]>
@@ -1412,6 +2392,8 @@ readonly fields: ContentPlanItemFieldRefs;
  */
 export interface Prisma__ContentPlanItemClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  contentPost<T extends Prisma.ContentPlanItem$contentPostArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ContentPlanItem$contentPostArgs<ExtArgs>>): Prisma.Prisma__ContentPostClient<runtime.Types.Result.GetResult<Prisma.$ContentPostPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  assets<T extends Prisma.ContentPlanItem$assetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ContentPlanItem$assetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContentPlanAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1473,6 +2455,21 @@ export interface ContentPlanItemFieldRefs {
   readonly status: Prisma.FieldRef<"ContentPlanItem", 'ContentPlanStatus'>
   readonly approvalStatus: Prisma.FieldRef<"ContentPlanItem", 'String'>
   readonly publishStatus: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly contentPostId: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly finalCaption: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly finalBrief: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly qaStatus: Prisma.FieldRef<"ContentPlanItem", 'QaStatus'>
+  readonly qaResult: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly qaNotes: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly approvedAt: Prisma.FieldRef<"ContentPlanItem", 'DateTime'>
+  readonly approvalCommand: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly approvalReference: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly approvalAttemptId: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly approvalVersion: Prisma.FieldRef<"ContentPlanItem", 'Int'>
+  readonly scheduledAt: Prisma.FieldRef<"ContentPlanItem", 'DateTime'>
+  readonly publishedAt: Prisma.FieldRef<"ContentPlanItem", 'DateTime'>
+  readonly publisherState: Prisma.FieldRef<"ContentPlanItem", 'PublisherState'>
+  readonly publisherError: Prisma.FieldRef<"ContentPlanItem", 'String'>
   readonly createdAt: Prisma.FieldRef<"ContentPlanItem", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ContentPlanItem", 'DateTime'>
 }
@@ -1492,6 +2489,10 @@ export type ContentPlanItemFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.ContentPlanItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanItemInclude<ExtArgs> | null
+  /**
    * Filter, which ContentPlanItem to fetch.
    */
   where: Prisma.ContentPlanItemWhereUniqueInput
@@ -1510,6 +2511,10 @@ export type ContentPlanItemFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.ContentPlanItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanItemInclude<ExtArgs> | null
+  /**
    * Filter, which ContentPlanItem to fetch.
    */
   where: Prisma.ContentPlanItemWhereUniqueInput
@@ -1527,6 +2532,10 @@ export type ContentPlanItemFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the ContentPlanItem
    */
   omit?: Prisma.ContentPlanItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanItemInclude<ExtArgs> | null
   /**
    * Filter, which ContentPlanItem to fetch.
    */
@@ -1576,6 +2585,10 @@ export type ContentPlanItemFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.ContentPlanItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanItemInclude<ExtArgs> | null
+  /**
    * Filter, which ContentPlanItem to fetch.
    */
   where?: Prisma.ContentPlanItemWhereInput
@@ -1623,6 +2636,10 @@ export type ContentPlanItemFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the ContentPlanItem
    */
   omit?: Prisma.ContentPlanItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanItemInclude<ExtArgs> | null
   /**
    * Filter, which ContentPlanItems to fetch.
    */
@@ -1672,6 +2689,10 @@ export type ContentPlanItemCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.ContentPlanItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanItemInclude<ExtArgs> | null
+  /**
    * The data needed to create a ContentPlanItem.
    */
   data: Prisma.XOR<Prisma.ContentPlanItemCreateInput, Prisma.ContentPlanItemUncheckedCreateInput>
@@ -1700,6 +2721,10 @@ export type ContentPlanItemUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the ContentPlanItem
    */
   omit?: Prisma.ContentPlanItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanItemInclude<ExtArgs> | null
   /**
    * The data needed to update a ContentPlanItem.
    */
@@ -1741,6 +2766,10 @@ export type ContentPlanItemUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.ContentPlanItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanItemInclude<ExtArgs> | null
+  /**
    * The filter to search for the ContentPlanItem to update in case it exists.
    */
   where: Prisma.ContentPlanItemWhereUniqueInput
@@ -1767,6 +2796,10 @@ export type ContentPlanItemDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.ContentPlanItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanItemInclude<ExtArgs> | null
+  /**
    * Filter which ContentPlanItem to delete.
    */
   where: Prisma.ContentPlanItemWhereUniqueInput
@@ -1787,6 +2820,49 @@ export type ContentPlanItemDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
+ * ContentPlanItem.contentPost
+ */
+export type ContentPlanItem$contentPostArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ContentPost
+   */
+  select?: Prisma.ContentPostSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ContentPost
+   */
+  omit?: Prisma.ContentPostOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPostInclude<ExtArgs> | null
+  where?: Prisma.ContentPostWhereInput
+}
+
+/**
+ * ContentPlanItem.assets
+ */
+export type ContentPlanItem$assetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ContentPlanAsset
+   */
+  select?: Prisma.ContentPlanAssetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ContentPlanAsset
+   */
+  omit?: Prisma.ContentPlanAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanAssetInclude<ExtArgs> | null
+  where?: Prisma.ContentPlanAssetWhereInput
+  orderBy?: Prisma.ContentPlanAssetOrderByWithRelationInput | Prisma.ContentPlanAssetOrderByWithRelationInput[]
+  cursor?: Prisma.ContentPlanAssetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ContentPlanAssetScalarFieldEnum | Prisma.ContentPlanAssetScalarFieldEnum[]
+}
+
+/**
  * ContentPlanItem without action
  */
 export type ContentPlanItemDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1798,4 +2874,8 @@ export type ContentPlanItemDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the ContentPlanItem
    */
   omit?: Prisma.ContentPlanItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContentPlanItemInclude<ExtArgs> | null
 }
