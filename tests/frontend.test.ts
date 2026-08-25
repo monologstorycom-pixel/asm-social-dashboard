@@ -25,21 +25,21 @@ test("enum labels are human readable", () => {
 });
 
 test("content plan workflow exposes only the adjacent action and stops at measuring", () => {
-  assert.deepEqual(nextContentPlanStatus("planned"), { status: "approved_for_creation", label: "Advance to Approved for Creation" });
-  assert.deepEqual(nextContentPlanStatus("published"), { status: "measuring", label: "Advance to Measuring" });
+  assert.deepEqual(nextContentPlanStatus("planned"), { status: "approved_for_creation", label: "Lanjut ke Approved for Creation" });
+  assert.deepEqual(nextContentPlanStatus("published"), { status: "measuring", label: "Lanjut ke Measuring" });
   assert.equal(nextContentPlanStatus("measuring"), null);
 });
 
 test("import preview summary and duplicate reasons use clear operational labels", () => {
   assert.deepEqual(importSummaryItems({ total: 7, valid: 6, invalid: 1, duplicates: 2, insertable: 4 }), [
-    ["Total", 7], ["Valid", 6], ["Invalid", 1], ["Duplicates", 2], ["Insertable", 4],
+    ["Total", 7], ["Valid", 6], ["Tidak valid", 1], ["Duplikat", 2], ["Bisa diimpor", 4],
   ]);
-  assert.equal(duplicateReasonLabel("within_file"), "Duplicate within file");
-  assert.equal(duplicateReasonLabel("existing_database"), "Already in content plan");
+  assert.equal(duplicateReasonLabel("within_file"), "Duplikat dalam file");
+  assert.equal(duplicateReasonLabel("existing_database"), "Sudah ada di rencana");
   assert.equal(duplicateReasonLabel(null), "—");
 });
 
 test("content plan ISO dates render without UTC timezone drift", () => {
-  assert.equal(planDateLabel("2026-08-25"), "25 Aug 2026");
+  assert.equal(planDateLabel("2026-08-25"), "25 Agu 2026");
   assert.equal(planDateLabel(""), "—");
 });

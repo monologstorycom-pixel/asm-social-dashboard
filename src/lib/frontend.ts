@@ -28,27 +28,27 @@ export type ContentPlanStatus = typeof CONTENT_PLAN_WORKFLOW[number];
 
 export function nextContentPlanStatus(current: ContentPlanStatus) {
   const status = CONTENT_PLAN_WORKFLOW[CONTENT_PLAN_WORKFLOW.indexOf(current) + 1];
-  return status ? { status, label: `Advance to ${friendlyLabel(status).replace(" For ", " for ")}` } : null;
+  return status ? { status, label: `Lanjut ke ${friendlyLabel(status).replace(" For ", " for ")}` } : null;
 }
 
 export type ImportSummary = { total: number; valid: number; invalid: number; duplicates: number; insertable: number };
 export const importSummaryItems = (summary: ImportSummary): [string, number][] => [
-  ["Total", summary.total], ["Valid", summary.valid], ["Invalid", summary.invalid], ["Duplicates", summary.duplicates], ["Insertable", summary.insertable],
+  ["Total", summary.total], ["Valid", summary.valid], ["Tidak valid", summary.invalid], ["Duplikat", summary.duplicates], ["Bisa diimpor", summary.insertable],
 ];
 export function duplicateReasonLabel(reason: "within_file" | "existing_database" | null) {
-  return reason === "within_file" ? "Duplicate within file" : reason === "existing_database" ? "Already in content plan" : "—";
+  return reason === "within_file" ? "Duplikat dalam file" : reason === "existing_database" ? "Sudah ada di rencana" : "—";
 }
 export function planDateLabel(value: string) {
   if (!value) return "—";
   const [year, month, day] = value.split("-").map(Number);
-  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(year, month - 1, day)));
+  return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(year, month - 1, day)));
 }
 
-export const compactNumber = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
-export const fullNumber = new Intl.NumberFormat("en");
+export const compactNumber = new Intl.NumberFormat("id", { notation: "compact", maximumFractionDigits: 1 });
+export const fullNumber = new Intl.NumberFormat("id");
 export const percent = (value = 0) => `${value.toFixed(2)}%`;
-export const dateLabel = (value: string | null) => value ? new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(value)) : "Not published";
-export const dateTimeLabel = (value: string | null) => value ? new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "Not published";
+export const dateLabel = (value: string | null) => value ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(new Date(value)) : "Belum dipublikasikan";
+export const dateTimeLabel = (value: string | null) => value ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "Belum dipublikasikan";
 
 export type Account = { id: string; accountName: string; username: string; platform: string };
 export type Asset = { id: string; assetType: string; assetUrl: string; slideNumber: number };

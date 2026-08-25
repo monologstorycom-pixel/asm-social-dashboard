@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit, Geist_Mono } from "next/font/google";
 import AppShell from "./app-shell";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ASM Social Media Command Center",
-  description: "Social performance analytics for PT Auri Steel Metalindo",
+  title: "ASM Pusat Komando",
+  description: "Dashboard analitik media sosial — PT Auri Steel Metalindo",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
-  return <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}><body><AppShell>{children}</AppShell></body></html>;
+  return <html lang="id" className={`${outfit.variable} ${geistMono.variable}`}><body className="grain"><AppShell>{children}</AppShell></body></html>;
 }
