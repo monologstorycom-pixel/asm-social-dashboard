@@ -13,6 +13,7 @@ const nav = [
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  if (pathname === "/privacy" || pathname === "/data-deletion") return children;
   return <div className="app-shell">
     <aside className="sidebar">
       <div className="brand" aria-label="PT Auri Steel Metalindo">
