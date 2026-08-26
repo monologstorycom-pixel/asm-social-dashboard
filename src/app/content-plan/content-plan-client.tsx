@@ -83,7 +83,9 @@ export default function ContentPlanClient() {
     const next = nextContentPlanStatus(detail.status); if (!next) return;
     setStatusBusy(true); setNotice("");
     try {
-      const result = await apiJson<{ item: PlanItem }>(`/api/content-plan/${encodeURIComponent(detail.Content_ID)}/status`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: next.status }) });
+      const approval = next.status === "approved";
+      const url = approval ? `/api/dashboard/content-plan/${encodeURIComponent(detail.Content_ID)}/approve` : `/api/content-plan/${encodeURIComponent(detail.Content_ID)}/status`;
+      const result = await apiJson<{ item: PlanItem }>(url, { method: "PATCH", ...(approval ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: next.status }) }) });
       setDetail(result.item); setNotice(`Alur kerja dilanjutkan ke ${friendlyLabel(result.item.status)}.`); setRefresh((value) => value + 1);
     } catch (reason) {
       if ((reason as { status?: number }).status === 409) { await loadDetail(detail.Content_ID); setNotice("Alur kerja berubah di tempat lain. Brief terbaru telah dimuat; tinjau sebelum mencoba lagi."); }

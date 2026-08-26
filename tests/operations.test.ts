@@ -6,6 +6,7 @@ import {
   analyticsSourceFilters,
   assertGeneralTransition,
   assertLifecycleInvariants,
+  authorizeDashboardRequest,
   authorizeInternalRequest,
   buildReconciliationReport,
   computeEarlyVelocity,
@@ -234,6 +235,22 @@ test("every non-preview mutation route requires internal bearer authentication",
     const route = readFileSync(new URL(path, import.meta.url), "utf8");
     assert.match(route, /authorizeInternalRequest\(request\)/, path);
   }
+});
+
+test("authenticated dashboard mutations require a same-origin browser request", () => {
+  const sameOrigin = new Request("https://sosmedasm.rsby.cloud/api/dashboard/content-plan/ASM-1/approve", { headers: { origin: "https://sosmedasm.rsby.cloud", "sec-fetch-site": "same-origin" } });
+  assert.doesNotThrow(() => authorizeDashboardRequest(sameOrigin));
+  const crossOrigin = new Request(sameOrigin.url, { headers: { origin: "https://evil.example", "sec-fetch-site": "cross-site" } });
+  assert.throws(() => authorizeDashboardRequest(crossOrigin), /Unauthorized/);
+});
+
+test("content plan dashboard approval uses a server-only bearer bridge", () => {
+  const route = readFileSync(new URL("../src/app/api/dashboard/content-plan/[contentId]/approve/route.ts", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../src/app/content-plan/content-plan-client.tsx", import.meta.url), "utf8");
+  assert.match(route, /authorizeDashboardRequest\(request\)/);
+  assert.match(route, /process\.env\.INTERNAL_API_TOKEN/);
+  assert.match(client, /\/api\/dashboard\/content-plan\/.*\/approve/);
+  assert.doesNotMatch(client, /INTERNAL_API_TOKEN|Authorization.*Bearer/);
 });
 
 test("operational migration is additive and prior deployed migration hashes stay documented", () => {

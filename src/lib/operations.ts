@@ -253,6 +253,13 @@ export function normalizeMetaMetrics(media: { like_count?: unknown; comments_cou
   };
 }
 
+export function authorizeDashboardRequest(request: Request) {
+  const url = new URL(request.url);
+  const host = request.headers.get("x-forwarded-host")?.split(",")[0].trim() || request.headers.get("host") || url.host;
+  const protocol = request.headers.get("x-forwarded-proto")?.split(",")[0].trim() || url.protocol.slice(0, -1);
+  if (request.headers.get("sec-fetch-site") !== "same-origin" || request.headers.get("origin") !== `${protocol}://${host}`) throw new HttpError(401, "Unauthorized");
+}
+
 export function authorizeInternalRequest(request: Request, configuredToken = process.env.INTERNAL_API_TOKEN) {
   if (!configuredToken) throw new HttpError(503, "Internal API authentication is not configured");
   const header = request.headers.get("authorization") ?? "";
