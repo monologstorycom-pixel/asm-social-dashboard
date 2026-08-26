@@ -1,5 +1,5 @@
 import { HttpError } from "./http";
-import { normalizeMetaMetrics } from "./operations";
+import { normalizeMetaMetrics, type MetaMedia } from "./operations";
 
 type Fetch = typeof fetch;
 type MetaPayload = { data?: Array<{ name: string; values?: Array<{ value: unknown }> }> };
@@ -11,6 +11,14 @@ export class MetaInsightsClient {
     private readonly fetcher: Fetch = fetch,
     private readonly graphBase = process.env.META_GRAPH_BASE_URL || "https://graph.facebook.com/v23.0",
   ) {}
+
+  async listAccountMedia(accountId: string, limit = 25): Promise<MetaMedia[]> {
+    if (!this.token) throw new HttpError(503, "META_ACCESS_TOKEN is not configured");
+    if (!/^\d+$/.test(accountId) || !Number.isInteger(limit) || limit < 1 || limit > 100) throw new HttpError(400, "Invalid Meta account or media limit");
+    const fields = "id,caption,media_type,media_product_type,permalink,timestamp,like_count,comments_count,children.limit(100){id}";
+    const payload = await this.get(`${accountId}/media?fields=${encodeURIComponent(fields)}&limit=${limit}`) as { data?: MetaMedia[] };
+    return payload.data ?? [];
+  }
 
   async getMediaMetrics(mediaId: string) {
     if (!this.token) throw new HttpError(503, "META_ACCESS_TOKEN is not configured");

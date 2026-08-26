@@ -7,14 +7,16 @@ import {
   analyticsSourceFilters,
   buildReconciliationReport,
   computeEarlyVelocity,
+  mapMetaMediaToPost,
   publishingRecommendation,
+  type MetaMedia,
   resolveDataMode,
   syncMetricWindows,
   META_WINDOWS,
   type DataMode,
 } from "./operations";
 
-export type OperationsDb = Pick<PrismaClient, "contentPost" | "postMetric" | "contentPlanItem" | "contentPlanAsset" | "$transaction">;
+export type OperationsDb = Pick<PrismaClient, "socialAccount" | "contentPost" | "postMetric" | "contentPlanItem" | "contentPlanAsset" | "$transaction">;
 
 export async function recordPublishResult(contentId: string, body: PublishResult, client: OperationsDb = db) {
   return client.$transaction(async (tx) => {
@@ -67,6 +69,47 @@ export function analyticsWhere(dataMode: Exclude<DataMode, "auto">) {
     post: postSource ? { source: postSource } : {},
     metric: metricSources ? { source: { in: metricSources } } : {},
   } as const;
+}
+
+export async function importLiveMetaMedia(
+  accountId = "17841405865261475",
+  capturedAt = new Date(),
+  client: OperationsDb = db,
+  meta = new MetaInsightsClient(),
+) {
+  const media = await meta.listAccountMedia(accountId, 25);
+  const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>> }> = [];
+  for (const item of media) samples.push({ item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id) });
+  return client.$transaction(async (tx) => {
+    const account = await tx.socialAccount.upsert({
+      where: { platform_platformAccountId: { platform: "instagram", platformAccountId: accountId } },
+      create: { platform: "instagram", platformAccountId: accountId, accountName: "Auri Steel Metalindo", username: accountId },
+      update: { active: true },
+    });
+    let imported = 0;
+    let snapshots = 0;
+    let existingSnapshots = 0;
+    for (const [index, sample] of samples.entries()) {
+      const existing = await tx.contentPost.findUnique({ where: { instagramMediaId: sample.item.id }, select: { id: true, source: true } });
+      if (existing?.source === "demo") throw new HttpError(409, "A demo post already uses a real Meta media ID; import stopped without overwriting demo");
+      const post = await tx.contentPost.upsert({
+        where: { instagramMediaId: sample.item.id },
+        create: { socialAccountId: account.id, ...sample.post },
+        update: { socialAccountId: account.id, ...sample.post },
+      });
+      if (!existing) imported += 1;
+      const prior = await tx.postMetric.findUnique({
+        where: { contentPostId_source_snapshotWindow: { contentPostId: post.id, source: "meta", snapshotWindow: "ad_hoc" } },
+        select: { id: true },
+      });
+      if (prior) { existingSnapshots += 1; continue; }
+      await tx.postMetric.create({ data: {
+        contentPostId: post.id, capturedAt: new Date(capturedAt.getTime() + index), source: "meta", snapshotWindow: "ad_hoc", ...sample.metrics,
+      } });
+      snapshots += 1;
+    }
+    return { media: media.length, imported, snapshots, existingSnapshots, capturedAt: capturedAt.toISOString() };
+  });
 }
 
 export async function syncPublishedPlan(contentId: string, now = new Date(), client: OperationsDb = db, meta = new MetaInsightsClient()) {

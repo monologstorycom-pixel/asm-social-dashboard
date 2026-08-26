@@ -10,6 +10,7 @@ import {
   buildReconciliationReport,
   computeEarlyVelocity,
   dueMetricWindows,
+  mapMetaMediaToPost,
   mapPlanFields,
   normalizeMetaMetrics,
   parsePublishWindow,
@@ -121,6 +122,18 @@ test("metric sync captures only the current due window and never backfills stale
   assert.equal(computeEarlyVelocity(40, new Date("2026-08-01T06:00:00.000Z"), 10, new Date("2026-08-01T01:00:00.000Z")), 6);
 });
 
+test("Meta media import maps provider fields without inventing analytics", () => {
+  assert.deepEqual(mapMetaMediaToPost({
+    id: "media", caption: "Real caption", media_type: "CAROUSEL_ALBUM", media_product_type: "FEED",
+    permalink: "https://www.instagram.com/p/example/", timestamp: "2026-08-25T12:00:00+0000", children: { data: [{ id: "a" }, { id: "b" }] },
+  }), {
+    instagramMediaId: "media", title: "Real caption", caption: "Real caption", contentPillar: "brand",
+    topic: "Instagram live", contentType: "carousel", creativeStyle: "editorial_no_box", slideCount: 2,
+    status: "published", permalink: "https://www.instagram.com/p/example/", publicUrl: "https://www.instagram.com/p/example/",
+    publishedAt: new Date("2026-08-25T12:00:00+0000"), source: "live",
+  });
+});
+
 test("Meta normalization handles media fields, insights, and total_interactions without inventing values", () => {
   assert.deepEqual(normalizeMetaMetrics({ like_count: 8, comments_count: 2 }, [{ name: "reach", values: [{ value: 100 }] }, { name: "saved", values: [{ value: 3 }] }, { name: "shares", values: [{ value: 4 }] }, { name: "total_interactions", values: [{ value: 22 }] }]), {
     reach: 100, impressions: 0, views: 0, likes: 8, comments: 2, saves: 3, shares: 4, engagementTotal: 22, engagementRate: 22,
@@ -211,6 +224,7 @@ test("operational lifecycle writes use conditional compare-and-set", () => {
 test("every non-preview mutation route requires internal bearer authentication", () => {
   for (const path of [
     "../src/app/api/posts/route.ts",
+    "../src/app/api/internal/meta/import/route.ts",
     "../src/app/api/posts/[id]/route.ts",
     "../src/app/api/posts/[id]/metrics/route.ts",
     "../src/app/api/content-plan/import/route.ts",

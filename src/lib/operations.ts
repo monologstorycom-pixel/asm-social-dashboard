@@ -177,6 +177,35 @@ export function computeEarlyVelocity(current: number, capturedAt: Date, previous
   return hours > 0 ? (current - previous) / hours : null;
 }
 
+export type MetaMedia = {
+  id: string;
+  caption?: string;
+  media_type: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
+  media_product_type?: string;
+  permalink: string;
+  timestamp: string;
+  like_count?: number;
+  comments_count?: number;
+  children?: { data?: Array<{ id: string }> };
+};
+
+export function mapMetaMediaToPost(media: MetaMedia) {
+  const publishedAt = new Date(media.timestamp);
+  if (!media.id || Number.isNaN(publishedAt.getTime())) throw new HttpError(502, "Meta returned invalid media identity or timestamp");
+  let permalink: URL;
+  try { permalink = new URL(media.permalink); } catch { throw new HttpError(502, "Meta returned an invalid permalink"); }
+  if (permalink.protocol !== "https:") throw new HttpError(502, "Meta returned an invalid permalink");
+  const caption = media.caption?.trim() || "Imported from Instagram";
+  const title = caption.split(/\r?\n/, 1)[0].slice(0, 191) || "Instagram media";
+  const contentType: "carousel" | "reel" | "image" = media.media_type === "CAROUSEL_ALBUM" ? "carousel" : media.media_type === "VIDEO" ? "reel" : "image";
+  return {
+    instagramMediaId: media.id, title, caption, contentPillar: "brand" as const, topic: "Instagram live",
+    contentType, creativeStyle: "editorial_no_box" as const,
+    slideCount: media.media_type === "CAROUSEL_ALBUM" ? Math.max(1, media.children?.data?.length ?? 1) : 1,
+    status: "published" as const, permalink: permalink.toString(), publicUrl: permalink.toString(), publishedAt, source: "live" as const,
+  };
+}
+
 type Insight = { name: string; values?: Array<{ value: unknown }> };
 const metricValue = (insights: Insight[], names: string[]) => {
   const value = insights.find((item) => names.includes(item.name))?.values?.at(-1)?.value;
