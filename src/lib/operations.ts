@@ -177,6 +177,13 @@ export function computeEarlyVelocity(current: number, capturedAt: Date, previous
   return hours > 0 ? (current - previous) / hours : null;
 }
 
+export type MetaMediaChild = {
+  id: string;
+  media_type?: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
+  media_url?: string;
+  thumbnail_url?: string;
+};
+
 export type MetaMedia = {
   id: string;
   caption?: string;
@@ -186,7 +193,9 @@ export type MetaMedia = {
   timestamp: string;
   like_count?: number;
   comments_count?: number;
-  children?: { data?: Array<{ id: string }> };
+  media_url?: string;
+  thumbnail_url?: string;
+  children?: { data?: MetaMediaChild[] };
 };
 
 export function mapMetaMediaToPost(media: MetaMedia) {
@@ -204,6 +213,16 @@ export function mapMetaMediaToPost(media: MetaMedia) {
     slideCount: media.media_type === "CAROUSEL_ALBUM" ? Math.max(1, media.children?.data?.length ?? 1) : 1,
     status: "published" as const, permalink: permalink.toString(), publicUrl: permalink.toString(), publishedAt, source: "live" as const,
   };
+}
+
+export type AssetMapping = { assetType: "image" | "video" | "thumbnail"; assetUrl: string; slideNumber: number };
+
+export function mapMediaToAssets(contentPostId: string, media: MetaMedia): AssetMapping[] {
+  const source = media.media_type === "CAROUSEL_ALBUM" ? media.children?.data ?? [] : [media];
+  return source.flatMap((item, index) => {
+    const assetUrl = item.media_type === "VIDEO" ? item.thumbnail_url ?? item.media_url : item.media_url;
+    return assetUrl ? [{ assetType: item.media_type === "VIDEO" && item.thumbnail_url ? "thumbnail" as const : item.media_type === "VIDEO" ? "video" as const : "image" as const, assetUrl, slideNumber: index + 1 }] : [];
+  });
 }
 
 type Insight = { name: string; values?: Array<{ value: unknown }> };

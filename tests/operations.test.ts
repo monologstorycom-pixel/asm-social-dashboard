@@ -10,6 +10,7 @@ import {
   buildReconciliationReport,
   computeEarlyVelocity,
   dueMetricWindows,
+  mapMediaToAssets,
   mapMetaMediaToPost,
   mapPlanFields,
   normalizeMetaMetrics,
@@ -21,7 +22,7 @@ import {
   validateScheduledAt,
 } from "../src/lib/operations";
 import { MetaInsightsClient } from "../src/lib/meta";
-import { recordPublishResult, resolveAnalyticsMode, type OperationsDb } from "../src/lib/operations-db";
+import { importLiveMetaMedia, recordPublishResult, resolveAnalyticsMode, type OperationsDb } from "../src/lib/operations-db";
 
 test("general lifecycle updates cannot bypass exact approval or operational invariants", () => {
   assert.doesNotThrow(() => assertGeneralTransition("approved_for_creation", "creating", {}));
@@ -184,7 +185,7 @@ test("Meta client is injected, read-only, and keeps the token out of URLs", asyn
   const client = new MetaInsightsClient("private-token", fetcher, "https://graph.invalid/v23.0");
   const metrics = await client.getMediaMetrics("media-id");
   assert.equal(metrics.reach, 10);
-  assert.equal(requests.length, 8);
+  assert.equal(requests.length, 9);
   assert.ok(requests.every(({ url, authorization }) => !url.includes("private-token") && authorization === "Bearer private-token"));
   assert.equal("publish" in client, false);
 });
@@ -242,4 +243,272 @@ test("operational migration is additive and prior deployed migration hashes stay
   assert.match(migration, /CREATE UNIQUE INDEX IF NOT EXISTS `content_posts_instagram_media_id_key`/);
   for (const field of ["content_post_id", "approved_at", "approval_command", "approval_attempt_id", "scheduled_at", "published_at", "source", "snapshot_window", "early_engagement_velocity"]) assert.ok(migration.includes(`\`${field}\``), field);
   assert.match(migration, /CREATE TABLE `content_plan_assets`/);
+});
+
+test("mapMediaToAssets maps IMAGE media to a single image asset", () => {
+  const assets = mapMediaToAssets("post-1", {
+    id: "media-1",
+    media_type: "IMAGE",
+    media_url: "https://example.com/image.jpg",
+    permalink: "https://www.instagram.com/p/test/",
+    timestamp: "2026-08-25T12:00:00+0000",
+  });
+  assert.equal(assets.length, 1);
+  assert.equal(assets[0].assetType, "image");
+  assert.equal(assets[0].assetUrl, "https://example.com/image.jpg");
+  assert.equal(assets[0].slideNumber, 1);
+});
+
+test("mapMediaToAssets maps VIDEO to video with thumbnail_url fallback", () => {
+  const withThumbnail = mapMediaToAssets("post-2", {
+    id: "media-2",
+    media_type: "VIDEO",
+    media_url: "https://example.com/video.mp4",
+    thumbnail_url: "https://example.com/thumb.jpg",
+    permalink: "https://www.instagram.com/p/test/",
+    timestamp: "2026-08-25T12:00:00+0000",
+  });
+  assert.deepEqual(withThumbnail, [{
+    assetType: "thumbnail",
+    assetUrl: "https://example.com/thumb.jpg",
+    slideNumber: 1,
+  }]);
+
+  const noThumbnail = mapMediaToAssets("post-2b", {
+    id: "media-2b",
+    media_type: "VIDEO",
+    media_url: "https://example.com/video.mp4",
+    permalink: "https://www.instagram.com/p/test/",
+    timestamp: "2026-08-25T12:00:00+0000",
+  });
+  assert.equal(noThumbnail.length, 1);
+  assert.equal(noThumbnail[0].assetType, "video");
+  assert.equal(noThumbnail[0].assetUrl, "https://example.com/video.mp4");
+});
+
+test("mapMediaToAssets maps CAROUSEL children in order with video thumbnail fallback", () => {
+  const assets = mapMediaToAssets("post-3", {
+    id: "media-3",
+    media_type: "CAROUSEL_ALBUM",
+    permalink: "https://www.instagram.com/p/test/",
+    timestamp: "2026-08-25T12:00:00+0000",
+    children: {
+      data: [
+        { id: "c1", media_type: "IMAGE", media_url: "https://example.com/c1.jpg" },
+        { id: "c2", media_type: "VIDEO", media_url: "https://example.com/c2.mp4", thumbnail_url: "https://example.com/c2-thumb.jpg" },
+        { id: "c3", media_type: "IMAGE", media_url: "https://example.com/c3.jpg" },
+      ],
+    },
+  });
+  assert.deepEqual(assets, [
+    { assetType: "image", assetUrl: "https://example.com/c1.jpg", slideNumber: 1 },
+    { assetType: "thumbnail", assetUrl: "https://example.com/c2-thumb.jpg", slideNumber: 2 },
+    { assetType: "image", assetUrl: "https://example.com/c3.jpg", slideNumber: 3 },
+  ]);
+});
+
+test("mapMediaToAssets returns empty array when no children or media_url", () => {
+  const assets = mapMediaToAssets("post-4", {
+    id: "media-4",
+    media_type: "CAROUSEL_ALBUM",
+    permalink: "https://www.instagram.com/p/test/",
+    timestamp: "2026-08-25T12:00:00+0000",
+    children: { data: [] },
+  });
+  assert.equal(assets.length, 0);
+});
+
+test("mapMetaMediaToPost sets permalink and publicUrl from media permalink", () => {
+  const post = mapMetaMediaToPost({
+    id: "media-5",
+    media_type: "IMAGE",
+    permalink: "https://www.instagram.com/p/test/",
+    timestamp: "2026-08-25T12:00:00+0000",
+  });
+  assert.equal(post.permalink, "https://www.instagram.com/p/test/");
+  assert.equal(post.publicUrl, "https://www.instagram.com/p/test/");
+});
+
+test("importLiveMetaMedia fetches all Meta GETs before one transaction and upserts assets idempotently", async () => {
+  const media = [
+    { id: "m1", media_type: "IMAGE", media_url: "https://example.com/img.jpg", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000" },
+    { id: "m2", media_type: "VIDEO", media_url: "https://example.com/vid.mp4", thumbnail_url: "https://example.com/vid-thumb.jpg", permalink: "https://www.instagram.com/p/2/", timestamp: "2026-08-25T13:00:00+0000" },
+  ];
+  const getMediaDetailCalls: string[] = [];
+  let getMetricsCalls = 0;
+  let transactionStarted = false;
+
+  const meta = {
+    listAccountMedia: async () => media,
+    getMediaDetail: async (mediaId: string) => { getMediaDetailCalls.push(mediaId); return media.find((m) => m.id === mediaId)!; },
+    getMediaMetrics: async () => { getMetricsCalls += 1; return { reach: 0, impressions: 0, views: 0, likes: 0, comments: 0, saves: 0, shares: 0, engagementTotal: 0, engagementRate: 0 }; },
+  } as unknown as InstanceType<typeof MetaInsightsClient>;
+
+  let postUpserts = 0;
+  const client = {
+    socialAccount: { upsert: async () => ({ id: "acct" }) },
+    contentPost: {
+      findUnique: async () => null,
+      upsert: async () => { postUpserts += 1; return { id: `post-${postUpserts}` }; },
+    },
+    postMetric: { findUnique: async () => null, create: async () => ({}) },
+    postAsset: { findUnique: async () => null, create: async () => ({}) },
+    $transaction: async (fn: (tx: unknown) => Promise<unknown>) => { transactionStarted = true; return fn(client); },
+  } as unknown as OperationsDb;
+
+  const result = await importLiveMetaMedia("12345", new Date(), client, meta);
+
+  assert.ok(getMediaDetailCalls.length >= 2, "getMediaDetail must be called for each media item");
+  assert.equal(getMetricsCalls, 2, "getMediaMetrics must be called for each media item");
+  assert.ok(transactionStarted, "all Meta GETs must complete before transaction");
+  assert.equal(result.imported, 2);
+  assert.equal(result.assets, 2, "each Instagram item produces one preview asset");
+});
+
+test("importLiveMetaMedia skips demo posts and is idempotent for live re-import", async () => {
+  const media = [{ id: "m1", media_type: "IMAGE", media_url: "https://example.com/img.jpg", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000" }];
+
+  const meta = {
+    listAccountMedia: async () => media,
+    getMediaDetail: async (id: string) => media.find((m) => m.id === id)!,
+    getMediaMetrics: async () => ({ reach: 0, impressions: 0, views: 0, likes: 0, comments: 0, saves: 0, shares: 0, engagementTotal: 0, engagementRate: 0 }),
+  } as unknown as InstanceType<typeof MetaInsightsClient>;
+
+  let postCount = 0;
+  const client = {
+    socialAccount: { upsert: async () => ({ id: "acct" }) },
+    contentPost: {
+      findUnique: async (q: { where: { instagramMediaId: string } }) => {
+        if (q.where.instagramMediaId === "m1") return { id: "existing", source: "demo" };
+        return null;
+      },
+      upsert: async () => { postCount += 1; return { id: "existing" }; },
+    },
+    postMetric: { findUnique: async () => null, create: async () => ({}) },
+    postAsset: { findUnique: async () => null, create: async () => ({}) },
+    $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(client),
+  } as unknown as OperationsDb;
+
+  await assert.rejects(() => importLiveMetaMedia("12345", new Date(), client, meta), /demo post/);
+  assert.equal(postCount, 0, "must not upsert demo posts");
+});
+
+test("importLiveMetaMedia asset upsert is idempotent for live re-import", async () => {
+  const media = [{ id: "m1", media_type: "IMAGE", media_url: "https://example.com/img.jpg", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000" }];
+
+  const meta = {
+    listAccountMedia: async () => media,
+    getMediaDetail: async (id: string) => media.find((m) => m.id === id)!,
+    getMediaMetrics: async () => ({ reach: 0, impressions: 0, views: 0, likes: 0, comments: 0, saves: 0, shares: 0, engagementTotal: 0, engagementRate: 0 }),
+  } as unknown as InstanceType<typeof MetaInsightsClient>;
+
+  let assetCreates = 0;
+  const client = {
+    socialAccount: { upsert: async () => ({ id: "acct" }) },
+    contentPost: {
+      findUnique: async () => null,
+      upsert: async () => { return { id: "post-1" }; },
+    },
+    postMetric: { findUnique: async () => null, create: async () => ({}) },
+    postAsset: {
+      findUnique: async (q: { where: { contentPostId_slideNumber: { contentPostId: string; slideNumber: number } } }) => {
+        if (q.where.contentPostId_slideNumber.slideNumber === 1) return { id: "asset-1", assetUrl: "https://example.com/img.jpg" };
+        return null;
+      },
+      create: async () => { assetCreates += 1; return {}; },
+    },
+    $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(client),
+  } as unknown as OperationsDb;
+
+  const result = await importLiveMetaMedia("12345", new Date(), client, meta);
+  assert.equal(assetCreates, 0, "must not create duplicate assets for idempotent re-import");
+  assert.equal(result.assets, 1, "must count existing assets");
+});
+
+test("importLiveMetaMedia returns useful counts including assets", async () => {
+  const media = [
+    { id: "m1", media_type: "IMAGE", media_url: "https://example.com/img.jpg", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000" },
+    { id: "m2", media_type: "CAROUSEL_ALBUM", permalink: "https://www.instagram.com/p/2/", timestamp: "2026-08-25T13:00:00+0000",
+      children: { data: [
+        { id: "c1", media_type: "IMAGE", media_url: "https://example.com/c1.jpg" },
+        { id: "c2", media_type: "IMAGE", media_url: "https://example.com/c2.jpg" },
+      ] },
+    },
+  ];
+
+  const meta = {
+    listAccountMedia: async () => media,
+    getMediaDetail: async (id: string) => media.find((m) => m.id === id)!,
+    getMediaMetrics: async () => ({ reach: 0, impressions: 0, views: 0, likes: 0, comments: 0, saves: 0, shares: 0, engagementTotal: 0, engagementRate: 0 }),
+  } as unknown as InstanceType<typeof MetaInsightsClient>;
+
+  let assetCount = 0;
+  const client = {
+    socialAccount: { upsert: async () => ({ id: "acct" }) },
+    contentPost: {
+      findUnique: async () => null,
+      upsert: async () => { assetCount += 1; return { id: `post-${assetCount}` }; },
+    },
+    postMetric: { findUnique: async () => null, create: async () => ({}) },
+    postAsset: { findUnique: async () => null, create: async () => ({}) },
+    $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(client),
+  } as unknown as OperationsDb;
+
+  const result = await importLiveMetaMedia("12345", new Date(), client, meta);
+  assert.equal(result.imported, 2);
+  assert.equal(result.assets, 3, "1 image asset + 2 carousel child assets");
+});
+
+test("Meta client getMediaDetail fetches individual media detail with URL fields", async () => {
+  const requests: Array<{ url: string }> = [];
+  const fetcher = (async (input: string | URL | Request) => {
+    requests.push({ url: String(input) });
+    return new Response(JSON.stringify({ id: "media-1", media_type: "IMAGE", media_url: "https://example.com/img.jpg", permalink: "https://www.instagram.com/p/test/", timestamp: "2026-08-25T12:00:00+0000" }), { status: 200 });
+  }) as typeof fetch;
+  const client = new MetaInsightsClient("token", fetcher, "https://graph.invalid/v23.0");
+  const detail = await client.getMediaDetail("media-1");
+  assert.equal(detail.media_url, "https://example.com/img.jpg");
+  assert.equal(detail.permalink, "https://www.instagram.com/p/test/");
+  assert.equal(requests.length, 1);
+});
+
+test("Meta client listAccountMedia returns media_url and thumbnail_url fields", async () => {
+  const fetcher = (async () => new Response(JSON.stringify({ data: [
+    { id: "m1", media_type: "IMAGE", media_url: "https://example.com/img.jpg", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000", children: { data: [] } },
+    { id: "m2", media_type: "VIDEO", media_url: "https://example.com/vid.mp4", thumbnail_url: "https://example.com/thumb.jpg", permalink: "https://www.instagram.com/p/2/", timestamp: "2026-08-25T13:00:00+0000" },
+  ] }), { status: 200 })) as typeof fetch;
+  const client = new MetaInsightsClient("token", fetcher, "https://graph.invalid/v23.0");
+  const items = await client.listAccountMedia("12345", 2);
+  assert.equal(items.length, 2);
+  assert.equal(items[0].media_url, "https://example.com/img.jpg");
+  assert.equal(items[1].thumbnail_url, "https://example.com/thumb.jpg");
+});
+
+test("Meta media import maps provider fields including media_url and thumbnail_url", () => {
+  assert.deepEqual(mapMetaMediaToPost({
+    id: "media", caption: "Real caption", media_type: "CAROUSEL_ALBUM", media_product_type: "FEED",
+    permalink: "https://www.instagram.com/p/example/", timestamp: "2026-08-25T12:00:00+0000",
+    media_url: "https://example.com/media.jpg",
+    children: { data: [{ id: "a", media_type: "IMAGE", media_url: "https://example.com/a.jpg" }, { id: "b", media_type: "IMAGE", media_url: "https://example.com/b.jpg" }] },
+  }), {
+    instagramMediaId: "media", title: "Real caption", caption: "Real caption", contentPillar: "brand",
+    topic: "Instagram live", contentType: "carousel", creativeStyle: "editorial_no_box", slideCount: 2,
+    status: "published", permalink: "https://www.instagram.com/p/example/", publicUrl: "https://www.instagram.com/p/example/",
+    publishedAt: new Date("2026-08-25T12:00:00+0000"), source: "live",
+  });
+});
+
+test("Meta client is injected, read-only, and keeps the token out of URLs (extended)", async () => {
+  const requests: Array<{ url: string; authorization: string | null }> = [];
+  const fetcher = (async (input: string | URL | Request, init?: RequestInit) => {
+    const url = String(input);
+    requests.push({ url, authorization: new Headers(init?.headers).get("authorization") });
+    return new Response(JSON.stringify(url.includes("/insights?") ? { data: [{ name: "reach", values: [{ value: 10 }] }] } : { like_count: 2, comments_count: 1, media_url: "https://example.com/media.jpg" }), { status: 200 });
+  }) as typeof fetch;
+  const client = new MetaInsightsClient("private-token", fetcher, "https://graph.invalid/v23.0");
+  const metrics = await client.getMediaMetrics("media-id");
+  assert.equal(metrics.reach, 10);
+  assert.equal(requests.length, 9);
+  assert.ok(requests.every(({ url, authorization }) => !url.includes("private-token") && authorization === "Bearer private-token"));
+  assert.equal("publish" in client, false);
 });

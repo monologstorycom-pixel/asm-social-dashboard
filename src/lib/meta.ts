@@ -15,15 +15,21 @@ export class MetaInsightsClient {
   async listAccountMedia(accountId: string, limit = 25): Promise<MetaMedia[]> {
     if (!this.token) throw new HttpError(503, "META_ACCESS_TOKEN is not configured");
     if (!/^\d+$/.test(accountId) || !Number.isInteger(limit) || limit < 1 || limit > 100) throw new HttpError(400, "Invalid Meta account or media limit");
-    const fields = "id,caption,media_type,media_product_type,permalink,timestamp,like_count,comments_count,children.limit(100){id}";
+    const fields = "id,caption,media_type,media_product_type,permalink,timestamp,like_count,comments_count,media_url,thumbnail_url,children.limit(100){id,media_type,media_url,thumbnail_url}";
     const payload = await this.get(`${accountId}/media?fields=${encodeURIComponent(fields)}&limit=${limit}`) as { data?: MetaMedia[] };
     return payload.data ?? [];
+  }
+
+  async getMediaDetail(mediaId: string): Promise<MetaMedia> {
+    if (!this.token) throw new HttpError(503, "META_ACCESS_TOKEN is not configured");
+    const fields = "id,caption,media_type,media_product_type,permalink,timestamp,like_count,comments_count,media_url,thumbnail_url,children.limit(100){id,media_type,media_url,thumbnail_url}";
+    return this.get(`${mediaId}?fields=${encodeURIComponent(fields)}`) as Promise<MetaMedia>;
   }
 
   async getMediaMetrics(mediaId: string) {
     if (!this.token) throw new HttpError(503, "META_ACCESS_TOKEN is not configured");
     const fields = "like_count,comments_count,permalink,timestamp";
-    const names = ["reach", "impressions", "saved", "shares", "views", "plays", "video_views"];
+    const names = ["reach", "impressions", "saved", "shares", "views", "plays", "video_views", "total_interactions"];
     const [media, metricRows] = await Promise.all([
       this.get(`${mediaId}?fields=${encodeURIComponent(fields)}`),
       Promise.all(names.map((name) => this.getOptionalMetric(mediaId, name))),

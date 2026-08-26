@@ -7,6 +7,7 @@ import {
   analyticsSourceFilters,
   buildReconciliationReport,
   computeEarlyVelocity,
+  mapMediaToAssets,
   mapMetaMediaToPost,
   publishingRecommendation,
   type MetaMedia,
@@ -78,8 +79,12 @@ export async function importLiveMetaMedia(
   meta = new MetaInsightsClient(),
 ) {
   const media = await meta.listAccountMedia(accountId, 25);
-  const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>> }> = [];
-  for (const item of media) samples.push({ item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id) });
+  const detail = await Promise.all(media.map((item) => meta.getMediaDetail(item.id)));
+  const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>>; assets: ReturnType<typeof mapMediaToAssets> }> = [];
+  for (const item of detail) {
+    const assets = mapMediaToAssets("placeholder", item);
+    samples.push({ item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id), assets });
+  }
   return client.$transaction(async (tx) => {
     const account = await tx.socialAccount.upsert({
       where: { platform_platformAccountId: { platform: "instagram", platformAccountId: accountId } },
@@ -89,6 +94,7 @@ export async function importLiveMetaMedia(
     let imported = 0;
     let snapshots = 0;
     let existingSnapshots = 0;
+    let assets = 0;
     for (const [index, sample] of samples.entries()) {
       const existing = await tx.contentPost.findUnique({ where: { instagramMediaId: sample.item.id }, select: { id: true, source: true } });
       if (existing?.source === "demo") throw new HttpError(409, "A demo post already uses a real Meta media ID; import stopped without overwriting demo");
@@ -98,6 +104,15 @@ export async function importLiveMetaMedia(
         update: { socialAccountId: account.id, ...sample.post },
       });
       if (!existing) imported += 1;
+      for (const asset of sample.assets) {
+        const existingAsset = await tx.postAsset.findUnique({ where: { contentPostId_slideNumber: { contentPostId: post.id, slideNumber: asset.slideNumber } } });
+        if (existingAsset) {
+          if (existingAsset.assetUrl !== asset.assetUrl) await tx.postAsset.update({ where: { id: existingAsset.id }, data: { assetUrl: asset.assetUrl } });
+        } else {
+          await tx.postAsset.create({ data: { contentPostId: post.id, ...asset } });
+        }
+        assets += 1;
+      }
       const prior = await tx.postMetric.findUnique({
         where: { contentPostId_source_snapshotWindow: { contentPostId: post.id, source: "meta", snapshotWindow: "ad_hoc" } },
         select: { id: true },
@@ -108,7 +123,7 @@ export async function importLiveMetaMedia(
       } });
       snapshots += 1;
     }
-    return { media: media.length, imported, snapshots, existingSnapshots, capturedAt: capturedAt.toISOString() };
+    return { media: media.length, imported, snapshots, existingSnapshots, assets, capturedAt: capturedAt.toISOString() };
   });
 }
 
