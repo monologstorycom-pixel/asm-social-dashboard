@@ -81,67 +81,68 @@ export async function importLiveMetaMedia(
   if (!accountId) throw new HttpError(503, "META_IG_USER_ID is not configured");
   const [profile, media] = await Promise.all([meta.getAccountProfile(accountId), meta.listAccountMedia(accountId, 820)]);
   if (!profile.name?.trim() || !profile.username?.trim()) throw new HttpError(502, "Meta returned an invalid account profile");
-  const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>>; assets: ReturnType<typeof mapMediaToAssets> }> = [];
-  const BATCH_SIZE = 50;
-  for (let i = 0; i < media.length; i += BATCH_SIZE) {
-    const batch = media.slice(i, i + BATCH_SIZE);
-    const details = await Promise.all(batch.map((item) => meta.getMediaDetail(item.id)));
-    for (const item of details) {
-      const assets = mapMediaToAssets("placeholder", item);
-      samples.push({ item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id), assets });
-    }
-  }
-  return client.$transaction(async (tx) => {
-    const profileData = {
-      accountName: profile.name.trim(), username: profile.username.trim(), profilePictureUrl: profile.profile_picture_url,
-      followersCount: profile.followers_count, mediaCount: profile.media_count,
-    };
-    const account = await tx.socialAccount.upsert({
-      where: { platform_platformAccountId: { platform: "instagram", platformAccountId: accountId } },
-      create: { platform: "instagram", platformAccountId: accountId, ...profileData },
-      update: { active: true, ...profileData },
-    });
-    let imported = 0;
-    let snapshots = 0;
-    let existingSnapshots = 0;
-    let assets = 0;
-    for (const [index, sample] of samples.entries()) {
-      const existing = await tx.contentPost.findUnique({ where: { instagramMediaId: sample.item.id }, select: { id: true, source: true } });
-      if (existing?.source === "demo") throw new HttpError(409, "A demo post already uses a real Meta media ID; import stopped without overwriting demo");
-      const post = await tx.contentPost.upsert({
-        where: { instagramMediaId: sample.item.id },
-        create: { socialAccountId: account.id, ...sample.post },
-        update: { socialAccountId: account.id, ...sample.post },
-      });
-      if (!existing) imported += 1;
-      for (const asset of sample.assets) {
-        const existingAsset = await tx.postAsset.findUnique({ where: { contentPostId_slideNumber: { contentPostId: post.id, slideNumber: asset.slideNumber } } });
-        if (existingAsset) {
-          if (existingAsset.assetUrl !== asset.assetUrl) await tx.postAsset.update({ where: { id: existingAsset.id }, data: { assetUrl: asset.assetUrl } });
-        } else {
-          await tx.postAsset.create({ data: { contentPostId: post.id, ...asset } });
-        }
-        assets += 1;
-      }
-      const prior = await tx.postMetric.findUnique({
-        where: { contentPostId_source_snapshotWindow: { contentPostId: post.id, source: "meta", snapshotWindow: "ad_hoc" } },
-        select: { id: true },
-      });
-      if (prior) {
-        await tx.postMetric.deleteMany({ where: { id: prior.id } });
-        await tx.postMetric.create({ data: {
-          contentPostId: post.id, capturedAt: new Date(capturedAt.getTime() + index), source: "meta", snapshotWindow: "ad_hoc", ...sample.metrics,
-        } });
-        existingSnapshots += 1;
-        continue;
-      }
-      await tx.postMetric.create({ data: {
-        contentPostId: post.id, capturedAt: new Date(capturedAt.getTime() + index), source: "meta", snapshotWindow: "ad_hoc", ...sample.metrics,
-      } });
-      snapshots += 1;
-    }
-    return { media: media.length, imported, snapshots, existingSnapshots, assets, capturedAt: capturedAt.toISOString() };
+  const profileData = {
+    accountName: profile.name.trim(), username: profile.username.trim(), profilePictureUrl: profile.profile_picture_url,
+    followersCount: profile.followers_count, mediaCount: profile.media_count,
+  };
+  const account = await client.socialAccount.upsert({
+    where: { platform_platformAccountId: { platform: "instagram", platformAccountId: accountId } },
+    create: { platform: "instagram", platformAccountId: accountId, ...profileData },
+    update: { active: true, ...profileData },
   });
+  let imported = 0;
+  let snapshots = 0;
+  let existingSnapshots = 0;
+  let assets = 0;
+  const BATCH_SIZE = 25;
+  for (let batchStart = 0; batchStart < media.length; batchStart += BATCH_SIZE) {
+    const batch = media.slice(batchStart, batchStart + BATCH_SIZE);
+    const details = await Promise.all(batch.map((item) => meta.getMediaDetail(item.id)));
+    const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>>; assets: ReturnType<typeof mapMediaToAssets> }> = [];
+    for (const item of details) {
+      const assetsMapped = mapMediaToAssets("placeholder", item);
+      samples.push({ item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id), assets: assetsMapped });
+    }
+    await client.$transaction(async (tx) => {
+      for (const [index, sample] of samples.entries()) {
+        const globalIndex = batchStart + index;
+        const existing = await tx.contentPost.findUnique({ where: { instagramMediaId: sample.item.id }, select: { id: true, source: true } });
+        if (existing?.source === "demo") throw new HttpError(409, "A demo post already uses a real Meta media ID; import stopped without overwriting demo");
+        const post = await tx.contentPost.upsert({
+          where: { instagramMediaId: sample.item.id },
+          create: { socialAccountId: account.id, ...sample.post },
+          update: { socialAccountId: account.id, ...sample.post },
+        });
+        if (!existing) imported += 1;
+        for (const asset of sample.assets) {
+          const existingAsset = await tx.postAsset.findUnique({ where: { contentPostId_slideNumber: { contentPostId: post.id, slideNumber: asset.slideNumber } } });
+          if (existingAsset) {
+            if (existingAsset.assetUrl !== asset.assetUrl) await tx.postAsset.update({ where: { id: existingAsset.id }, data: { assetUrl: asset.assetUrl } });
+          } else {
+            await tx.postAsset.create({ data: { contentPostId: post.id, ...asset } });
+          }
+          assets += 1;
+        }
+        const prior = await tx.postMetric.findUnique({
+          where: { contentPostId_source_snapshotWindow: { contentPostId: post.id, source: "meta", snapshotWindow: "ad_hoc" } },
+          select: { id: true },
+        });
+        if (prior) {
+          await tx.postMetric.deleteMany({ where: { id: prior.id } });
+          await tx.postMetric.create({ data: {
+            contentPostId: post.id, capturedAt: new Date(capturedAt.getTime() + globalIndex), source: "meta", snapshotWindow: "ad_hoc", ...sample.metrics,
+          } });
+          existingSnapshots += 1;
+          continue;
+        }
+        await tx.postMetric.create({ data: {
+          contentPostId: post.id, capturedAt: new Date(capturedAt.getTime() + globalIndex), source: "meta", snapshotWindow: "ad_hoc", ...sample.metrics,
+        } });
+        snapshots += 1;
+      }
+    });
+  }
+  return { media: media.length, imported, snapshots, existingSnapshots, assets, capturedAt: capturedAt.toISOString() };
 }
 
 export async function syncPublishedPlan(contentId: string, now = new Date(), client: OperationsDb = db, meta = new MetaInsightsClient()) {
