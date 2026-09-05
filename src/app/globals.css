@@ -1393,6 +1393,39 @@ img { display: block; max-width: 100%; }
 .brief-sections dl > div { min-width: 0; }
 .detail-updated { margin-top: var(--space-2xl); color: var(--ink-3); font-family: var(--font-mono); font-size: var(--step--1); }
 
+/* ═══ Login ═══ */
+.login-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-l);
+  background: linear-gradient(145deg, var(--accent-light), var(--base) 45%);
+}
+.login-card {
+  width: min(420px, 100%);
+  padding: var(--space-xl);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+.login-brand { padding: 0; margin-bottom: var(--space-xl); }
+.login-card h1 { margin: var(--space-xs) 0 0; font-size: var(--step-5); line-height: 1.2; }
+.login-intro { margin: var(--space-xs) 0 var(--space-l); color: var(--ink-2); }
+.login-form { display: grid; gap: var(--space-m); }
+.login-form label { display: grid; gap: var(--space-2xs); color: var(--ink-2); font-size: var(--step--1); font-weight: 600; }
+.login-form input {
+  width: 100%;
+  height: 42px;
+  padding: 0 var(--space-s);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--base);
+}
+.login-form input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); outline: none; }
+.login-form .form-error { margin: 0; }
+.login-form .primary-action { width: 100%; min-height: 42px; }
+
 /* ═══════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════ */
