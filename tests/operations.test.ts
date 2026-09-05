@@ -459,14 +459,14 @@ test("importLiveMetaMedia refreshes an existing ad_hoc insight snapshot", async 
     getMediaDetail: async () => media[0],
     getMediaMetrics: async () => metrics,
   } as unknown as InstanceType<typeof MetaInsightsClient>;
-  const updates: unknown[] = [];
+  const ops: string[] = [];
   const client = {
     socialAccount: { upsert: async () => ({ id: "acct" }) },
     contentPost: { findUnique: async () => ({ id: "post-1", source: "live" }), upsert: async () => ({ id: "post-1" }) },
     postMetric: {
       findUnique: async () => ({ id: "metric-1" }),
-      update: async (query: unknown) => { updates.push(query); return {}; },
-      create: async () => { throw new Error("must update the existing snapshot"); },
+      deleteMany: async () => { ops.push("deleteMany"); return { count: 1 }; },
+      create: async (query: unknown) => { ops.push(`create:${JSON.stringify(query)}`); return {}; },
     },
     postAsset: { findUnique: async () => null, create: async () => ({}) },
     $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(client),
@@ -475,7 +475,8 @@ test("importLiveMetaMedia refreshes an existing ad_hoc insight snapshot", async 
 
   const result = await importLiveMetaMedia("12345", capturedAt, client, meta);
 
-  assert.deepEqual(updates, [{ where: { id: "metric-1" }, data: { capturedAt, ...metrics } }]);
+  assert.ok(ops.includes("deleteMany"), "should delete existing snapshot before creating new one");
+  assert.ok(ops.some((op) => op.startsWith("create:")), "should create new snapshot after delete");
   assert.equal(result.snapshots, 0);
   assert.equal(result.existingSnapshots, 1);
 });
