@@ -79,7 +79,8 @@ export async function importLiveMetaMedia(
   meta = new MetaInsightsClient(),
 ) {
   if (!accountId) throw new HttpError(503, "META_IG_USER_ID is not configured");
-  const media = await meta.listAccountMedia(accountId, 25);
+  const [profile, media] = await Promise.all([meta.getAccountProfile(accountId), meta.listAccountMedia(accountId, 100)]);
+  if (!profile.name?.trim() || !profile.username?.trim()) throw new HttpError(502, "Meta returned an invalid account profile");
   const detail = await Promise.all(media.map((item) => meta.getMediaDetail(item.id)));
   const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>>; assets: ReturnType<typeof mapMediaToAssets> }> = [];
   for (const item of detail) {
@@ -87,10 +88,14 @@ export async function importLiveMetaMedia(
     samples.push({ item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id), assets });
   }
   return client.$transaction(async (tx) => {
+    const profileData = {
+      accountName: profile.name.trim(), username: profile.username.trim(), profilePictureUrl: profile.profile_picture_url,
+      followersCount: profile.followers_count, mediaCount: profile.media_count,
+    };
     const account = await tx.socialAccount.upsert({
       where: { platform_platformAccountId: { platform: "instagram", platformAccountId: accountId } },
-      create: { platform: "instagram", platformAccountId: accountId, accountName: "Auri Steel Metalindo", username: accountId },
-      update: { active: true },
+      create: { platform: "instagram", platformAccountId: accountId, ...profileData },
+      update: { active: true, ...profileData },
     });
     let imported = 0;
     let snapshots = 0;

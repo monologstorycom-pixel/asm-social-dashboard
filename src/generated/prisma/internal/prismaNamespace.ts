@@ -1064,6 +1064,9 @@ export const SocialAccountScalarFieldEnum = {
   accountName: 'accountName',
   username: 'username',
   platformAccountId: 'platformAccountId',
+  profilePictureUrl: 'profilePictureUrl',
+  followersCount: 'followersCount',
+  mediaCount: 'mediaCount',
   active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1243,22 +1246,23 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-export const SocialAccountOrderByRelevanceFieldEnum = {
-  id: 'id',
-  accountName: 'accountName',
-  username: 'username',
-  platformAccountId: 'platformAccountId'
-} as const
-
-export type SocialAccountOrderByRelevanceFieldEnum = (typeof SocialAccountOrderByRelevanceFieldEnum)[keyof typeof SocialAccountOrderByRelevanceFieldEnum]
-
-
 export const NullsOrder = {
   first: 'first',
   last: 'last'
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const SocialAccountOrderByRelevanceFieldEnum = {
+  id: 'id',
+  accountName: 'accountName',
+  username: 'username',
+  platformAccountId: 'platformAccountId',
+  profilePictureUrl: 'profilePictureUrl'
+} as const
+
+export type SocialAccountOrderByRelevanceFieldEnum = (typeof SocialAccountOrderByRelevanceFieldEnum)[keyof typeof SocialAccountOrderByRelevanceFieldEnum]
 
 
 export const ContentPostOrderByRelevanceFieldEnum = {
@@ -1399,6 +1403,13 @@ export type EnumSocialPlatformFieldRefInput<$PrismaModel> = FieldRefInputType<$P
 
 
 /**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
@@ -1430,13 +1441,6 @@ export type EnumContentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
  * Reference to a field of type 'CreativeStyle'
  */
 export type EnumCreativeStyleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CreativeStyle'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
     
 
 

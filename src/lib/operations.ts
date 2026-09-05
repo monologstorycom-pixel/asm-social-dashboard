@@ -85,6 +85,9 @@ export function analyticsSourceFilters(dataMode: Exclude<DataMode, "auto">) {
   return { postSource: undefined, metricSources: undefined };
 }
 
+const jakartaDay = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit" });
+export const jakartaDateKey = (date: Date) => jakartaDay.format(date);
+
 export function latestSnapshotAt(groups: Date[][]) {
   const latest = groups.flat().reduce<Date | null>((value, capturedAt) => !value || capturedAt > value ? capturedAt : value, null);
   return latest?.toISOString() ?? null;
@@ -213,8 +216,8 @@ export function mapMetaMediaToPost(media: MetaMedia) {
   const title = caption.split(/\r?\n/, 1)[0].slice(0, 191) || "Instagram media";
   const contentType: "carousel" | "reel" | "image" = media.media_type === "CAROUSEL_ALBUM" ? "carousel" : media.media_type === "VIDEO" ? "reel" : "image";
   return {
-    instagramMediaId: media.id, title, caption, contentPillar: "brand" as const, topic: "Instagram live",
-    contentType, creativeStyle: "editorial_no_box" as const,
+    instagramMediaId: media.id, title, caption, contentPillar: "unclassified" as const, topic: "unclassified",
+    contentType, creativeStyle: "unclassified" as const,
     slideCount: media.media_type === "CAROUSEL_ALBUM" ? Math.max(1, media.children?.data?.length ?? 1) : 1,
     status: "published" as const, permalink: permalink.toString(), publicUrl: permalink.toString(), publishedAt, source: "live" as const,
   };

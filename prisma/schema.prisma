@@ -35,6 +35,7 @@ enum PostStatus {
 }
 
 enum ContentPillar {
+  unclassified
   education
   product
   comparison
@@ -44,6 +45,7 @@ enum ContentPillar {
 }
 
 enum CreativeStyle {
+  unclassified
   editorial_no_box
   editorial_magazine
   infographic
@@ -115,6 +117,9 @@ model SocialAccount {
   accountName       String         @map("account_name") @db.VarChar(150)
   username          String         @db.VarChar(100)
   platformAccountId String         @map("platform_account_id") @db.VarChar(191)
+  profilePictureUrl String?        @map("profile_picture_url") @db.Text
+  followersCount    Int?           @map("followers_count") @db.UnsignedInt
+  mediaCount        Int?           @map("media_count") @db.UnsignedInt
   active            Boolean        @default(true)
   createdAt         DateTime       @default(now()) @map("created_at")
   updatedAt         DateTime       @updatedAt @map("updated_at")

@@ -20,8 +20,20 @@ export type SocialAccountModel = runtime.Types.Result.DefaultSelection<Prisma.$S
 
 export type AggregateSocialAccount = {
   _count: SocialAccountCountAggregateOutputType | null
+  _avg: SocialAccountAvgAggregateOutputType | null
+  _sum: SocialAccountSumAggregateOutputType | null
   _min: SocialAccountMinAggregateOutputType | null
   _max: SocialAccountMaxAggregateOutputType | null
+}
+
+export type SocialAccountAvgAggregateOutputType = {
+  followersCount: number | null
+  mediaCount: number | null
+}
+
+export type SocialAccountSumAggregateOutputType = {
+  followersCount: number | null
+  mediaCount: number | null
 }
 
 export type SocialAccountMinAggregateOutputType = {
@@ -30,6 +42,9 @@ export type SocialAccountMinAggregateOutputType = {
   accountName: string | null
   username: string | null
   platformAccountId: string | null
+  profilePictureUrl: string | null
+  followersCount: number | null
+  mediaCount: number | null
   active: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -41,6 +56,9 @@ export type SocialAccountMaxAggregateOutputType = {
   accountName: string | null
   username: string | null
   platformAccountId: string | null
+  profilePictureUrl: string | null
+  followersCount: number | null
+  mediaCount: number | null
   active: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -52,6 +70,9 @@ export type SocialAccountCountAggregateOutputType = {
   accountName: number
   username: number
   platformAccountId: number
+  profilePictureUrl: number
+  followersCount: number
+  mediaCount: number
   active: number
   createdAt: number
   updatedAt: number
@@ -59,12 +80,25 @@ export type SocialAccountCountAggregateOutputType = {
 }
 
 
+export type SocialAccountAvgAggregateInputType = {
+  followersCount?: true
+  mediaCount?: true
+}
+
+export type SocialAccountSumAggregateInputType = {
+  followersCount?: true
+  mediaCount?: true
+}
+
 export type SocialAccountMinAggregateInputType = {
   id?: true
   platform?: true
   accountName?: true
   username?: true
   platformAccountId?: true
+  profilePictureUrl?: true
+  followersCount?: true
+  mediaCount?: true
   active?: true
   createdAt?: true
   updatedAt?: true
@@ -76,6 +110,9 @@ export type SocialAccountMaxAggregateInputType = {
   accountName?: true
   username?: true
   platformAccountId?: true
+  profilePictureUrl?: true
+  followersCount?: true
+  mediaCount?: true
   active?: true
   createdAt?: true
   updatedAt?: true
@@ -87,6 +124,9 @@ export type SocialAccountCountAggregateInputType = {
   accountName?: true
   username?: true
   platformAccountId?: true
+  profilePictureUrl?: true
+  followersCount?: true
+  mediaCount?: true
   active?: true
   createdAt?: true
   updatedAt?: true
@@ -131,6 +171,18 @@ export type SocialAccountAggregateArgs<ExtArgs extends runtime.Types.Extensions.
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: SocialAccountAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: SocialAccountSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: SocialAccountMinAggregateInputType
@@ -161,6 +213,8 @@ export type SocialAccountGroupByArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   _count?: SocialAccountCountAggregateInputType | true
+  _avg?: SocialAccountAvgAggregateInputType
+  _sum?: SocialAccountSumAggregateInputType
   _min?: SocialAccountMinAggregateInputType
   _max?: SocialAccountMaxAggregateInputType
 }
@@ -171,10 +225,15 @@ export type SocialAccountGroupByOutputType = {
   accountName: string
   username: string
   platformAccountId: string
+  profilePictureUrl: string | null
+  followersCount: number | null
+  mediaCount: number | null
   active: boolean
   createdAt: Date
   updatedAt: Date
   _count: SocialAccountCountAggregateOutputType | null
+  _avg: SocialAccountAvgAggregateOutputType | null
+  _sum: SocialAccountSumAggregateOutputType | null
   _min: SocialAccountMinAggregateOutputType | null
   _max: SocialAccountMaxAggregateOutputType | null
 }
@@ -203,6 +262,9 @@ export type SocialAccountWhereInput = {
   accountName?: Prisma.StringFilter<"SocialAccount"> | string
   username?: Prisma.StringFilter<"SocialAccount"> | string
   platformAccountId?: Prisma.StringFilter<"SocialAccount"> | string
+  profilePictureUrl?: Prisma.StringNullableFilter<"SocialAccount"> | string | null
+  followersCount?: Prisma.IntNullableFilter<"SocialAccount"> | number | null
+  mediaCount?: Prisma.IntNullableFilter<"SocialAccount"> | number | null
   active?: Prisma.BoolFilter<"SocialAccount"> | boolean
   createdAt?: Prisma.DateTimeFilter<"SocialAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SocialAccount"> | Date | string
@@ -215,6 +277,9 @@ export type SocialAccountOrderByWithRelationInput = {
   accountName?: Prisma.SortOrder
   username?: Prisma.SortOrder
   platformAccountId?: Prisma.SortOrder
+  profilePictureUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  followersCount?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediaCount?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -233,6 +298,9 @@ export type SocialAccountWhereUniqueInput = Prisma.AtLeast<{
   accountName?: Prisma.StringFilter<"SocialAccount"> | string
   username?: Prisma.StringFilter<"SocialAccount"> | string
   platformAccountId?: Prisma.StringFilter<"SocialAccount"> | string
+  profilePictureUrl?: Prisma.StringNullableFilter<"SocialAccount"> | string | null
+  followersCount?: Prisma.IntNullableFilter<"SocialAccount"> | number | null
+  mediaCount?: Prisma.IntNullableFilter<"SocialAccount"> | number | null
   active?: Prisma.BoolFilter<"SocialAccount"> | boolean
   createdAt?: Prisma.DateTimeFilter<"SocialAccount"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SocialAccount"> | Date | string
@@ -245,12 +313,17 @@ export type SocialAccountOrderByWithAggregationInput = {
   accountName?: Prisma.SortOrder
   username?: Prisma.SortOrder
   platformAccountId?: Prisma.SortOrder
+  profilePictureUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  followersCount?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediaCount?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SocialAccountCountOrderByAggregateInput
+  _avg?: Prisma.SocialAccountAvgOrderByAggregateInput
   _max?: Prisma.SocialAccountMaxOrderByAggregateInput
   _min?: Prisma.SocialAccountMinOrderByAggregateInput
+  _sum?: Prisma.SocialAccountSumOrderByAggregateInput
 }
 
 export type SocialAccountScalarWhereWithAggregatesInput = {
@@ -262,6 +335,9 @@ export type SocialAccountScalarWhereWithAggregatesInput = {
   accountName?: Prisma.StringWithAggregatesFilter<"SocialAccount"> | string
   username?: Prisma.StringWithAggregatesFilter<"SocialAccount"> | string
   platformAccountId?: Prisma.StringWithAggregatesFilter<"SocialAccount"> | string
+  profilePictureUrl?: Prisma.StringNullableWithAggregatesFilter<"SocialAccount"> | string | null
+  followersCount?: Prisma.IntNullableWithAggregatesFilter<"SocialAccount"> | number | null
+  mediaCount?: Prisma.IntNullableWithAggregatesFilter<"SocialAccount"> | number | null
   active?: Prisma.BoolWithAggregatesFilter<"SocialAccount"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SocialAccount"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"SocialAccount"> | Date | string
@@ -273,6 +349,9 @@ export type SocialAccountCreateInput = {
   accountName: string
   username: string
   platformAccountId: string
+  profilePictureUrl?: string | null
+  followersCount?: number | null
+  mediaCount?: number | null
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -285,6 +364,9 @@ export type SocialAccountUncheckedCreateInput = {
   accountName: string
   username: string
   platformAccountId: string
+  profilePictureUrl?: string | null
+  followersCount?: number | null
+  mediaCount?: number | null
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -297,6 +379,9 @@ export type SocialAccountUpdateInput = {
   accountName?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   platformAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  profilePictureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followersCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediaCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -309,6 +394,9 @@ export type SocialAccountUncheckedUpdateInput = {
   accountName?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   platformAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  profilePictureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followersCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediaCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -321,6 +409,9 @@ export type SocialAccountCreateManyInput = {
   accountName: string
   username: string
   platformAccountId: string
+  profilePictureUrl?: string | null
+  followersCount?: number | null
+  mediaCount?: number | null
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -332,6 +423,9 @@ export type SocialAccountUpdateManyMutationInput = {
   accountName?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   platformAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  profilePictureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followersCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediaCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -343,6 +437,9 @@ export type SocialAccountUncheckedUpdateManyInput = {
   accountName?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   platformAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  profilePictureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followersCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediaCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -370,9 +467,17 @@ export type SocialAccountCountOrderByAggregateInput = {
   accountName?: Prisma.SortOrder
   username?: Prisma.SortOrder
   platformAccountId?: Prisma.SortOrder
+  profilePictureUrl?: Prisma.SortOrder
+  followersCount?: Prisma.SortOrder
+  mediaCount?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type SocialAccountAvgOrderByAggregateInput = {
+  followersCount?: Prisma.SortOrder
+  mediaCount?: Prisma.SortOrder
 }
 
 export type SocialAccountMaxOrderByAggregateInput = {
@@ -381,6 +486,9 @@ export type SocialAccountMaxOrderByAggregateInput = {
   accountName?: Prisma.SortOrder
   username?: Prisma.SortOrder
   platformAccountId?: Prisma.SortOrder
+  profilePictureUrl?: Prisma.SortOrder
+  followersCount?: Prisma.SortOrder
+  mediaCount?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -392,9 +500,17 @@ export type SocialAccountMinOrderByAggregateInput = {
   accountName?: Prisma.SortOrder
   username?: Prisma.SortOrder
   platformAccountId?: Prisma.SortOrder
+  profilePictureUrl?: Prisma.SortOrder
+  followersCount?: Prisma.SortOrder
+  mediaCount?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type SocialAccountSumOrderByAggregateInput = {
+  followersCount?: Prisma.SortOrder
+  mediaCount?: Prisma.SortOrder
 }
 
 export type SocialAccountScalarRelationFilter = {
@@ -408,6 +524,18 @@ export type StringFieldUpdateOperationsInput = {
 
 export type EnumSocialPlatformFieldUpdateOperationsInput = {
   set?: $Enums.SocialPlatform
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type BoolFieldUpdateOperationsInput = {
@@ -438,6 +566,9 @@ export type SocialAccountCreateWithoutPostsInput = {
   accountName: string
   username: string
   platformAccountId: string
+  profilePictureUrl?: string | null
+  followersCount?: number | null
+  mediaCount?: number | null
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -449,6 +580,9 @@ export type SocialAccountUncheckedCreateWithoutPostsInput = {
   accountName: string
   username: string
   platformAccountId: string
+  profilePictureUrl?: string | null
+  followersCount?: number | null
+  mediaCount?: number | null
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -476,6 +610,9 @@ export type SocialAccountUpdateWithoutPostsInput = {
   accountName?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   platformAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  profilePictureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followersCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediaCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -487,6 +624,9 @@ export type SocialAccountUncheckedUpdateWithoutPostsInput = {
   accountName?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
   platformAccountId?: Prisma.StringFieldUpdateOperationsInput | string
+  profilePictureUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  followersCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediaCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -529,6 +669,9 @@ export type SocialAccountSelect<ExtArgs extends runtime.Types.Extensions.Interna
   accountName?: boolean
   username?: boolean
   platformAccountId?: boolean
+  profilePictureUrl?: boolean
+  followersCount?: boolean
+  mediaCount?: boolean
   active?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -544,12 +687,15 @@ export type SocialAccountSelectScalar = {
   accountName?: boolean
   username?: boolean
   platformAccountId?: boolean
+  profilePictureUrl?: boolean
+  followersCount?: boolean
+  mediaCount?: boolean
   active?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SocialAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "platform" | "accountName" | "username" | "platformAccountId" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["socialAccount"]>
+export type SocialAccountOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "platform" | "accountName" | "username" | "platformAccountId" | "profilePictureUrl" | "followersCount" | "mediaCount" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["socialAccount"]>
 export type SocialAccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   posts?: boolean | Prisma.SocialAccount$postsArgs<ExtArgs>
   _count?: boolean | Prisma.SocialAccountCountOutputTypeDefaultArgs<ExtArgs>
@@ -566,6 +712,9 @@ export type $SocialAccountPayload<ExtArgs extends runtime.Types.Extensions.Inter
     accountName: string
     username: string
     platformAccountId: string
+    profilePictureUrl: string | null
+    followersCount: number | null
+    mediaCount: number | null
     active: boolean
     createdAt: Date
     updatedAt: Date
@@ -944,6 +1093,9 @@ export interface SocialAccountFieldRefs {
   readonly accountName: Prisma.FieldRef<"SocialAccount", 'String'>
   readonly username: Prisma.FieldRef<"SocialAccount", 'String'>
   readonly platformAccountId: Prisma.FieldRef<"SocialAccount", 'String'>
+  readonly profilePictureUrl: Prisma.FieldRef<"SocialAccount", 'String'>
+  readonly followersCount: Prisma.FieldRef<"SocialAccount", 'Int'>
+  readonly mediaCount: Prisma.FieldRef<"SocialAccount", 'Int'>
   readonly active: Prisma.FieldRef<"SocialAccount", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"SocialAccount", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"SocialAccount", 'DateTime'>

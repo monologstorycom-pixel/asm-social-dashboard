@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { safeRoute, queryObject } from "@/lib/http";
 import { buildPostWhere, metricJson } from "@/lib/post-query";
 import { analyticsWhere, resolveAnalyticsMode } from "@/lib/operations-db";
-import { latestSnapshotAt } from "@/lib/operations";
+import { jakartaDateKey, latestSnapshotAt } from "@/lib/operations";
 import { overviewFiltersSchema } from "@/lib/validation";
 
 type Totals = { posts: number; reach: number; engagement: number; saves: number; shares: number };
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 
     const timeline = new Map<string, { date: string; reach: number; engagement: number; saves: number; shares: number }>();
     for (const post of posts) for (const metric of post.metrics) {
-      const date = metric.capturedAt.toISOString();
+      const date = jakartaDateKey(metric.capturedAt);
       const point = timeline.get(date) ?? { date, reach: 0, engagement: 0, saves: 0, shares: 0 };
       point.reach += metric.reach;
       point.engagement += metric.engagementTotal;

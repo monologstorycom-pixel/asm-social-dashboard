@@ -46,6 +46,7 @@ export type PostStatus = (typeof PostStatus)[keyof typeof PostStatus]
 
 
 export const ContentPillar = {
+  unclassified: 'unclassified',
   education: 'education',
   product: 'product',
   comparison: 'comparison',
@@ -58,6 +59,7 @@ export type ContentPillar = (typeof ContentPillar)[keyof typeof ContentPillar]
 
 
 export const CreativeStyle = {
+  unclassified: 'unclassified',
   editorial_no_box: 'editorial_no_box',
   editorial_magazine: 'editorial_magazine',
   infographic: 'infographic',

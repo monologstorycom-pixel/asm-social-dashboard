@@ -3,6 +3,7 @@ import { normalizeMetaMetrics, type MetaMedia } from "./operations";
 
 type Fetch = typeof fetch;
 type MetaPayload = { data?: Array<{ name: string; values?: Array<{ value: unknown }> }> };
+export type MetaAccountProfile = { id: string; name: string; username: string; profile_picture_url?: string; followers_count?: number; media_count?: number };
 
 /** Read-only Meta Graph client. It has no publishing methods by design. */
 export class MetaInsightsClient {
@@ -12,12 +13,30 @@ export class MetaInsightsClient {
     private readonly graphBase = process.env.META_GRAPH_BASE_URL || "https://graph.facebook.com/v23.0",
   ) {}
 
-  async listAccountMedia(accountId: string, limit = 25): Promise<MetaMedia[]> {
+  async listAccountMedia(accountId: string, limit = 100): Promise<MetaMedia[]> {
     if (!this.token) throw new HttpError(503, "META_ACCESS_TOKEN is not configured");
-    if (!/^\d+$/.test(accountId) || !Number.isInteger(limit) || limit < 1 || limit > 100) throw new HttpError(400, "Invalid Meta account or media limit");
+    if (!/^\d+$/.test(accountId) || !Number.isInteger(limit) || limit < 1 || limit > 200) throw new HttpError(400, "Invalid Meta account or media limit");
     const fields = "id,caption,media_type,media_product_type,permalink,timestamp,like_count,comments_count,media_url,thumbnail_url,children.limit(100){id,media_type,media_url,thumbnail_url}";
-    const payload = await this.get(`${accountId}/media?fields=${encodeURIComponent(fields)}&limit=${limit}`) as { data?: MetaMedia[] };
-    return payload.data ?? [];
+    const media: MetaMedia[] = [];
+    const cursors = new Set<string>();
+    let after: string | undefined;
+    do {
+      const pageSize = Math.min(100, limit - media.length);
+      const path = `${accountId}/media?fields=${encodeURIComponent(fields)}&limit=${pageSize}${after ? `&after=${encodeURIComponent(after)}` : ""}`;
+      const payload = await this.get(path) as { data?: MetaMedia[]; paging?: { cursors?: { after?: string } } };
+      media.push(...(payload.data ?? []));
+      after = payload.paging?.cursors?.after;
+      if (after && cursors.has(after)) after = undefined;
+      else if (after) cursors.add(after);
+    } while (after && media.length < limit);
+    return media.slice(0, limit);
+  }
+
+  async getAccountProfile(accountId: string): Promise<MetaAccountProfile> {
+    if (!this.token) throw new HttpError(503, "META_ACCESS_TOKEN is not configured");
+    if (!/^\d+$/.test(accountId)) throw new HttpError(400, "Invalid Meta account");
+    const fields = "name,username,profile_picture_url,followers_count,media_count";
+    return this.get(`${accountId}?fields=${encodeURIComponent(fields)}`) as Promise<MetaAccountProfile>;
   }
 
   async getMediaDetail(mediaId: string): Promise<MetaMedia> {

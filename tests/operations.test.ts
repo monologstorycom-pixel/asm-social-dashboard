@@ -14,6 +14,7 @@ import {
   mapMediaToAssets,
   mapMetaMediaToPost,
   mapPlanFields,
+  jakartaDateKey,
   latestSnapshotAt,
   normalizeMetaMetrics,
   parsePublishWindow,
@@ -74,6 +75,18 @@ test("analytics freshness uses the newest selected snapshot", () => {
   assert.equal(latestSnapshotAt([[]]), null);
   const overview = readFileSync(new URL("../src/app/api/dashboard/overview/route.ts", import.meta.url), "utf8");
   assert.match(overview, /freshness:\s*\{\s*latestSnapshotAt:\s*asOf\s*\}/);
+});
+
+test("overview groups snapshots by Asia/Jakarta calendar day", () => {
+  assert.equal(jakartaDateKey(new Date("2026-08-24T16:59:59.000Z")), "2026-08-24");
+  assert.equal(jakartaDateKey(new Date("2026-08-24T17:00:00.000Z")), "2026-08-25");
+  const route = readFileSync(new URL("../src/app/api/dashboard/overview/route.ts", import.meta.url), "utf8");
+  assert.match(route, /const date = jakartaDateKey\(metric\.capturedAt\)/);
+});
+
+test("overview badge uses API freshness instead of top-post timestamps", () => {
+  const overview = readFileSync(new URL("../src/app/overview-client.tsx", import.meta.url), "utf8");
+  assert.match(overview, /capturedAt=\{data\?\.freshness\.latestSnapshotAt\}/);
 });
 
 test("analytics source filters never mix demo and live metrics", () => {
@@ -137,8 +150,8 @@ test("Meta media import maps provider fields without inventing analytics", () =>
     id: "media", caption: "Real caption", media_type: "CAROUSEL_ALBUM", media_product_type: "FEED",
     permalink: "https://www.instagram.com/p/example/", timestamp: "2026-08-25T12:00:00+0000", children: { data: [{ id: "a" }, { id: "b" }] },
   }), {
-    instagramMediaId: "media", title: "Real caption", caption: "Real caption", contentPillar: "brand",
-    topic: "Instagram live", contentType: "carousel", creativeStyle: "editorial_no_box", slideCount: 2,
+    instagramMediaId: "media", title: "Real caption", caption: "Real caption", contentPillar: "unclassified",
+    topic: "unclassified", contentType: "carousel", creativeStyle: "unclassified", slideCount: 2,
     status: "published", permalink: "https://www.instagram.com/p/example/", publicUrl: "https://www.instagram.com/p/example/",
     publishedAt: new Date("2026-08-25T12:00:00+0000"), source: "live",
   });
@@ -375,14 +388,16 @@ test("importLiveMetaMedia fetches all Meta GETs before one transaction and upser
   let transactionStarted = false;
 
   const meta = {
+    getAccountProfile: async () => ({ id: "12345", name: "ASM Profile", username: "asm.profile", profile_picture_url: "https://example.com/profile.jpg", followers_count: 321, media_count: 45 }),
     listAccountMedia: async () => media,
     getMediaDetail: async (mediaId: string) => { getMediaDetailCalls.push(mediaId); return media.find((m) => m.id === mediaId)!; },
     getMediaMetrics: async () => { getMetricsCalls += 1; return { reach: 0, impressions: 0, views: 0, likes: 0, comments: 0, saves: 0, shares: 0, engagementTotal: 0, engagementRate: 0 }; },
   } as unknown as InstanceType<typeof MetaInsightsClient>;
 
   let postUpserts = 0;
+  let accountUpsert: unknown;
   const client = {
-    socialAccount: { upsert: async () => ({ id: "acct" }) },
+    socialAccount: { upsert: async (query: unknown) => { accountUpsert = query; return { id: "acct" }; } },
     contentPost: {
       findUnique: async () => null,
       upsert: async () => { postUpserts += 1; return { id: `post-${postUpserts}` }; },
@@ -399,12 +414,18 @@ test("importLiveMetaMedia fetches all Meta GETs before one transaction and upser
   assert.ok(transactionStarted, "all Meta GETs must complete before transaction");
   assert.equal(result.imported, 2);
   assert.equal(result.assets, 2, "each Instagram item produces one preview asset");
+  assert.deepEqual(accountUpsert, {
+    where: { platform_platformAccountId: { platform: "instagram", platformAccountId: "12345" } },
+    create: { platform: "instagram", platformAccountId: "12345", accountName: "ASM Profile", username: "asm.profile", profilePictureUrl: "https://example.com/profile.jpg", followersCount: 321, mediaCount: 45 },
+    update: { active: true, accountName: "ASM Profile", username: "asm.profile", profilePictureUrl: "https://example.com/profile.jpg", followersCount: 321, mediaCount: 45 },
+  });
 });
 
 test("importLiveMetaMedia skips demo posts and is idempotent for live re-import", async () => {
   const media = [{ id: "m1", media_type: "IMAGE", media_url: "https://example.com/img.jpg", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000" }];
 
   const meta = {
+    getAccountProfile: async () => ({ id: "12345", name: "ASM Profile", username: "asm.profile", profile_picture_url: "https://example.com/profile.jpg", followers_count: 321, media_count: 45 }),
     listAccountMedia: async () => media,
     getMediaDetail: async (id: string) => media.find((m) => m.id === id)!,
     getMediaMetrics: async () => ({ reach: 0, impressions: 0, views: 0, likes: 0, comments: 0, saves: 0, shares: 0, engagementTotal: 0, engagementRate: 0 }),
@@ -433,6 +454,7 @@ test("importLiveMetaMedia refreshes an existing ad_hoc insight snapshot", async 
   const media = [{ id: "m1", media_type: "IMAGE", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000" }];
   const metrics = { reach: 2, impressions: 3, views: 4, likes: 1, comments: 0, saves: 0, shares: 0, engagementTotal: 1, engagementRate: 50 };
   const meta = {
+    getAccountProfile: async () => ({ id: "12345", name: "ASM Profile", username: "asm.profile", profile_picture_url: "https://example.com/profile.jpg", followers_count: 321, media_count: 45 }),
     listAccountMedia: async () => media,
     getMediaDetail: async () => media[0],
     getMediaMetrics: async () => metrics,
@@ -462,6 +484,7 @@ test("importLiveMetaMedia asset upsert is idempotent for live re-import", async 
   const media = [{ id: "m1", media_type: "IMAGE", media_url: "https://example.com/img.jpg", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000" }];
 
   const meta = {
+    getAccountProfile: async () => ({ id: "12345", name: "ASM Profile", username: "asm.profile", profile_picture_url: "https://example.com/profile.jpg", followers_count: 321, media_count: 45 }),
     listAccountMedia: async () => media,
     getMediaDetail: async (id: string) => media.find((m) => m.id === id)!,
     getMediaMetrics: async () => ({ reach: 0, impressions: 0, views: 0, likes: 0, comments: 0, saves: 0, shares: 0, engagementTotal: 0, engagementRate: 0 }),
@@ -502,6 +525,7 @@ test("importLiveMetaMedia returns useful counts including assets", async () => {
   ];
 
   const meta = {
+    getAccountProfile: async () => ({ id: "12345", name: "ASM Profile", username: "asm.profile", profile_picture_url: "https://example.com/profile.jpg", followers_count: 321, media_count: 45 }),
     listAccountMedia: async () => media,
     getMediaDetail: async (id: string) => media.find((m) => m.id === id)!,
     getMediaMetrics: async () => ({ reach: 0, impressions: 0, views: 0, likes: 0, comments: 0, saves: 0, shares: 0, engagementTotal: 0, engagementRate: 0 }),
@@ -549,18 +573,35 @@ test("Meta client listAccountMedia returns media_url and thumbnail_url fields", 
   assert.equal(items[1].thumbnail_url, "https://example.com/thumb.jpg");
 });
 
-test("Meta media import maps provider fields including media_url and thumbnail_url", () => {
-  assert.deepEqual(mapMetaMediaToPost({
-    id: "media", caption: "Real caption", media_type: "CAROUSEL_ALBUM", media_product_type: "FEED",
-    permalink: "https://www.instagram.com/p/example/", timestamp: "2026-08-25T12:00:00+0000",
-    media_url: "https://example.com/media.jpg",
-    children: { data: [{ id: "a", media_type: "IMAGE", media_url: "https://example.com/a.jpg" }, { id: "b", media_type: "IMAGE", media_url: "https://example.com/b.jpg" }] },
-  }), {
-    instagramMediaId: "media", title: "Real caption", caption: "Real caption", contentPillar: "brand",
-    topic: "Instagram live", contentType: "carousel", creativeStyle: "editorial_no_box", slideCount: 2,
-    status: "published", permalink: "https://www.instagram.com/p/example/", publicUrl: "https://www.instagram.com/p/example/",
-    publishedAt: new Date("2026-08-25T12:00:00+0000"), source: "live",
-  });
+test("Meta client listAccountMedia follows after cursors up to the requested operational limit", async () => {
+  const requests: string[] = [];
+  const fetcher = (async (input: string | URL | Request) => {
+    const url = String(input);
+    requests.push(url);
+    if (requests.length === 1) return new Response(JSON.stringify({ data: [{ id: "m1" }, { id: "m2" }], paging: { cursors: { after: "cursor-2" } } }), { status: 200 });
+    return new Response(JSON.stringify({ data: [{ id: "m3" }, { id: "m4" }], paging: { cursors: { after: "cursor-4" } } }), { status: 200 });
+  }) as typeof fetch;
+  const client = new MetaInsightsClient("token", fetcher, "https://graph.invalid/v23.0");
+
+  const items = await client.listAccountMedia("12345", 3);
+
+  assert.deepEqual(items.map(({ id }) => id), ["m1", "m2", "m3"]);
+  assert.equal(requests.length, 2);
+  assert.match(requests[1], /after=cursor-2/);
+});
+
+test("Meta client getAccountProfile fetches real Instagram profile fields", async () => {
+  let request = "";
+  const fetcher = (async (input: string | URL | Request) => {
+    request = String(input);
+    return new Response(JSON.stringify({ id: "12345", name: "ASM Profile", username: "asm.profile", profile_picture_url: "https://example.com/profile.jpg", followers_count: 321, media_count: 45 }), { status: 200 });
+  }) as typeof fetch;
+  const client = new MetaInsightsClient("token", fetcher, "https://graph.invalid/v23.0");
+
+  const profile = await client.getAccountProfile("12345");
+
+  assert.equal(profile.username, "asm.profile");
+  assert.match(request, /fields=name%2Cusername%2Cprofile_picture_url%2Cfollowers_count%2Cmedia_count/);
 });
 
 test("Meta client is injected, read-only, and keeps the token out of URLs (extended)", async () => {

@@ -84,6 +84,9 @@ export const SocialAccountScalarFieldEnum = {
   accountName: 'accountName',
   username: 'username',
   platformAccountId: 'platformAccountId',
+  profilePictureUrl: 'profilePictureUrl',
+  followersCount: 'followersCount',
+  mediaCount: 'mediaCount',
   active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -263,22 +266,23 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-export const SocialAccountOrderByRelevanceFieldEnum = {
-  id: 'id',
-  accountName: 'accountName',
-  username: 'username',
-  platformAccountId: 'platformAccountId'
-} as const
-
-export type SocialAccountOrderByRelevanceFieldEnum = (typeof SocialAccountOrderByRelevanceFieldEnum)[keyof typeof SocialAccountOrderByRelevanceFieldEnum]
-
-
 export const NullsOrder = {
   first: 'first',
   last: 'last'
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const SocialAccountOrderByRelevanceFieldEnum = {
+  id: 'id',
+  accountName: 'accountName',
+  username: 'username',
+  platformAccountId: 'platformAccountId',
+  profilePictureUrl: 'profilePictureUrl'
+} as const
+
+export type SocialAccountOrderByRelevanceFieldEnum = (typeof SocialAccountOrderByRelevanceFieldEnum)[keyof typeof SocialAccountOrderByRelevanceFieldEnum]
 
 
 export const ContentPostOrderByRelevanceFieldEnum = {
