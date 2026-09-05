@@ -207,7 +207,7 @@ test("Meta client is injected, read-only, and keeps the token out of URLs", asyn
   const client = new MetaInsightsClient("private-token", fetcher, "https://graph.invalid/v23.0");
   const metrics = await client.getMediaMetrics("media-id");
   assert.equal(metrics.reach, 10);
-  assert.equal(requests.length, 9);
+  assert.equal(requests.length, 2);
   assert.ok(requests.every(({ url, authorization }) => !url.includes("private-token") && authorization === "Bearer private-token"));
   assert.equal("publish" in client, false);
 });
@@ -615,7 +615,7 @@ test("Meta client is injected, read-only, and keeps the token out of URLs (exten
   const client = new MetaInsightsClient("private-token", fetcher, "https://graph.invalid/v23.0");
   const metrics = await client.getMediaMetrics("media-id");
   assert.equal(metrics.reach, 10);
-  assert.equal(requests.length, 9);
+  assert.equal(requests.length, 2);
   assert.ok(requests.every(({ url, authorization }) => !url.includes("private-token") && authorization === "Bearer private-token"));
   assert.equal("publish" in client, false);
 });

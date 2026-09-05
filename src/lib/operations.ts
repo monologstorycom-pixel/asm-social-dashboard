@@ -233,7 +233,7 @@ export function mapMediaToAssets(contentPostId: string, media: MetaMedia): Asset
   });
 }
 
-type Insight = { name: string; values?: Array<{ value: unknown }> };
+export type Insight = { name: string; values?: Array<{ value: unknown }> };
 const metricValue = (insights: Insight[], names: string[]) => {
   const value = insights.find((item) => names.includes(item.name))?.values?.at(-1)?.value;
   return typeof value === "number" && Number.isFinite(value) && value >= 0 ? Math.trunc(value) : 0;
