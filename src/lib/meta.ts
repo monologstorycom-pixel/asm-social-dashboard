@@ -48,13 +48,30 @@ export class MetaInsightsClient {
   async getMediaMetrics(mediaId: string) {
     if (!this.token) throw new HttpError(503, "META_ACCESS_TOKEN is not configured");
     const fields = "like_count,comments_count,permalink,timestamp";
-    const metrics = ["reach", "impressions", "saved", "shares", "views", "plays", "video_views", "total_interactions"].join(",");
-    const [media, insight] = await Promise.all([
-      this.get(`${mediaId}?fields=${encodeURIComponent(fields)}`),
-      this.get(`${mediaId}/insights?metric=${encodeURIComponent(metrics)}`),
-    ]);
-    const metricRows = ((insight as MetaPayload).data ?? []) as unknown as Insight[];
-    return normalizeMetaMetrics(media as { like_count?: unknown; comments_count?: unknown }, metricRows);
+    const metrics = ["reach", "impressions", "saved", "shares", "views", "plays", "video_views", "total_interactions"];
+    const media = await this.get(`${mediaId}?fields=${encodeURIComponent(fields)}`);
+    try {
+      const insight = await this.get(`${mediaId}/insights?metric=${encodeURIComponent(metrics.join(","))}`);
+      const metricRows = ((insight as MetaPayload).data ?? []) as unknown as Insight[];
+      return normalizeMetaMetrics(media as { like_count?: unknown; comments_count?: unknown }, metricRows);
+    } catch {
+      const fallbackRows = [] as Insight[];
+      for (const metric of metrics) {
+        const insight = await this.getOptional(`${mediaId}/insights?metric=${encodeURIComponent(metric)}`);
+        if (insight) fallbackRows.push(...(((insight as MetaPayload).data ?? []) as unknown as Insight[]));
+      }
+      return normalizeMetaMetrics(media as { like_count?: unknown; comments_count?: unknown }, fallbackRows);
+    }
+  }
+
+  private async getOptional(path: string): Promise<unknown | null> {
+    const response = await this.fetcher(`${this.graphBase}/${path}`, {
+      headers: { Authorization: `Bearer ${this.token}` },
+      cache: "no-store",
+    });
+    if (response.status === 400) return null;
+    if (!response.ok) throw new HttpError(502, `Meta read request failed (${response.status})`);
+    return response.json();
   }
 
   private async get(path: string): Promise<unknown> {
