@@ -62,6 +62,7 @@ export async function GET(request: Request) {
     })).sort((a, b) => Number(b.latestMetric?.[metricKey] ?? 0) - Number(a.latestMetric?.[metricKey] ?? 0)).slice(0, 5);
 
     const accounts = [...new Map(posts.map((post) => [post.socialAccount.id, post.socialAccount])).values()].filter((a) => a.platform === "instagram");
+    const account = accounts[0] ?? null;
     const unique = <T,>(values: T[]) => [...new Set(values)].sort();
     const asOf = latestSnapshotAt(posts.map((post) => post.metrics.map((metric) => metric.capturedAt)));
     return Response.json({
@@ -69,6 +70,11 @@ export async function GET(request: Request) {
       source: mode.dataMode === "demo" ? "demo" : mode.dataMode === "live" ? "meta" : "mixed",
       asOf,
       freshness: { latestSnapshotAt: asOf },
+      accountName: account?.accountName ?? null,
+      username: account?.username ?? null,
+      followersCount: account?.followersCount ?? null,
+      mediaCount: account?.mediaCount ?? null,
+      profilePictureUrl: account?.profilePictureUrl ?? null,
       totals,
       selectedMetric: filters.metric,
       performanceOverTime,
