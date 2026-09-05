@@ -15,7 +15,7 @@ export class MetaInsightsClient {
 
   async listAccountMedia(accountId: string, limit = 100): Promise<MetaMedia[]> {
     if (!this.token) throw new HttpError(503, "META_ACCESS_TOKEN is not configured");
-    if (!/^\d+$/.test(accountId) || !Number.isInteger(limit) || limit < 1 || limit > 200) throw new HttpError(400, "Invalid Meta account or media limit");
+    if (!/^\d+$/.test(accountId) || !Number.isInteger(limit) || limit < 1 || limit > 1000) throw new HttpError(400, "Invalid Meta account or media limit");
     const fields = "id,caption,media_type,media_product_type,permalink,timestamp,like_count,comments_count,media_url,thumbnail_url,children.limit(100){id,media_type,media_url,thumbnail_url}";
     const media: MetaMedia[] = [];
     const cursors = new Set<string>();

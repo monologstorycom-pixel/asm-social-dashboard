@@ -79,7 +79,7 @@ export async function importLiveMetaMedia(
   meta = new MetaInsightsClient(),
 ) {
   if (!accountId) throw new HttpError(503, "META_IG_USER_ID is not configured");
-  const [profile, media] = await Promise.all([meta.getAccountProfile(accountId), meta.listAccountMedia(accountId, 100)]);
+  const [profile, media] = await Promise.all([meta.getAccountProfile(accountId), meta.listAccountMedia(accountId, 820)]);
   if (!profile.name?.trim() || !profile.username?.trim()) throw new HttpError(502, "Meta returned an invalid account profile");
   const detail = await Promise.all(media.map((item) => meta.getMediaDetail(item.id)));
   const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>>; assets: ReturnType<typeof mapMediaToAssets> }> = [];
