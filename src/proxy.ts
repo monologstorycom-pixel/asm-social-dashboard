@@ -3,8 +3,10 @@ import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
 
 function buildUrl(path: string, request: NextRequest) {
   const url = new URL(path, request.url);
-  url.protocol = request.headers.get("x-forwarded-proto") ?? url.protocol;
-  url.host = request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? url.host;
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  const forwardedHost = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  if (forwardedProto) url.protocol = forwardedProto;
+  if (forwardedHost) url.host = forwardedHost.replace(/:3000$/, "");
   return url;
 }
 
