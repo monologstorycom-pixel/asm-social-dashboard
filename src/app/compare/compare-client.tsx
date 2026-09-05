@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { bestMetricIds, compactNumber, dateTimeLabel, friendlyLabel, fullNumber, percent, Post, readStoredSelection, storeSelection, toggleSelection } from "@/lib/frontend";
+import DataSourceBadge from "../data-source-badge";
 
 type MetricKey = "reach" | "likes" | "comments" | "saves" | "shares" | "engagementRate";
 const metricOptions: Array<{ key: MetricKey; label: string }> = [{ key: "reach", label: "Jangkauan" }, { key: "likes", label: "Suka" }, { key: "comments", label: "Komentar" }, { key: "saves", label: "Simpan" }, { key: "shares", label: "Bagikan" }, { key: "engagementRate", label: "Rasio" }];
@@ -14,13 +15,14 @@ const colors = ["#2d7a7a", "#5a9e9e", "#8bbcbc", "#a8d0d0", "#c5e2e2"];
 export default function CompareClient() {
   const params = useSearchParams(); const router = useRouter();
   const [ids, setIds] = useState<string[]>([]); const [items, setItems] = useState<Post[]>([]); const [picker, setPicker] = useState<Post[]>([]);
+  const [sourceInfo, setSourceInfo] = useState<{ dataMode: string; source: string } | null>(null);
   const [metric, setMetric] = useState<MetricKey>("reach"); const [query, setQuery] = useState(""); const [loading, setLoading] = useState(false); const [error, setError] = useState(""); const [notice, setNotice] = useState("");
   useEffect(() => { const urlIds = (params.get("ids") ?? "").split(",").filter(Boolean); setIds(urlIds.length ? [...new Set(urlIds)].slice(0, 5) : readStoredSelection()); }, [params]);
-  useEffect(() => { fetch("/api/posts?pageSize=100&sort=publishDate&order=desc").then((r) => r.ok ? r.json() : Promise.reject()).then((data: { items: Post[] }) => setPicker(data.items)).catch(() => undefined); }, []);
+  useEffect(() => { fetch("/api/posts?pageSize=100&sort=publishDate&order=desc").then((r) => r.ok ? r.json() : Promise.reject()).then((data: { dataMode: string; source: string; items: Post[] }) => { setPicker(data.items); setSourceInfo(data); }).catch(() => undefined); }, []);
   useEffect(() => {
     if (ids.length < 2) { setItems([]); setError(""); return; }
     const controller = new AbortController(); setLoading(true); setError("");
-    fetch(`/api/compare?ids=${ids.join(",")}`, { signal: controller.signal }).then(async (r) => { if (!r.ok) throw new Error(); return r.json() as Promise<{ items: Post[] }>; }).then(({ items: rows }) => setItems(rows)).catch((reason: unknown) => { if (!(reason instanceof DOMException && reason.name === "AbortError")) setError("Postingan yang dipilih tidak dapat dibandingkan. Mungkin salah satu sudah tidak tersedia."); }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    fetch(`/api/compare?ids=${ids.join(",")}`, { signal: controller.signal }).then(async (r) => { if (!r.ok) throw new Error(); return r.json() as Promise<{ dataMode: string; source: string; items: Post[] }>; }).then(({ items: rows, ...source }) => { setItems(rows); setSourceInfo(source); }).catch((reason: unknown) => { if (!(reason instanceof DOMException && reason.name === "AbortError")) setError("Postingan yang dipilih tidak dapat dibandingkan. Mungkin salah satu sudah tidak tersedia."); }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [ids]);
   const changeIds = (next: string[]) => { setIds(next); setNotice(""); storeSelection(next); router.replace(next.length ? `/compare?ids=${next.join(",")}` : "/compare"); };
@@ -30,6 +32,7 @@ export default function CompareClient() {
 
   return <div className="page-wrap compare-page">
     <header className="page-header"><div><p className="eyebrow">Intelijen berdampingan</p><h1>Bandingkan postingan</h1><p>Temukan sinyal konten di balik kinerja yang lebih kuat.</p></div><div className="compare-count"><strong>{ids.length}</strong><span>dari 5 postingan<br/>dipilih</span></div></header>
+    <DataSourceBadge dataMode={sourceInfo?.dataMode} source={sourceInfo?.source} capturedAt={(items.length ? items : picker).map((post) => post.latestMetric?.capturedAt).filter((value): value is string => Boolean(value)).sort().at(-1)}/>
     <div className="compare-layout">
       <div className="compare-main">
         {ids.length < 2 ? <section className="state-box compare-empty"><span className="empty-icon" aria-hidden="true">⇄</span><strong>Pilih minimal 2 postingan</strong><p>Pilih dari picker atau bangun seleksi Anda di eksplorasi Postingan.</p><Link className="primary-action" href="/posts">Jelajahi semua postingan</Link></section> : error ? <section className="state-box" role="alert"><strong>Perbandingan tidak tersedia</strong><p>{error}</p></section> : loading ? <section className="panel compare-loading">Membangun perbandingan…</section> : <>

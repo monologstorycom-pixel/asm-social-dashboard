@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { buildApiQuery, compactNumber, dateLabel, FilterOptions, friendlyLabel, percent, Post } from "@/lib/frontend";
+import DataSourceBadge from "./data-source-badge";
 
 type MetricName = "reach" | "engagement" | "saves" | "shares";
 type Overview = {
+  dataMode: string; source: string;
   totals: { posts: number; reach: number; engagement: number; engagementRate: number; saves: number; shares: number };
   performanceOverTime: Array<{ date: string; reach: number; engagement: number; saves: number; shares: number }>;
   topPosts: Post[];
@@ -47,7 +49,8 @@ export default function OverviewClient() {
   ] as const;
 
   return <div className="page-wrap">
-    <header className="page-header"><div><p className="eyebrow">Intelijen kinerja</p><h1>Ringkasan</h1><p>Pantau momentum konten di seluruh kanal sosial ASM.</p></div><div className="live-badge"><span />Ruang kerja aktif</div></header>
+    <header className="page-header"><div><p className="eyebrow">Intelijen kinerja</p><h1>Ringkasan</h1><p>Pantau momentum konten di seluruh kanal sosial ASM.</p></div></header>
+    <DataSourceBadge dataMode={data?.dataMode} source={data?.source} capturedAt={data?.topPosts.map((post) => post.latestMetric?.capturedAt).filter((value): value is string => Boolean(value)).sort().at(-1)}/>
 
     <section className="filter-panel" aria-label="Filter analitik global">
       <div className="filter-heading"><strong>Filter global</strong><button className="text-button" onClick={() => setFilters(emptyFilters)} disabled={!Object.values(filters).some(Boolean)}>Atur ulang</button></div>

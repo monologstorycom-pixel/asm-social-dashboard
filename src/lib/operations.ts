@@ -85,6 +85,11 @@ export function analyticsSourceFilters(dataMode: Exclude<DataMode, "auto">) {
   return { postSource: undefined, metricSources: undefined };
 }
 
+export function latestSnapshotAt(groups: Date[][]) {
+  const latest = groups.flat().reduce<Date | null>((value, capturedAt) => !value || capturedAt > value ? capturedAt : value, null);
+  return latest?.toISOString() ?? null;
+}
+
 type MetricValues = ReturnType<typeof normalizeMetaMetrics>;
 type SyncInput = {
   post: { id: string; publishedAt: Date; instagramMediaId: string };

@@ -14,6 +14,7 @@ import {
   mapMediaToAssets,
   mapMetaMediaToPost,
   mapPlanFields,
+  latestSnapshotAt,
   normalizeMetaMetrics,
   parsePublishWindow,
   publishingRecommendation,
@@ -66,6 +67,13 @@ test("data mode automatically switches from clearly-labelled demo to live", () =
   assert.deepEqual(resolveDataMode("auto", false), { dataMode: "demo", source: "demo" });
   assert.deepEqual(resolveDataMode("auto", true), { dataMode: "live", source: "live" });
   assert.deepEqual(resolveDataMode("all", true), { dataMode: "all", source: undefined });
+});
+
+test("analytics freshness uses the newest selected snapshot", () => {
+  assert.equal(latestSnapshotAt([[new Date("2026-08-24T01:00:00.000Z")], [], [new Date("2026-08-24T03:00:00.000Z")]]), "2026-08-24T03:00:00.000Z");
+  assert.equal(latestSnapshotAt([[]]), null);
+  const overview = readFileSync(new URL("../src/app/api/dashboard/overview/route.ts", import.meta.url), "utf8");
+  assert.match(overview, /freshness:\s*\{\s*latestSnapshotAt:\s*asOf\s*\}/);
 });
 
 test("analytics source filters never mix demo and live metrics", () => {
@@ -344,6 +352,17 @@ test("mapMetaMediaToPost sets permalink and publicUrl from media permalink", () 
   });
   assert.equal(post.permalink, "https://www.instagram.com/p/test/");
   assert.equal(post.publicUrl, "https://www.instagram.com/p/test/");
+});
+
+test("importLiveMetaMedia fails closed when META_IG_USER_ID is missing", async () => {
+  const previous = process.env.META_IG_USER_ID;
+  delete process.env.META_IG_USER_ID;
+  try {
+    await assert.rejects(() => importLiveMetaMedia(), /META_IG_USER_ID is not configured/);
+  } finally {
+    if (previous === undefined) delete process.env.META_IG_USER_ID;
+    else process.env.META_IG_USER_ID = previous;
+  }
 });
 
 test("importLiveMetaMedia fetches all Meta GETs before one transaction and upserts assets idempotently", async () => {

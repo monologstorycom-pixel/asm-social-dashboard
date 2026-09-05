@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { safeRoute, queryObject } from "@/lib/http";
 import { buildPostWhere, metricJson } from "@/lib/post-query";
 import { analyticsWhere, resolveAnalyticsMode } from "@/lib/operations-db";
+import { latestSnapshotAt } from "@/lib/operations";
 import { overviewFiltersSchema } from "@/lib/validation";
 
 type Totals = { posts: number; reach: number; engagement: number; saves: number; shares: number };
@@ -62,10 +63,12 @@ export async function GET(request: Request) {
 
     const accounts = [...new Map(posts.map((post) => [post.socialAccount.id, post.socialAccount])).values()];
     const unique = <T,>(values: T[]) => [...new Set(values)].sort();
+    const asOf = latestSnapshotAt(posts.map((post) => post.metrics.map((metric) => metric.capturedAt)));
     return Response.json({
       dataMode: mode.dataMode,
       source: mode.dataMode === "demo" ? "demo" : mode.dataMode === "live" ? "meta" : "mixed",
-      asOf: new Date().toISOString(),
+      asOf,
+      freshness: { latestSnapshotAt: asOf },
       totals,
       selectedMetric: filters.metric,
       performanceOverTime,

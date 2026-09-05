@@ -73,11 +73,12 @@ export function analyticsWhere(dataMode: Exclude<DataMode, "auto">) {
 }
 
 export async function importLiveMetaMedia(
-  accountId = "17841405865261475",
+  accountId = process.env.META_IG_USER_ID,
   capturedAt = new Date(),
   client: OperationsDb = db,
   meta = new MetaInsightsClient(),
 ) {
+  if (!accountId) throw new HttpError(503, "META_IG_USER_ID is not configured");
   const media = await meta.listAccountMedia(accountId, 25);
   const detail = await Promise.all(media.map((item) => meta.getMediaDetail(item.id)));
   const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>>; assets: ReturnType<typeof mapMediaToAssets> }> = [];

@@ -23,6 +23,12 @@ export function friendlyLabel(value: string) {
   return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+export function dataSourceLabel(dataMode: string, source: string) {
+  if (dataMode === "demo" || source === "demo") return "Snapshot demo";
+  if (dataMode === "live" || source === "meta") return "Snapshot Meta";
+  return "Data campuran";
+}
+
 export const CONTENT_PLAN_WORKFLOW = ["planned", "approved_for_creation", "creating", "ready_for_review", "approved", "scheduled", "published", "measuring"] as const;
 export type ContentPlanStatus = typeof CONTENT_PLAN_WORKFLOW[number];
 
@@ -58,7 +64,7 @@ export type Metric = {
 };
 export type Post = {
   id: string; title: string; caption: string; topic: string; contentPillar: string; contentType: string;
-  creativeStyle: string; status: string; publishedAt: string | null; publicUrl: string | null;
+  creativeStyle: string; status: string; publishedAt: string | null; publicUrl: string | null; permalink: string | null;
   socialAccount: Account; assets: Asset[]; latestMetric: Metric | null; metrics?: Metric[];
 };
 export type FilterOptions = {
@@ -75,4 +81,38 @@ export function readStoredSelection() {
 
 export function storeSelection(ids: string[]) {
   if (typeof window !== "undefined") localStorage.setItem("asm-selected-posts", JSON.stringify(ids.slice(0, 5)));
+}
+
+export function orderAssetsBySlide(assets: Asset[]): Asset[] {
+  return [...assets].sort((a, b) => a.slideNumber - b.slideNumber);
+}
+
+export function previewSrc(assets: Asset[]): string | null {
+  if (!assets.length) return null;
+  const ordered = orderAssetsBySlide(assets);
+  return ordered.find((a) => a.assetType === "thumbnail")?.assetUrl ?? ordered[0]?.assetUrl ?? null;
+}
+
+export function safeExternalLinkProps(url: string | null): { target?: string; rel?: string } {
+  return url ? { target: "_blank", rel: "noopener noreferrer" } : {};
+}
+
+export function carouselPrev(current: number, total: number): number {
+  return (current - 1 + total) % total;
+}
+
+export function carouselNext(current: number, total: number): number {
+  return (current + 1) % total;
+}
+
+export function slideIndicatorLabel(current: number, total: number): string {
+  return `Slide ${current + 1} dari ${total}`;
+}
+
+export function thumbnailAttrs(src: string): { src: string; alt: string; loading: "lazy" } {
+  return { src, alt: "", loading: "lazy" };
+}
+
+export function dialogMediaAttrs(src: string, title: string): { src: string; alt: string } {
+  return { src, alt: `Pratinjau ${title}` };
 }
