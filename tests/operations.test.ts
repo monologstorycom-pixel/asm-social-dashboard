@@ -429,6 +429,35 @@ test("importLiveMetaMedia skips demo posts and is idempotent for live re-import"
   assert.equal(postCount, 0, "must not upsert demo posts");
 });
 
+test("importLiveMetaMedia refreshes an existing ad_hoc insight snapshot", async () => {
+  const media = [{ id: "m1", media_type: "IMAGE", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000" }];
+  const metrics = { reach: 2, impressions: 3, views: 4, likes: 1, comments: 0, saves: 0, shares: 0, engagementTotal: 1, engagementRate: 50 };
+  const meta = {
+    listAccountMedia: async () => media,
+    getMediaDetail: async () => media[0],
+    getMediaMetrics: async () => metrics,
+  } as unknown as InstanceType<typeof MetaInsightsClient>;
+  const updates: unknown[] = [];
+  const client = {
+    socialAccount: { upsert: async () => ({ id: "acct" }) },
+    contentPost: { findUnique: async () => ({ id: "post-1", source: "live" }), upsert: async () => ({ id: "post-1" }) },
+    postMetric: {
+      findUnique: async () => ({ id: "metric-1" }),
+      update: async (query: unknown) => { updates.push(query); return {}; },
+      create: async () => { throw new Error("must update the existing snapshot"); },
+    },
+    postAsset: { findUnique: async () => null, create: async () => ({}) },
+    $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(client),
+  } as unknown as OperationsDb;
+  const capturedAt = new Date("2026-09-05T00:00:00.000Z");
+
+  const result = await importLiveMetaMedia("12345", capturedAt, client, meta);
+
+  assert.deepEqual(updates, [{ where: { id: "metric-1" }, data: { capturedAt, ...metrics } }]);
+  assert.equal(result.snapshots, 0);
+  assert.equal(result.existingSnapshots, 1);
+});
+
 test("importLiveMetaMedia asset upsert is idempotent for live re-import", async () => {
   const media = [{ id: "m1", media_type: "IMAGE", media_url: "https://example.com/img.jpg", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000" }];
 

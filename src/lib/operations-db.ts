@@ -118,7 +118,11 @@ export async function importLiveMetaMedia(
         where: { contentPostId_source_snapshotWindow: { contentPostId: post.id, source: "meta", snapshotWindow: "ad_hoc" } },
         select: { id: true },
       });
-      if (prior) { existingSnapshots += 1; continue; }
+      if (prior) {
+        await tx.postMetric.update({ where: { id: prior.id }, data: { capturedAt: new Date(capturedAt.getTime() + index), ...sample.metrics } });
+        existingSnapshots += 1;
+        continue;
+      }
       await tx.postMetric.create({ data: {
         contentPostId: post.id, capturedAt: new Date(capturedAt.getTime() + index), source: "meta", snapshotWindow: "ad_hoc", ...sample.metrics,
       } });
