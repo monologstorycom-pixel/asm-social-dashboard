@@ -2,20 +2,9 @@ import { NextResponse } from "next/server";
 import { createSessionToken, credentialsMatch, SESSION_COOKIE, SESSION_SECONDS } from "@/lib/auth";
 
 function publicUrl(request: Request) {
-  const url = new URL(request.url);
-  const proto = request.headers.get("x-forwarded-proto");
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  if (proto) url.protocol = `${proto}:`;
-  if (host) {
-    // strip :3000 internal port
-    const cleanHost = host.replace(/:3000$/, "");
-    url.host = cleanHost;
-    // also fix 0.0.0.0 to public domain
-    if (cleanHost.startsWith("0.0.0.0") || cleanHost.startsWith("127.0.0.1")) {
-      url.host = process.env.NEXT_PUBLIC_APP_HOST || "sosmedasm.rsby.cloud";
-    }
-  }
-  return url;
+  const host = process.env.NEXT_PUBLIC_APP_HOST || request.headers.get("x-forwarded-host")?.replace(/:\d+$/, "") || "sosmedasm.rsby.cloud";
+  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+  return new URL(`${protocol}://${host}`);
 }
 
 export async function POST(request: Request) {
