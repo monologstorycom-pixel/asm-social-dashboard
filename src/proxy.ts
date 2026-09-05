@@ -8,17 +8,15 @@ export function proxy(request: NextRequest) {
   url.pathname = "/login";
   url.search = "";
   url.searchParams.set("next", request.nextUrl.pathname);
-  // Fix host: strip :3000, fix 0.0.0.0
   const proto = request.headers.get("x-forwarded-proto");
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
   if (proto) url.protocol = `${proto}:`;
   if (host) {
-    const cleanHost = host.replace(/:3000$/, "");
-    if (cleanHost.startsWith("0.0.0.0") || cleanHost.startsWith("127.0.0.1")) {
-      url.host = process.env.NEXT_PUBLIC_APP_HOST || "sosmedasm.rsby.cloud";
-    } else {
-      url.host = cleanHost;
-    }
+    const cleanHost = host.replace(/:\d+$/, "");
+    url.hostname = cleanHost === "0.0.0.0" || cleanHost === "127.0.0.1" || cleanHost === "localhost"
+      ? process.env.NEXT_PUBLIC_APP_HOST || "sosmedasm.rsby.cloud"
+      : cleanHost;
+    url.port = "";
   }
   return NextResponse.redirect(url, 307);
 }
