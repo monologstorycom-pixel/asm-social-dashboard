@@ -124,7 +124,10 @@ export async function importLiveMetaMedia(
         select: { id: true },
       });
       if (prior) {
-        await tx.postMetric.update({ where: { id: prior.id }, data: { capturedAt: new Date(capturedAt.getTime() + index), ...sample.metrics } });
+        await tx.postMetric.deleteMany({ where: { id: prior.id } });
+        await tx.postMetric.create({ data: {
+          contentPostId: post.id, capturedAt: new Date(capturedAt.getTime() + index), source: "meta", snapshotWindow: "ad_hoc", ...sample.metrics,
+        } });
         existingSnapshots += 1;
         continue;
       }
