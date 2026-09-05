@@ -148,6 +148,8 @@ img { display: block; max-width: 100%; }
 .brand small { font-size: var(--step--1); color: var(--ink-3); margin-top: 1px; }
 
 .sidebar nav { display: grid; gap: 2px; padding: 0 var(--space-xs); }
+.sidebar nav form { display: contents; }
+.sidebar nav .logout-button { width: 100%; text-align: left; font: inherit; background: none; border: none; cursor: pointer; }
 .nav-link {
   display: flex;
   align-items: center;
@@ -1457,7 +1459,7 @@ img { display: block; max-width: 100%; }
     box-shadow: 0 -1px 8px rgba(0,0,0,.06);
   }
   .brand, .sidebar-foot { display: none; }
-  .sidebar nav { display: grid; grid-template-columns: repeat(4, 1fr); height: 100%; padding: 0; }
+  .sidebar nav { display: grid; grid-template-columns: repeat(5, 1fr); height: 100%; padding: 0; }
   .nav-link {
     flex-direction: column;
     justify-content: center;

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { unstable_doesMiddlewareMatch as doesProxyMatch } from "next/experimental/testing/server";
 import { config } from "../src/proxy";
+import { POST as logout } from "../src/app/api/auth/logout/route";
 import { createSessionToken, credentialsMatch, verifySessionToken } from "../src/lib/auth";
 
 test("dashboard credentials require exact configured values", () => {
@@ -27,4 +28,20 @@ test("proxy matcher covers root, dashboard routes, and api dashboard", () => {
   assert.equal(doesProxyMatch({ config, url: "/api/dashboard/overview" }), true);
   assert.equal(doesProxyMatch({ config, url: "/login" }), false);
   assert.equal(doesProxyMatch({ config, url: "/api/auth/login" }), false);
+  assert.equal(doesProxyMatch({ config, url: "/api/auth/logout" }), false);
+});
+
+test("logout clears the session cookie and redirects to login", async () => {
+  const response = await logout(new Request("https://example.com/api/auth/logout", {
+    method: "POST",
+    headers: { "x-forwarded-host": "example.com:3000" },
+  }));
+  assert.equal(response.status, 303);
+  assert.equal(response.headers.get("location"), `${process.env.NODE_ENV === "production" ? "https" : "http"}://example.com/login`);
+  const cookie = response.headers.get("set-cookie") ?? "";
+  assert.match(cookie, /asm_dashboard_session=/);
+  assert.match(cookie, /Max-Age=0/i);
+  assert.match(cookie, /Path=\//i);
+  assert.match(cookie, /HttpOnly/i);
+  assert.match(cookie, /SameSite=Strict/i);
 });

@@ -27,6 +27,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <span aria-hidden="true">{item.icon}</span>{item.label}
           </Link>;
         })}
+        <form action="/api/auth/logout" method="post">
+          <button className="nav-link logout-button" type="submit">
+            <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/></svg></span>
+            Keluar
+          </button>
+        </form>
       </nav>
       <div className="sidebar-foot"><span className="status-dot" />Ruang kerja data <small>PT Auri Steel Metalindo</small></div>
     </aside>
