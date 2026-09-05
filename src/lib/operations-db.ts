@@ -72,14 +72,85 @@ export function analyticsWhere(dataMode: Exclude<DataMode, "auto">) {
   } as const;
 }
 
+export async function importLiveMetaMediaPage(
+  accountId = process.env.META_IG_USER_ID,
+  capturedAt = new Date(),
+  client: OperationsDb = db,
+  meta = new MetaInsightsClient(),
+  after?: string,
+  pageSize = 100,
+) {
+  if (!accountId) throw new HttpError(503, "META_IG_USER_ID is not configured");
+  const profile = await meta.getAccountProfile(accountId);
+  if (!profile.name?.trim() || !profile.username?.trim()) throw new HttpError(502, "Meta returned an invalid account profile");
+  const profileData = {
+    accountName: profile.name.trim(), username: profile.username.trim(), profilePictureUrl: profile.profile_picture_url,
+    followersCount: profile.followers_count, mediaCount: profile.media_count,
+  };
+  const account = await client.socialAccount.upsert({
+    where: { platform_platformAccountId: { platform: "instagram", platformAccountId: accountId } },
+    create: { platform: "instagram", platformAccountId: accountId, ...profileData },
+    update: { active: true, ...profileData },
+  });
+  const page = await meta.listAccountMediaPage(accountId, after, pageSize);
+  const media = page.data;
+  if (!media.length) return { media: 0, imported: 0, snapshots: 0, existingSnapshots: 0, assets: 0, capturedAt: capturedAt.toISOString(), after: page.after ?? null, hasMore: false };
+  const details = await Promise.all(media.map((item) => meta.getMediaDetail(item.id)));
+  let imported = 0;
+  let snapshots = 0;
+  let existingSnapshots = 0;
+  let assets = 0;
+  await client.$transaction(async (tx) => {
+    for (const [index, item] of details.entries()) {
+      const assetsMapped = mapMediaToAssets("placeholder", item);
+      const sample = { item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id), assets: assetsMapped };
+      const existing = await tx.contentPost.findUnique({ where: { instagramMediaId: sample.item.id }, select: { id: true, source: true } });
+      if (existing?.source === "demo") throw new HttpError(409, "A demo post already uses a real Meta media ID; import stopped without overwriting demo");
+      const post = await tx.contentPost.upsert({
+        where: { instagramMediaId: sample.item.id },
+        create: { socialAccountId: account.id, ...sample.post },
+        update: { socialAccountId: account.id, ...sample.post },
+      });
+      if (!existing) imported += 1;
+      for (const asset of sample.assets) {
+        const existingAsset = await tx.postAsset.findUnique({ where: { contentPostId_slideNumber: { contentPostId: post.id, slideNumber: asset.slideNumber } } });
+        if (existingAsset) {
+          if (existingAsset.assetUrl !== asset.assetUrl) await tx.postAsset.update({ where: { id: existingAsset.id }, data: { assetUrl: asset.assetUrl } });
+        } else {
+          await tx.postAsset.create({ data: { contentPostId: post.id, ...asset } });
+        }
+        assets += 1;
+      }
+      const prior = await tx.postMetric.findUnique({
+        where: { contentPostId_source_snapshotWindow: { contentPostId: post.id, source: "meta", snapshotWindow: "ad_hoc" } },
+        select: { id: true },
+      });
+      if (prior) {
+        await tx.postMetric.deleteMany({ where: { id: prior.id } });
+        await tx.postMetric.create({ data: {
+          contentPostId: post.id, capturedAt: new Date(capturedAt.getTime() + index), source: "meta", snapshotWindow: "ad_hoc", ...sample.metrics,
+        } });
+        existingSnapshots += 1;
+        continue;
+      }
+      await tx.postMetric.create({ data: {
+        contentPostId: post.id, capturedAt: new Date(capturedAt.getTime() + index), source: "meta", snapshotWindow: "ad_hoc", ...sample.metrics,
+      } });
+      snapshots += 1;
+    }
+  });
+  return { media: media.length, imported, snapshots, existingSnapshots, assets, capturedAt: capturedAt.toISOString(), after: page.after ?? null, hasMore: !!page.after };
+}
+
 export async function importLiveMetaMedia(
   accountId = process.env.META_IG_USER_ID,
   capturedAt = new Date(),
   client: OperationsDb = db,
   meta = new MetaInsightsClient(),
+  limit = 100,
 ) {
   if (!accountId) throw new HttpError(503, "META_IG_USER_ID is not configured");
-  const [profile, media] = await Promise.all([meta.getAccountProfile(accountId), meta.listAccountMedia(accountId, 820)]);
+  const [profile, media] = await Promise.all([meta.getAccountProfile(accountId), meta.listAccountMedia(accountId, limit)]);
   if (!profile.name?.trim() || !profile.username?.trim()) throw new HttpError(502, "Meta returned an invalid account profile");
   const profileData = {
     accountName: profile.name.trim(), username: profile.username.trim(), profilePictureUrl: profile.profile_picture_url,

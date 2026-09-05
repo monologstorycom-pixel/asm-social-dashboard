@@ -13,19 +13,23 @@ export class MetaInsightsClient {
     private readonly graphBase = process.env.META_GRAPH_BASE_URL || "https://graph.facebook.com/v23.0",
   ) {}
 
-  async listAccountMedia(accountId: string, limit = 100): Promise<MetaMedia[]> {
+  async listAccountMediaPage(accountId: string, after?: string, pageSize = 100): Promise<{ data: MetaMedia[]; after?: string }> {
     if (!this.token) throw new HttpError(503, "META_ACCESS_TOKEN is not configured");
-    if (!/^\d+$/.test(accountId) || !Number.isInteger(limit) || limit < 1 || limit > 1000) throw new HttpError(400, "Invalid Meta account or media limit");
+    if (!/^\d+$/.test(accountId) || !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 100) throw new HttpError(400, "Invalid Meta account or media limit");
     const fields = "id,caption,media_type,media_product_type,permalink,timestamp,like_count,comments_count,media_url,thumbnail_url,children.limit(100){id,media_type,media_url,thumbnail_url}";
+    const path = `${accountId}/media?fields=${encodeURIComponent(fields)}&limit=${pageSize}${after ? `&after=${encodeURIComponent(after)}` : ""}`;
+    const payload = await this.get(path) as { data?: MetaMedia[]; paging?: { cursors?: { after?: string } } };
+    return { data: payload.data ?? [], after: payload.paging?.cursors?.after };
+  }
+
+  async listAccountMedia(accountId: string, limit = 100): Promise<MetaMedia[]> {
     const media: MetaMedia[] = [];
     const cursors = new Set<string>();
     let after: string | undefined;
     do {
-      const pageSize = Math.min(100, limit - media.length);
-      const path = `${accountId}/media?fields=${encodeURIComponent(fields)}&limit=${pageSize}${after ? `&after=${encodeURIComponent(after)}` : ""}`;
-      const payload = await this.get(path) as { data?: MetaMedia[]; paging?: { cursors?: { after?: string } } };
-      media.push(...(payload.data ?? []));
-      after = payload.paging?.cursors?.after;
+      const page = await this.listAccountMediaPage(accountId, after, Math.min(100, limit - media.length));
+      media.push(...page.data);
+      after = page.after;
       if (after && cursors.has(after)) after = undefined;
       else if (after) cursors.add(after);
     } while (after && media.length < limit);
