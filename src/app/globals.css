@@ -1425,6 +1425,8 @@ img { display: block; max-width: 100%; }
 .login-form input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); outline: none; }
 .login-form .form-error { margin: 0; }
 .login-form .primary-action { width: 100%; min-height: 42px; }
+.login-error { margin: 0 0 var(--space-s); color: var(--danger, #c53030); font-size: var(--step--1); font-weight: 600; }
+.login-copy { margin-bottom: var(--space-m); }
 
 /* ═══════════════════════════════════════════
    RESPONSIVE

@@ -7,7 +7,8 @@ const digest = (value: string) => createHmac("sha256", "asm-dashboard-credential
 const signature = (expiresAt: string, secret: string) => createHmac("sha256", secret).update(expiresAt).digest("base64url");
 
 export function credentialsMatch(username: string, password: string, expectedUsername = process.env.DASHBOARD_USERNAME, expectedPassword = process.env.DASHBOARD_PASSWORD) {
-  return Boolean(expectedUsername && expectedPassword && timingSafeEqual(digest(username), digest(expectedUsername)) && timingSafeEqual(digest(password), digest(expectedPassword)));
+  if (!expectedUsername || !expectedPassword) return false;
+  return timingSafeEqual(digest(username), digest(expectedUsername)) && timingSafeEqual(digest(password), digest(expectedPassword));
 }
 
 export function createSessionToken(secret: string, expiresAt = Date.now() + SESSION_SECONDS * 1000) {
