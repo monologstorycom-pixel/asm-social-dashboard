@@ -61,7 +61,7 @@ export async function GET(request: Request) {
       latestMetric: metric ? metricJson(metric) : null,
     })).sort((a, b) => Number(b.latestMetric?.[metricKey] ?? 0) - Number(a.latestMetric?.[metricKey] ?? 0)).slice(0, 5);
 
-    const accounts = [...new Map(posts.map((post) => [post.socialAccount.id, post.socialAccount])).values()];
+    const accounts = [...new Map(posts.map((post) => [post.socialAccount.id, post.socialAccount])).values()].filter((a) => a.platform === "instagram");
     const unique = <T,>(values: T[]) => [...new Set(values)].sort();
     const asOf = latestSnapshotAt(posts.map((post) => post.metrics.map((metric) => metric.capturedAt)));
     return Response.json({
