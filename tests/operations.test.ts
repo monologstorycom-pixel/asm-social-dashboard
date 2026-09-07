@@ -316,8 +316,7 @@ test("content plan dashboard import accepts a valid dashboard session when fetch
 test("content plan dashboard import forwards multipart through a server-only bearer bridge", () => {
   const route = readFileSync(new URL("../src/app/api/dashboard/content-plan/import/route.ts", import.meta.url), "utf8");
   const client = readFileSync(new URL("../src/app/content-plan/content-plan-client.tsx", import.meta.url), "utf8");
-  assert.match(route, /authorizeDashboardRequest\(request\)/);
-  assert.match(route, /verifySessionToken\(/);
+  assert.match(route, /authorizeDashboardOrSessionRequest\(request\)/);
   assert.match(route, /process\.env\.INTERNAL_API_TOKEN/);
   assert.match(route, /body:\s*request\.body/);
   assert.match(route, /request\.headers\.get\("content-type"\)/);
