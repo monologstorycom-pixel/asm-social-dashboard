@@ -274,10 +274,32 @@ test("content plan dashboard approval uses a server-only bearer bridge", () => {
   assert.doesNotMatch(client, /INTERNAL_API_TOKEN|Authorization.*Bearer/);
 });
 
+test("content plan dashboard import accepts a valid dashboard session when fetch metadata is unavailable", async () => {
+  const { createSessionToken, SESSION_COOKIE } = await import("../src/lib/auth");
+  const { POST } = await import("../src/app/api/dashboard/content-plan/import/route");
+  const previousToken = process.env.INTERNAL_API_TOKEN;
+  const previousSecret = process.env.SESSION_SECRET;
+  process.env.INTERNAL_API_TOKEN = "test-internal-token";
+  process.env.SESSION_SECRET = "test-session-secret";
+  try {
+    const response = await POST(new Request("https://sosmedasm.rsby.cloud/api/dashboard/content-plan/import", {
+      method: "POST",
+      headers: { "content-type": "application/json", cookie: `${SESSION_COOKIE}=${createSessionToken("test-session-secret")}` },
+      body: JSON.stringify({ csv: "bad" }),
+    }));
+    assert.equal(response.status, 400);
+    assert.match(await response.text(), /CSV header must exactly match/);
+  } finally {
+    if (previousToken === undefined) delete process.env.INTERNAL_API_TOKEN; else process.env.INTERNAL_API_TOKEN = previousToken;
+    if (previousSecret === undefined) delete process.env.SESSION_SECRET; else process.env.SESSION_SECRET = previousSecret;
+  }
+});
+
 test("content plan dashboard import forwards multipart through a server-only bearer bridge", () => {
   const route = readFileSync(new URL("../src/app/api/dashboard/content-plan/import/route.ts", import.meta.url), "utf8");
   const client = readFileSync(new URL("../src/app/content-plan/content-plan-client.tsx", import.meta.url), "utf8");
   assert.match(route, /authorizeDashboardRequest\(request\)/);
+  assert.match(route, /verifySessionToken\(/);
   assert.match(route, /process\.env\.INTERNAL_API_TOKEN/);
   assert.match(route, /body:\s*request\.body/);
   assert.match(route, /request\.headers\.get\("content-type"\)/);
