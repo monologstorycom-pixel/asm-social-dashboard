@@ -71,6 +71,14 @@ test("automation switches fail closed unless explicitly enabled", () => {
   assert.deepEqual(automationSwitches({ AUTO_APPROVAL: "true", AUTO_SCHEDULE: "1", AUTO_PUBLISH: "yes" }), { autoApproval: true, autoSchedule: true, autoPublish: true });
 });
 
+test("publisher poll is a server-only five-minute safe target", () => {
+  const route = readFileSync(new URL("../src/app/api/internal/publisher/poll/route.ts", import.meta.url), "utf8");
+  assert.match(route, /authorizeInternalRequest\(request\)/);
+  assert.match(route, /AUTO_PUBLISH is off/);
+  assert.match(route, /\/api\/internal\/publisher\/due/);
+  assert.doesNotMatch(route, /Response\.redirect|SESSION_COOKIE/);
+});
+
 test("AI scheduling selects a specific minute inside the content publish window", () => {
   const plan = { contentId: "ASM-TEST-001", date: new Date("2026-09-08T00:00:00.000Z"), day: "Selasa", testPublishWindow: "11:30-13:00", pillar: "b2b_education", format: "carousel_4", topicTag: "tips" };
   const result = recommendScheduledAt(plan, []);
