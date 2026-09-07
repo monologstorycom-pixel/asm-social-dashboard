@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { buildApiQuery, CONTENT_PLAN_WORKFLOW, type ContentPlanStatus, duplicateReasonLabel, friendlyLabel, importSummaryItems, type ImportSummary, nextContentPlanStatus, planDateLabel } from "@/lib/frontend";
+import { buildApiQuery, CONTENT_PLAN_WORKFLOW, type ContentPlanStatus, duplicateReasonLabel, friendlyLabel, importSummaryItems, type ImportSummary, nextContentPlanStatus, planDateLabel, scheduleInPublishWindow } from "@/lib/frontend";
 
 type PlanItem = {
   id: string; Content_ID: string; date: string; hari: string; test_publish_window: string; pillar: string; goal: string;
@@ -79,18 +79,31 @@ export default function ContentPlanClient() {
 
   const update = (key: keyof Filters, value: string | number) => setFilters((current) => ({ ...current, [key]: value, ...(key !== "page" && { page: 1 }) }));
   const advanceStatus = async () => {
-    if (!detail) return;
+    if (!detail || detail.status === "approved") return;
     const next = nextContentPlanStatus(detail.status); if (!next) return;
     setStatusBusy(true); setNotice("");
     try {
       const approval = next.status === "approved";
-      const url = approval ? `/api/dashboard/content-plan/${encodeURIComponent(detail.Content_ID)}/approve` : `/api/content-plan/${encodeURIComponent(detail.Content_ID)}/status`;
+      const url = approval ? `/api/dashboard/content-plan/${encodeURIComponent(detail.Content_ID)}/approve` : `/api/dashboard/content-plan/${encodeURIComponent(detail.Content_ID)}/status`;
       const result = await apiJson<{ item: PlanItem }>(url, { method: "PATCH", ...(approval ? {} : { headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: next.status }) }) });
       setDetail(result.item); setNotice(`Alur kerja dilanjutkan ke ${friendlyLabel(result.item.status)}.`); setRefresh((value) => value + 1);
     } catch (reason) {
       if ((reason as { status?: number }).status === 409) { await loadDetail(detail.Content_ID); setNotice("Alur kerja berubah di tempat lain. Brief terbaru telah dimuat; tinjau sebelum mencoba lagi."); }
       else setNotice(reason instanceof Error ? reason.message : "Alur kerja tidak dapat diperbarui.");
     } finally { setStatusBusy(false); }
+  };
+
+  const scheduleContent = async (value: string) => {
+    if (!detail) return "Brief tidak tersedia.";
+    const validation = scheduleInPublishWindow(value, detail.date, detail.test_publish_window);
+    if (validation.error) return validation.error;
+    setStatusBusy(true); setNotice("");
+    try {
+      await apiJson(`/api/dashboard/content-plan/${encodeURIComponent(detail.Content_ID)}/schedule`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scheduled_at: validation.iso }) });
+      await loadDetail(detail.Content_ID); setRefresh((current) => current + 1); setNotice("Konten berhasil dijadwalkan.");
+      return "";
+    } catch (reason) { return reason instanceof Error ? reason.message : "Konten tidak dapat dijadwalkan."; }
+    finally { setStatusBusy(false); }
   };
 
   const chooseFile = (selected: File | null) => {
@@ -111,7 +124,7 @@ export default function ContentPlanClient() {
   const importFile = async () => {
     if (!file || !preview || !window.confirm(`Impor ${preview.summary.insertable} baris yang bisa diimpor? Content ID yang sudah ada akan dilewati.`)) return;
     setImportBusy(true); setUploadError("");
-    try { const result = await postFile<ImportResult>("/api/content-plan/import"); setImportResult(result); setNotice(`Impor selesai: ${result.inserted} dimasukkan, ${result.skipped} dilewati.`); setRefresh((value) => value + 1); }
+    try { const result = await postFile<ImportResult>("/api/dashboard/content-plan/import"); setImportResult(result); setNotice(`Impor selesai: ${result.inserted} dimasukkan, ${result.skipped} dilewati.`); setRefresh((value) => value + 1); }
     catch (reason) { setUploadError(reason instanceof Error ? reason.message : "Impor CSV gagal."); }
     finally { setImportBusy(false); }
   };
@@ -138,16 +151,17 @@ export default function ContentPlanClient() {
       <div className="filter-panel cp-filters" aria-label="Filter rencana konten"><label className="cp-search">Cari<input type="search" placeholder="Content ID, judul, hook, sudut, atau topik…" value={filters.search} onChange={(event) => update("search", event.target.value)}/></label><label>Status<select value={filters.status} onChange={(event) => update("status", event.target.value)}><option value="">Semua status</option>{CONTENT_PLAN_WORKFLOW.map((status) => <option value={status} key={status}>{friendlyLabel(status)}</option>)}</select></label><label>Pilar<input value={filters.pillar} onChange={(event) => update("pillar", event.target.value)}/></label><label>Topik<input value={filters.topic} onChange={(event) => update("topic", event.target.value)}/></label><label>Dari<input type="date" max={filters.dateTo || undefined} value={filters.dateFrom} onChange={(event) => update("dateFrom", event.target.value)}/></label><label>Sampai<input type="date" min={filters.dateFrom || undefined} value={filters.dateTo} onChange={(event) => update("dateTo", event.target.value)}/></label><label>Urutan tanggal<select value={filters.sort} onChange={(event) => update("sort", event.target.value)}><option value="asc">Paling lama</option><option value="desc">Paling baru</option></select></label><button className="reset-filter" onClick={() => setFilters(initialFilters)} disabled={JSON.stringify(filters) === JSON.stringify(initialFilters)}>Atur ulang</button></div>
       {error ? <div className="state-box" role="alert"><strong>Gagal memuat rencana konten</strong><p>{error}</p><button onClick={() => setRefresh((value) => value + 1)}>Coba lagi</button></div> : loading && !list ? <div className="cp-loading panel">Memuat rencana konten…</div> : list?.items.length ? <><div className="panel table-scroll"><table className="content-plan-table"><caption className="sr-only">Brief rencana konten</caption><thead><tr><th>Tanggal</th><th>Content ID</th><th>Judul</th><th>Pilar</th><th>Format</th><th>Status</th><th>Persetujuan</th><th>Status Publikasi</th></tr></thead><tbody>{list.items.map((item) => <tr key={item.Content_ID} onClick={() => setDetailId(item.Content_ID)}><td>{planDateLabel(item.date)}</td><td><button type="button" className="row-link" onClick={() => setDetailId(item.Content_ID)}>{item.Content_ID}</button></td><td>{item.working_title || "—"}</td><td>{item.pillar || "—"}</td><td>{item.format || "—"}</td><td><Badge value={item.status}/></td><td><Badge value={item.approval_status}/></td><td><Badge value={item.publish_status}/></td></tr>)}</tbody></table></div><nav className="pagination" aria-label="Halaman rencana konten"><button onClick={() => update("page", filters.page - 1)} disabled={filters.page <= 1}>&#8592; Sebelumnya</button><span>Halaman <strong>{list.pagination.page}</strong> dari {Math.max(1, list.pagination.totalPages)} · {list.pagination.total} brief</span><button onClick={() => update("page", filters.page + 1)} disabled={filters.page >= list.pagination.totalPages}>Berikutnya &#8594;</button></nav></> : <div className="state-box empty"><strong>Tidak ada brief konten ditemukan</strong><p>Sesuaikan atau atur ulang filter untuk memperluas daftar sumber kebenaran.</p><button onClick={() => setFilters(initialFilters)}>Atur ulang filter</button></div>}
     </section>
-    {detailId && <BriefDialog item={detail} loading={detailLoading} busy={statusBusy} close={() => setDetailId(null)} advance={advanceStatus}/>} 
+    {detailId && <BriefDialog item={detail} loading={detailLoading} busy={statusBusy} close={() => setDetailId(null)} advance={advanceStatus} schedule={scheduleContent}/>}
   </div>;
 }
 
 function Badge({ value }: { value: string }) { return <span className={`cp-badge ${value}`}>{friendlyLabel(value || "tidak diketahui")}</span>; }
 function TodayBrief({ item, open }: { item: PlanItem; open: () => void }) { return <article className="today-brief"><div className="today-primary"><div><span className="content-id">{item.Content_ID}</span><h3>{item.working_title || "Brief tanpa judul"}</h3><p>{item.hook || item.core_angle || "Tidak ada hook atau sudut inti yang diberikan."}</p></div><div className="today-actions"><Badge value={item.status}/><button className="primary-action" type="button" onClick={open}>BUKA BRIEF</button></div></div><dl className="today-meta"><div><dt>Rencana</dt><dd>{planDateLabel(item.date)} · {item.hari || "—"} · {item.test_publish_window || "—"}</dd></div><div><dt>Audiens</dt><dd>{item.audience || "—"}</dd></div><div><dt>Arah</dt><dd>{item.pillar || "—"} · {item.format || "—"} · {item.creative_style || "—"}</dd></div><div><dt>Governansi</dt><dd>{friendlyLabel(item.approval_status)} persetujuan · {friendlyLabel(item.publish_status)} publikasi</dd></div></dl><details><summary>Selengkapi brief</summary><BriefFields item={item}/></details></article>; }
 function BriefFields({ item }: { item: PlanItem }) { return <div className="brief-sections">{briefSections.map(([heading, fields]) => <section key={heading}><h3>{heading}</h3><dl>{fields.map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{key === "date" ? planDateLabel(String(item[key])) : String(item[key] || "—")}</dd></div>)}</dl></section>)}</div>; }
-function BriefDialog({ item, loading, busy, close, advance }: { item: PlanItem | null; loading: boolean; busy: boolean; close: () => void; advance: () => void }) {
-  const drawer = useRef<HTMLElement>(null); const closeRef = useRef<HTMLButtonElement>(null);
+function BriefDialog({ item, loading, busy, close, advance, schedule }: { item: PlanItem | null; loading: boolean; busy: boolean; close: () => void; advance: () => void; schedule: (value: string) => Promise<string> }) {
+  const drawer = useRef<HTMLElement>(null); const closeRef = useRef<HTMLButtonElement>(null); const [scheduledAt, setScheduledAt] = useState(""); const [scheduleError, setScheduleError] = useState("");
   useEffect(() => { const previous = document.activeElement as HTMLElement | null; closeRef.current?.focus(); document.body.classList.add("modal-open"); const key = (event: KeyboardEvent) => { if (event.key === "Escape") close(); if (event.key === "Tab" && drawer.current) { const focusable = [...drawer.current.querySelectorAll<HTMLElement>("button,[href],input,select,textarea,[tabindex]:not([tabindex='-1'])")].filter((node) => !node.hasAttribute("disabled")); if (!focusable.length) return; const first = focusable[0], last = focusable.at(-1)!; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } } }; document.addEventListener("keydown", key); return () => { document.removeEventListener("keydown", key); document.body.classList.remove("modal-open"); previous?.focus(); }; }, [close]);
   const next = item ? nextContentPlanStatus(item.status) : null;
-  return <div className="dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><section ref={drawer} className="detail-drawer cp-drawer" role="dialog" aria-modal="true" aria-labelledby="brief-title"><button ref={closeRef} className="dialog-close" onClick={close} aria-label="Tutup brief konten">&#215;</button>{loading || !item ? <div className="detail-loading">Memuat brief lengkap…</div> : <div className="detail-content"><p className="eyebrow">Brief konten lengkap · {item.Content_ID}</p><h2 id="brief-title">{item.working_title || "Brief tanpa judul"}</h2><div className="workflow-control"><div><span>Alur kerja saat ini</span><Badge value={item.status}/><small>Persetujuan: {friendlyLabel(item.approval_status)} · Publikasi: {friendlyLabel(item.publish_status)} (hanya baca)</small></div>{next ? <button className="primary-action" type="button" disabled={busy} onClick={advance}>{busy ? "Memperbarui…" : next.label}</button> : <span className="workflow-ceiling">Alur kerja selesai · Pengukuran</span>}</div><BriefFields item={item}/><p className="detail-updated">Terakhir diperbarui {new Date(item.updated_at).toLocaleString("id-ID")}</p></div>}</section></div>;
+  const submitSchedule = async () => setScheduleError(await schedule(scheduledAt));
+  return <div className="dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><section ref={drawer} className="detail-drawer cp-drawer" role="dialog" aria-modal="true" aria-labelledby="brief-title"><button ref={closeRef} className="dialog-close" onClick={close} aria-label="Tutup brief konten">&#215;</button>{loading || !item ? <div className="detail-loading">Memuat brief lengkap…</div> : <div className="detail-content"><p className="eyebrow">Brief konten lengkap · {item.Content_ID}</p><h2 id="brief-title">{item.working_title || "Brief tanpa judul"}</h2><div className="workflow-control"><div><span>Alur kerja saat ini</span><Badge value={item.status}/><small>Persetujuan: {friendlyLabel(item.approval_status)} · Publikasi: {friendlyLabel(item.publish_status)} (hanya baca)</small></div>{item.status === "approved" ? <div><label>Jadwalkan<input type="datetime-local" value={scheduledAt} onChange={(event) => { setScheduledAt(event.target.value); setScheduleError(""); }} aria-describedby="schedule-window schedule-error"/></label><small id="schedule-window">WIB · {item.test_publish_window}</small>{scheduleError && <p id="schedule-error" className="form-error" role="alert">{scheduleError}</p>}<button className="primary-action" type="button" disabled={busy} onClick={submitSchedule}>{busy ? "Menjadwalkan…" : "Jadwalkan"}</button></div> : next ? <button className="primary-action" type="button" disabled={busy} onClick={advance}>{busy ? "Memperbarui…" : next.label}</button> : <span className="workflow-ceiling">Alur kerja selesai · Pengukuran</span>}</div><BriefFields item={item}/><p className="detail-updated">Terakhir diperbarui {new Date(item.updated_at).toLocaleString("id-ID")}</p></div>}</section></div>;
 }

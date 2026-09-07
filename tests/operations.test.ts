@@ -274,6 +274,32 @@ test("content plan dashboard approval uses a server-only bearer bridge", () => {
   assert.doesNotMatch(client, /INTERNAL_API_TOKEN|Authorization.*Bearer/);
 });
 
+test("content plan dashboard import forwards multipart through a server-only bearer bridge", () => {
+  const route = readFileSync(new URL("../src/app/api/dashboard/content-plan/import/route.ts", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../src/app/content-plan/content-plan-client.tsx", import.meta.url), "utf8");
+  assert.match(route, /authorizeDashboardRequest\(request\)/);
+  assert.match(route, /process\.env\.INTERNAL_API_TOKEN/);
+  assert.match(route, /body:\s*request\.body/);
+  assert.match(route, /request\.headers\.get\("content-type"\)/);
+  assert.doesNotMatch(client, /INTERNAL_API_TOKEN|Authorization.*Bearer/);
+});
+
+test("content plan dashboard status forwards JSON through a server-only bearer bridge", () => {
+  const route = readFileSync(new URL("../src/app/api/dashboard/content-plan/[contentId]/status/route.ts", import.meta.url), "utf8");
+  assert.match(route, /authorizeDashboardRequest\(request\)/);
+  assert.match(route, /process\.env\.INTERNAL_API_TOKEN/);
+  assert.match(route, /body:\s*request\.body/);
+  assert.match(route, /content-type.*application\/json/);
+});
+
+test("content plan dashboard schedule forwards JSON through a server-only bearer bridge", () => {
+  const route = readFileSync(new URL("../src/app/api/dashboard/content-plan/[contentId]/schedule/route.ts", import.meta.url), "utf8");
+  assert.match(route, /authorizeDashboardRequest\(request\)/);
+  assert.match(route, /process\.env\.INTERNAL_API_TOKEN/);
+  assert.match(route, /body:\s*request\.body/);
+  assert.match(route, /content-type.*application\/json/);
+});
+
 test("operational migration is additive and prior deployed migration hashes stay documented", () => {
   const migration = readFileSync(new URL("../prisma/migrations/20260824180000_add_content_operations/migration.sql", import.meta.url), "utf8");
   assert.doesNotMatch(migration, /DROP TABLE|TRUNCATE|DELETE FROM|CHECK\s*\(/);

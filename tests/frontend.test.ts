@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { bestMetricIds, buildApiQuery, carouselNext, carouselPrev, dataSourceLabel, dialogMediaAttrs, duplicateReasonLabel, friendlyLabel, importSummaryItems, nextContentPlanStatus, orderAssetsBySlide, planDateLabel, previewSrc, safeExternalLinkProps, slideIndicatorLabel, thumbnailAttrs, toggleSelection } from "../src/lib/frontend";
+import { bestMetricIds, buildApiQuery, carouselNext, carouselPrev, dataSourceLabel, dialogMediaAttrs, duplicateReasonLabel, friendlyLabel, importSummaryItems, nextContentPlanStatus, orderAssetsBySlide, planDateLabel, previewSrc, safeExternalLinkProps, scheduleInPublishWindow, slideIndicatorLabel, thumbnailAttrs, toggleSelection } from "../src/lib/frontend";
 
 const ids = ["a", "b", "c", "d", "e", "f"];
 
@@ -51,6 +51,41 @@ test("content plan ISO dates render without UTC timezone drift", () => {
   assert.equal(planDateLabel(""), "—");
 });
 
+test("content plan client uses dashboard mutation endpoints", () => {
+  const source = readFileSync(new URL("../src/app/content-plan/content-plan-client.tsx", import.meta.url), "utf8");
+  assert.match(source, /postFile<ImportResult>\("\/api\/dashboard\/content-plan\/import"\)/);
+  assert.match(source, /`\/api\/dashboard\/content-plan\/\$\{encodeURIComponent\(detail\.Content_ID\)\}\/status`/);
+  assert.match(source, /postFile<Preview>\("\/api\/content-plan\/import\/preview"\)/);
+  assert.doesNotMatch(source, /INTERNAL_API_TOKEN|Authorization|Bearer/);
+});
+
+test("schedule validation interprets datetime-local and publish window in WIB", () => {
+  assert.deepEqual(scheduleInPublishWindow("2026-08-25T09:30", "2026-08-25", "09:00–10:00 WIB"), { iso: "2026-08-25T02:30:00.000Z", error: "" });
+  assert.deepEqual(scheduleInPublishWindow("2026-08-25T09:00", "2026-08-25", "09.00 - 10.00"), { iso: "2026-08-25T02:00:00.000Z", error: "" });
+});
+
+test("schedule validation accepts overnight windows crossing midnight", () => {
+  assert.deepEqual(scheduleInPublishWindow("2026-08-25T23:30", "2026-08-25", "23:00–01:00 WIB"), { iso: "2026-08-25T16:30:00.000Z", error: "" });
+  assert.deepEqual(scheduleInPublishWindow("2026-08-26T00:15", "2026-08-25", "23:00–01:00 WIB"), { iso: "2026-08-25T17:15:00.000Z", error: "" });
+});
+
+test("schedule validation rejects missing, malformed, and out-of-window values", () => {
+  assert.equal(scheduleInPublishWindow("", "2026-08-25", "09:00–10:00 WIB").error, "Pilih waktu publikasi.");
+  assert.equal(scheduleInPublishWindow("2026-08-25T08:59", "2026-08-25", "09:00–10:00 WIB").error, "Waktu harus berada dalam jendela publikasi 09:00–10:00 WIB.");
+  assert.equal(scheduleInPublishWindow("2026-08-25T09:30", "2026-08-25", "pagi").error, "Jendela publikasi tidak dapat dibaca.");
+});
+
+test("approved content uses the dedicated accessible schedule control", () => {
+  const source = readFileSync(new URL("../src/app/content-plan/content-plan-client.tsx", import.meta.url), "utf8");
+  assert.match(source, /item\.status === "approved"/);
+  assert.match(source, /<label[^>]*>Jadwalkan/);
+  assert.match(source, /type="datetime-local"/);
+  assert.match(source, /`\/api\/dashboard\/content-plan\/\$\{encodeURIComponent\(detail\.Content_ID\)\}\/schedule`/);
+  assert.match(source, /method: "POST"/);
+  assert.match(source, /JSON\.stringify\(\{ scheduled_at: validation\.iso \}\)/);
+  assert.match(source, /role="alert"/);
+  assert.doesNotMatch(source, /JSON\.stringify\(\{ status: "scheduled" \}\)/);
+});
 
 function mediaAsset(slideNumber: number, assetType: string, assetUrl: string) {
   return { id: `${slideNumber}-${assetType}`, assetType, assetUrl, slideNumber };

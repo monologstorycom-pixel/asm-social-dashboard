@@ -26,6 +26,7 @@ test("proxy matcher covers root, dashboard routes, and api dashboard", () => {
   assert.equal(doesProxyMatch({ config, url: "/compare" }), true);
   assert.equal(doesProxyMatch({ config, url: "/content-plan/today" }), true);
   assert.equal(doesProxyMatch({ config, url: "/api/dashboard/overview" }), true);
+  assert.equal(doesProxyMatch({ config, url: "/api/content-plan/ASM-1/status" }), true);
   assert.equal(doesProxyMatch({ config, url: "/login" }), false);
   assert.equal(doesProxyMatch({ config, url: "/api/auth/login" }), false);
   assert.equal(doesProxyMatch({ config, url: "/api/auth/logout" }), false);

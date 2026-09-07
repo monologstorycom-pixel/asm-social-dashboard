@@ -50,6 +50,28 @@ export function planDateLabel(value: string) {
   return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(year, month - 1, day)));
 }
 
+export function scheduleInPublishWindow(value: string, planDate: string, label: string): { iso: string; error: string } {
+  if (!value) return { iso: "", error: "Pilih waktu publikasi." };
+  const local = value.match(/^(\d{4})-(\d{2})-(\d{2})T([01]\d|2[0-3]):([0-5]\d)$/);
+  const times = [...label.matchAll(/(?:^|\D)([01]?\d|2[0-3])[:.]([0-5]\d)/g)].map((match) => Number(match[1]) * 60 + Number(match[2]));
+  if (!times.length) return { iso: "", error: "Jendela publikasi tidak dapat dibaca." };
+  if (!local) return { iso: "", error: `Waktu harus berada dalam jendela publikasi ${label}.` };
+  const windowStart = times[0];
+  const windowEnd = times[1] ?? times[0] + 60;
+  const overnight = windowEnd <= windowStart;
+  const [vYear, vMonth, vDay, vHour, vMin] = [Number(local[1]), Number(local[2]), Number(local[3]), Number(local[4]), Number(local[5])];
+  const planDateMs = Date.UTC(Number(planDate.slice(0, 4)), Number(planDate.slice(5, 7)) - 1, Number(planDate.slice(8, 10)));
+  const valueDate = new Date(Date.UTC(vYear, vMonth - 1, vDay));
+  const dayDiff = Math.round((valueDate.getTime() - planDateMs) / 86_400_000);
+  if (!overnight && dayDiff !== 0) return { iso: "", error: `Waktu harus berada dalam jendela publikasi ${label}.` };
+  if (overnight && dayDiff !== 0 && dayDiff !== 1) return { iso: "", error: `Waktu harus berada dalam jendela publikasi ${label}.` };
+  const minutes = vHour * 60 + vMin;
+  const inSameDay = minutes >= windowStart && minutes <= 24 * 60;
+  const inNextDay = overnight && minutes >= 0 && minutes <= windowEnd;
+  if (!inSameDay && !inNextDay) return { iso: "", error: `Waktu harus berada dalam jendela publikasi ${label}.` };
+  return { iso: new Date(Date.UTC(vYear, vMonth - 1, vDay, vHour - 7, vMin)).toISOString(), error: "" };
+}
+
 export const compactNumber = new Intl.NumberFormat("id", { notation: "compact", maximumFractionDigits: 1 });
 export const fullNumber = new Intl.NumberFormat("id");
 export const percent = (value = 0) => `${value.toFixed(2)}%`;
