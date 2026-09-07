@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
+import { automationSwitches, recommendScheduledAt } from "../src/lib/automation";
+
 import {
   analyticsSourceFilters,
   assertGeneralTransition,
@@ -62,6 +64,22 @@ test("schedule must be within the controlled parsed test window", () => {
   assert.deepEqual(window, { start: new Date("2026-08-25T12:00:00.000Z"), end: new Date("2026-08-25T14:00:00.000Z"), label: "19:00-21:00 WIB" });
   assert.doesNotThrow(() => validateScheduledAt(new Date("2026-08-25T13:00:00.000Z"), window));
   assert.throws(() => validateScheduledAt(new Date("2026-08-25T15:00:00.000Z"), window), /recommended window/);
+});
+
+test("automation switches fail closed unless explicitly enabled", () => {
+  assert.deepEqual(automationSwitches({}), { autoApproval: false, autoSchedule: false, autoPublish: false });
+  assert.deepEqual(automationSwitches({ AUTO_APPROVAL: "true", AUTO_SCHEDULE: "1", AUTO_PUBLISH: "yes" }), { autoApproval: true, autoSchedule: true, autoPublish: true });
+});
+
+test("AI scheduling selects a specific minute inside the content publish window", () => {
+  const plan = { contentId: "ASM-TEST-001", date: new Date("2026-09-08T00:00:00.000Z"), day: "Selasa", testPublishWindow: "11:30-13:00", pillar: "b2b_education", format: "carousel_4", topicTag: "tips" };
+  const result = recommendScheduledAt(plan, []);
+  const window = parsePublishWindow(plan.testPublishWindow, plan.date);
+  assert.ok(result.scheduledAt >= window.start && result.scheduledAt <= window.end);
+  assert.notEqual(result.scheduledAt.getUTCHours(), 1, "must not be fixed to 08:00 WIB");
+  assert.equal(result.dataMode, "exploration");
+  assert.equal(result.confidence, "low");
+  assert.match(result.reason, /Exploration terukur/);
 });
 
 test("data mode automatically switches from clearly-labelled demo to live", () => {

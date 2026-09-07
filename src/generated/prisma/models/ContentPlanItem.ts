@@ -28,10 +28,12 @@ export type AggregateContentPlanItem = {
 
 export type ContentPlanItemAvgAggregateOutputType = {
   approvalVersion: number | null
+  scheduleSampleCount: number | null
 }
 
 export type ContentPlanItemSumAggregateOutputType = {
   approvalVersion: number | null
+  scheduleSampleCount: number | null
 }
 
 export type ContentPlanItemMinAggregateOutputType = {
@@ -82,6 +84,13 @@ export type ContentPlanItemMinAggregateOutputType = {
   publishedAt: Date | null
   publisherState: $Enums.PublisherState | null
   publisherError: string | null
+  autoApprovalStatus: string | null
+  scheduleReason: string | null
+  scheduleDataMode: string | null
+  scheduleConfidence: string | null
+  scheduleSampleCount: number | null
+  publisherLeaseId: string | null
+  publisherLeaseUntil: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -134,6 +143,13 @@ export type ContentPlanItemMaxAggregateOutputType = {
   publishedAt: Date | null
   publisherState: $Enums.PublisherState | null
   publisherError: string | null
+  autoApprovalStatus: string | null
+  scheduleReason: string | null
+  scheduleDataMode: string | null
+  scheduleConfidence: string | null
+  scheduleSampleCount: number | null
+  publisherLeaseId: string | null
+  publisherLeaseUntil: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -186,6 +202,13 @@ export type ContentPlanItemCountAggregateOutputType = {
   publishedAt: number
   publisherState: number
   publisherError: number
+  autoApprovalStatus: number
+  scheduleReason: number
+  scheduleDataMode: number
+  scheduleConfidence: number
+  scheduleSampleCount: number
+  publisherLeaseId: number
+  publisherLeaseUntil: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -194,10 +217,12 @@ export type ContentPlanItemCountAggregateOutputType = {
 
 export type ContentPlanItemAvgAggregateInputType = {
   approvalVersion?: true
+  scheduleSampleCount?: true
 }
 
 export type ContentPlanItemSumAggregateInputType = {
   approvalVersion?: true
+  scheduleSampleCount?: true
 }
 
 export type ContentPlanItemMinAggregateInputType = {
@@ -248,6 +273,13 @@ export type ContentPlanItemMinAggregateInputType = {
   publishedAt?: true
   publisherState?: true
   publisherError?: true
+  autoApprovalStatus?: true
+  scheduleReason?: true
+  scheduleDataMode?: true
+  scheduleConfidence?: true
+  scheduleSampleCount?: true
+  publisherLeaseId?: true
+  publisherLeaseUntil?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -300,6 +332,13 @@ export type ContentPlanItemMaxAggregateInputType = {
   publishedAt?: true
   publisherState?: true
   publisherError?: true
+  autoApprovalStatus?: true
+  scheduleReason?: true
+  scheduleDataMode?: true
+  scheduleConfidence?: true
+  scheduleSampleCount?: true
+  publisherLeaseId?: true
+  publisherLeaseUntil?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -352,6 +391,13 @@ export type ContentPlanItemCountAggregateInputType = {
   publishedAt?: true
   publisherState?: true
   publisherError?: true
+  autoApprovalStatus?: true
+  scheduleReason?: true
+  scheduleDataMode?: true
+  scheduleConfidence?: true
+  scheduleSampleCount?: true
+  publisherLeaseId?: true
+  publisherLeaseUntil?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -491,6 +537,13 @@ export type ContentPlanItemGroupByOutputType = {
   publishedAt: Date | null
   publisherState: $Enums.PublisherState
   publisherError: string | null
+  autoApprovalStatus: string | null
+  scheduleReason: string | null
+  scheduleDataMode: string | null
+  scheduleConfidence: string | null
+  scheduleSampleCount: number
+  publisherLeaseId: string | null
+  publisherLeaseUntil: Date | null
   createdAt: Date
   updatedAt: Date
   _count: ContentPlanItemCountAggregateOutputType | null
@@ -566,6 +619,13 @@ export type ContentPlanItemWhereInput = {
   publishedAt?: Prisma.DateTimeNullableFilter<"ContentPlanItem"> | Date | string | null
   publisherState?: Prisma.EnumPublisherStateFilter<"ContentPlanItem"> | $Enums.PublisherState
   publisherError?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  autoApprovalStatus?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  scheduleReason?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  scheduleDataMode?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  scheduleConfidence?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  scheduleSampleCount?: Prisma.IntFilter<"ContentPlanItem"> | number
+  publisherLeaseId?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  publisherLeaseUntil?: Prisma.DateTimeNullableFilter<"ContentPlanItem"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ContentPlanItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ContentPlanItem"> | Date | string
   contentPost?: Prisma.XOR<Prisma.ContentPostNullableScalarRelationFilter, Prisma.ContentPostWhereInput> | null
@@ -620,6 +680,13 @@ export type ContentPlanItemOrderByWithRelationInput = {
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   publisherState?: Prisma.SortOrder
   publisherError?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoApprovalStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduleReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduleDataMode?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduleConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduleSampleCount?: Prisma.SortOrder
+  publisherLeaseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  publisherLeaseUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   contentPost?: Prisma.ContentPostOrderByWithRelationInput
@@ -678,6 +745,13 @@ export type ContentPlanItemWhereUniqueInput = Prisma.AtLeast<{
   publishedAt?: Prisma.DateTimeNullableFilter<"ContentPlanItem"> | Date | string | null
   publisherState?: Prisma.EnumPublisherStateFilter<"ContentPlanItem"> | $Enums.PublisherState
   publisherError?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  autoApprovalStatus?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  scheduleReason?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  scheduleDataMode?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  scheduleConfidence?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  scheduleSampleCount?: Prisma.IntFilter<"ContentPlanItem"> | number
+  publisherLeaseId?: Prisma.StringNullableFilter<"ContentPlanItem"> | string | null
+  publisherLeaseUntil?: Prisma.DateTimeNullableFilter<"ContentPlanItem"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"ContentPlanItem"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ContentPlanItem"> | Date | string
   contentPost?: Prisma.XOR<Prisma.ContentPostNullableScalarRelationFilter, Prisma.ContentPostWhereInput> | null
@@ -732,6 +806,13 @@ export type ContentPlanItemOrderByWithAggregationInput = {
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   publisherState?: Prisma.SortOrder
   publisherError?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoApprovalStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduleReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduleDataMode?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduleConfidence?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduleSampleCount?: Prisma.SortOrder
+  publisherLeaseId?: Prisma.SortOrderInput | Prisma.SortOrder
+  publisherLeaseUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ContentPlanItemCountOrderByAggregateInput
@@ -792,6 +873,13 @@ export type ContentPlanItemScalarWhereWithAggregatesInput = {
   publishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ContentPlanItem"> | Date | string | null
   publisherState?: Prisma.EnumPublisherStateWithAggregatesFilter<"ContentPlanItem"> | $Enums.PublisherState
   publisherError?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  autoApprovalStatus?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  scheduleReason?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  scheduleDataMode?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  scheduleConfidence?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  scheduleSampleCount?: Prisma.IntWithAggregatesFilter<"ContentPlanItem"> | number
+  publisherLeaseId?: Prisma.StringNullableWithAggregatesFilter<"ContentPlanItem"> | string | null
+  publisherLeaseUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"ContentPlanItem"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ContentPlanItem"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ContentPlanItem"> | Date | string
 }
@@ -843,6 +931,13 @@ export type ContentPlanItemCreateInput = {
   publishedAt?: Date | string | null
   publisherState?: $Enums.PublisherState
   publisherError?: string | null
+  autoApprovalStatus?: string | null
+  scheduleReason?: string | null
+  scheduleDataMode?: string | null
+  scheduleConfidence?: string | null
+  scheduleSampleCount?: number
+  publisherLeaseId?: string | null
+  publisherLeaseUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contentPost?: Prisma.ContentPostCreateNestedOneWithoutContentPlanInput
@@ -897,6 +992,13 @@ export type ContentPlanItemUncheckedCreateInput = {
   publishedAt?: Date | string | null
   publisherState?: $Enums.PublisherState
   publisherError?: string | null
+  autoApprovalStatus?: string | null
+  scheduleReason?: string | null
+  scheduleDataMode?: string | null
+  scheduleConfidence?: string | null
+  scheduleSampleCount?: number
+  publisherLeaseId?: string | null
+  publisherLeaseUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.ContentPlanAssetUncheckedCreateNestedManyWithoutContentPlanInput
@@ -949,6 +1051,13 @@ export type ContentPlanItemUpdateInput = {
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
   publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleDataMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleConfidence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleSampleCount?: Prisma.IntFieldUpdateOperationsInput | number
+  publisherLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publisherLeaseUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contentPost?: Prisma.ContentPostUpdateOneWithoutContentPlanNestedInput
@@ -1003,6 +1112,13 @@ export type ContentPlanItemUncheckedUpdateInput = {
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
   publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleDataMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleConfidence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleSampleCount?: Prisma.IntFieldUpdateOperationsInput | number
+  publisherLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publisherLeaseUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.ContentPlanAssetUncheckedUpdateManyWithoutContentPlanNestedInput
@@ -1056,6 +1172,13 @@ export type ContentPlanItemCreateManyInput = {
   publishedAt?: Date | string | null
   publisherState?: $Enums.PublisherState
   publisherError?: string | null
+  autoApprovalStatus?: string | null
+  scheduleReason?: string | null
+  scheduleDataMode?: string | null
+  scheduleConfidence?: string | null
+  scheduleSampleCount?: number
+  publisherLeaseId?: string | null
+  publisherLeaseUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1107,6 +1230,13 @@ export type ContentPlanItemUpdateManyMutationInput = {
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
   publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleDataMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleConfidence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleSampleCount?: Prisma.IntFieldUpdateOperationsInput | number
+  publisherLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publisherLeaseUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1159,6 +1289,13 @@ export type ContentPlanItemUncheckedUpdateManyInput = {
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
   publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleDataMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleConfidence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleSampleCount?: Prisma.IntFieldUpdateOperationsInput | number
+  publisherLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publisherLeaseUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1222,12 +1359,20 @@ export type ContentPlanItemCountOrderByAggregateInput = {
   publishedAt?: Prisma.SortOrder
   publisherState?: Prisma.SortOrder
   publisherError?: Prisma.SortOrder
+  autoApprovalStatus?: Prisma.SortOrder
+  scheduleReason?: Prisma.SortOrder
+  scheduleDataMode?: Prisma.SortOrder
+  scheduleConfidence?: Prisma.SortOrder
+  scheduleSampleCount?: Prisma.SortOrder
+  publisherLeaseId?: Prisma.SortOrder
+  publisherLeaseUntil?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type ContentPlanItemAvgOrderByAggregateInput = {
   approvalVersion?: Prisma.SortOrder
+  scheduleSampleCount?: Prisma.SortOrder
 }
 
 export type ContentPlanItemMaxOrderByAggregateInput = {
@@ -1278,6 +1423,13 @@ export type ContentPlanItemMaxOrderByAggregateInput = {
   publishedAt?: Prisma.SortOrder
   publisherState?: Prisma.SortOrder
   publisherError?: Prisma.SortOrder
+  autoApprovalStatus?: Prisma.SortOrder
+  scheduleReason?: Prisma.SortOrder
+  scheduleDataMode?: Prisma.SortOrder
+  scheduleConfidence?: Prisma.SortOrder
+  scheduleSampleCount?: Prisma.SortOrder
+  publisherLeaseId?: Prisma.SortOrder
+  publisherLeaseUntil?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1330,12 +1482,20 @@ export type ContentPlanItemMinOrderByAggregateInput = {
   publishedAt?: Prisma.SortOrder
   publisherState?: Prisma.SortOrder
   publisherError?: Prisma.SortOrder
+  autoApprovalStatus?: Prisma.SortOrder
+  scheduleReason?: Prisma.SortOrder
+  scheduleDataMode?: Prisma.SortOrder
+  scheduleConfidence?: Prisma.SortOrder
+  scheduleSampleCount?: Prisma.SortOrder
+  publisherLeaseId?: Prisma.SortOrder
+  publisherLeaseUntil?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type ContentPlanItemSumOrderByAggregateInput = {
   approvalVersion?: Prisma.SortOrder
+  scheduleSampleCount?: Prisma.SortOrder
 }
 
 export type ContentPlanItemScalarRelationFilter = {
@@ -1448,6 +1608,13 @@ export type ContentPlanItemCreateWithoutContentPostInput = {
   publishedAt?: Date | string | null
   publisherState?: $Enums.PublisherState
   publisherError?: string | null
+  autoApprovalStatus?: string | null
+  scheduleReason?: string | null
+  scheduleDataMode?: string | null
+  scheduleConfidence?: string | null
+  scheduleSampleCount?: number
+  publisherLeaseId?: string | null
+  publisherLeaseUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.ContentPlanAssetCreateNestedManyWithoutContentPlanInput
@@ -1500,6 +1667,13 @@ export type ContentPlanItemUncheckedCreateWithoutContentPostInput = {
   publishedAt?: Date | string | null
   publisherState?: $Enums.PublisherState
   publisherError?: string | null
+  autoApprovalStatus?: string | null
+  scheduleReason?: string | null
+  scheduleDataMode?: string | null
+  scheduleConfidence?: string | null
+  scheduleSampleCount?: number
+  publisherLeaseId?: string | null
+  publisherLeaseUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   assets?: Prisma.ContentPlanAssetUncheckedCreateNestedManyWithoutContentPlanInput
@@ -1568,6 +1742,13 @@ export type ContentPlanItemUpdateWithoutContentPostInput = {
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
   publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleDataMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleConfidence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleSampleCount?: Prisma.IntFieldUpdateOperationsInput | number
+  publisherLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publisherLeaseUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.ContentPlanAssetUpdateManyWithoutContentPlanNestedInput
@@ -1620,6 +1801,13 @@ export type ContentPlanItemUncheckedUpdateWithoutContentPostInput = {
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
   publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleDataMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleConfidence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleSampleCount?: Prisma.IntFieldUpdateOperationsInput | number
+  publisherLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publisherLeaseUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assets?: Prisma.ContentPlanAssetUncheckedUpdateManyWithoutContentPlanNestedInput
@@ -1672,6 +1860,13 @@ export type ContentPlanItemCreateWithoutAssetsInput = {
   publishedAt?: Date | string | null
   publisherState?: $Enums.PublisherState
   publisherError?: string | null
+  autoApprovalStatus?: string | null
+  scheduleReason?: string | null
+  scheduleDataMode?: string | null
+  scheduleConfidence?: string | null
+  scheduleSampleCount?: number
+  publisherLeaseId?: string | null
+  publisherLeaseUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   contentPost?: Prisma.ContentPostCreateNestedOneWithoutContentPlanInput
@@ -1725,6 +1920,13 @@ export type ContentPlanItemUncheckedCreateWithoutAssetsInput = {
   publishedAt?: Date | string | null
   publisherState?: $Enums.PublisherState
   publisherError?: string | null
+  autoApprovalStatus?: string | null
+  scheduleReason?: string | null
+  scheduleDataMode?: string | null
+  scheduleConfidence?: string | null
+  scheduleSampleCount?: number
+  publisherLeaseId?: string | null
+  publisherLeaseUntil?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1792,6 +1994,13 @@ export type ContentPlanItemUpdateWithoutAssetsInput = {
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
   publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleDataMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleConfidence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleSampleCount?: Prisma.IntFieldUpdateOperationsInput | number
+  publisherLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publisherLeaseUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contentPost?: Prisma.ContentPostUpdateOneWithoutContentPlanNestedInput
@@ -1845,6 +2054,13 @@ export type ContentPlanItemUncheckedUpdateWithoutAssetsInput = {
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   publisherState?: Prisma.EnumPublisherStateFieldUpdateOperationsInput | $Enums.PublisherState
   publisherError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleDataMode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleConfidence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduleSampleCount?: Prisma.IntFieldUpdateOperationsInput | number
+  publisherLeaseId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publisherLeaseUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1928,6 +2144,13 @@ export type ContentPlanItemSelect<ExtArgs extends runtime.Types.Extensions.Inter
   publishedAt?: boolean
   publisherState?: boolean
   publisherError?: boolean
+  autoApprovalStatus?: boolean
+  scheduleReason?: boolean
+  scheduleDataMode?: boolean
+  scheduleConfidence?: boolean
+  scheduleSampleCount?: boolean
+  publisherLeaseId?: boolean
+  publisherLeaseUntil?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   contentPost?: boolean | Prisma.ContentPlanItem$contentPostArgs<ExtArgs>
@@ -1985,11 +2208,18 @@ export type ContentPlanItemSelectScalar = {
   publishedAt?: boolean
   publisherState?: boolean
   publisherError?: boolean
+  autoApprovalStatus?: boolean
+  scheduleReason?: boolean
+  scheduleDataMode?: boolean
+  scheduleConfidence?: boolean
+  scheduleSampleCount?: boolean
+  publisherLeaseId?: boolean
+  publisherLeaseUntil?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ContentPlanItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contentId" | "date" | "day" | "testPublishWindow" | "pillar" | "goal" | "format" | "creativeStyle" | "audience" | "topicTag" | "workingTitle" | "hook" | "coreAngle" | "slide1" | "slide2" | "slide3" | "slide45" | "visualDirection" | "cta" | "captionBrief" | "primaryMetric" | "secondaryMetric" | "engagementMechanic" | "storyCompanion" | "experimentTag" | "productFocus" | "claimGuardrail" | "assetsNeeded" | "status" | "approvalStatus" | "publishStatus" | "contentPostId" | "finalCaption" | "finalBrief" | "qaStatus" | "qaResult" | "qaNotes" | "approvedAt" | "approvalCommand" | "approvalReference" | "approvalAttemptId" | "approvalVersion" | "scheduledAt" | "publishedAt" | "publisherState" | "publisherError" | "createdAt" | "updatedAt", ExtArgs["result"]["contentPlanItem"]>
+export type ContentPlanItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contentId" | "date" | "day" | "testPublishWindow" | "pillar" | "goal" | "format" | "creativeStyle" | "audience" | "topicTag" | "workingTitle" | "hook" | "coreAngle" | "slide1" | "slide2" | "slide3" | "slide45" | "visualDirection" | "cta" | "captionBrief" | "primaryMetric" | "secondaryMetric" | "engagementMechanic" | "storyCompanion" | "experimentTag" | "productFocus" | "claimGuardrail" | "assetsNeeded" | "status" | "approvalStatus" | "publishStatus" | "contentPostId" | "finalCaption" | "finalBrief" | "qaStatus" | "qaResult" | "qaNotes" | "approvedAt" | "approvalCommand" | "approvalReference" | "approvalAttemptId" | "approvalVersion" | "scheduledAt" | "publishedAt" | "publisherState" | "publisherError" | "autoApprovalStatus" | "scheduleReason" | "scheduleDataMode" | "scheduleConfidence" | "scheduleSampleCount" | "publisherLeaseId" | "publisherLeaseUntil" | "createdAt" | "updatedAt", ExtArgs["result"]["contentPlanItem"]>
 export type ContentPlanItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   contentPost?: boolean | Prisma.ContentPlanItem$contentPostArgs<ExtArgs>
   assets?: boolean | Prisma.ContentPlanItem$assetsArgs<ExtArgs>
@@ -2050,6 +2280,13 @@ export type $ContentPlanItemPayload<ExtArgs extends runtime.Types.Extensions.Int
     publishedAt: Date | null
     publisherState: $Enums.PublisherState
     publisherError: string | null
+    autoApprovalStatus: string | null
+    scheduleReason: string | null
+    scheduleDataMode: string | null
+    scheduleConfidence: string | null
+    scheduleSampleCount: number
+    publisherLeaseId: string | null
+    publisherLeaseUntil: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["contentPlanItem"]>
@@ -2470,6 +2707,13 @@ export interface ContentPlanItemFieldRefs {
   readonly publishedAt: Prisma.FieldRef<"ContentPlanItem", 'DateTime'>
   readonly publisherState: Prisma.FieldRef<"ContentPlanItem", 'PublisherState'>
   readonly publisherError: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly autoApprovalStatus: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly scheduleReason: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly scheduleDataMode: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly scheduleConfidence: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly scheduleSampleCount: Prisma.FieldRef<"ContentPlanItem", 'Int'>
+  readonly publisherLeaseId: Prisma.FieldRef<"ContentPlanItem", 'String'>
+  readonly publisherLeaseUntil: Prisma.FieldRef<"ContentPlanItem", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"ContentPlanItem", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ContentPlanItem", 'DateTime'>
 }

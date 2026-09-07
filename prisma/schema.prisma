@@ -107,6 +107,7 @@ enum PublisherState {
   idle
   ready
   scheduled
+  publishing
   published
   failed
 }
@@ -287,6 +288,13 @@ model ContentPlanItem {
   publishedAt        DateTime?          @map("published_at")
   publisherState     PublisherState     @default(idle) @map("publisher_state")
   publisherError     String?            @map("publisher_error") @db.Text
+  autoApprovalStatus String?            @map("auto_approval_status") @db.VarChar(50)
+  scheduleReason     String?            @map("schedule_reason") @db.Text
+  scheduleDataMode   String?            @map("schedule_data_mode") @db.VarChar(50)
+  scheduleConfidence String?            @map("schedule_confidence") @db.VarChar(50)
+  scheduleSampleCount Int               @default(0) @map("schedule_sample_count") @db.UnsignedInt
+  publisherLeaseId   String?            @map("publisher_lease_id") @db.Char(36)
+  publisherLeaseUntil DateTime?         @map("publisher_lease_until")
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
   contentPost        ContentPost?       @relation(fields: [contentPostId], references: [id], onDelete: SetNull)

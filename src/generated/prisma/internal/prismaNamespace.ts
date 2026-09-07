@@ -1215,6 +1215,13 @@ export const ContentPlanItemScalarFieldEnum = {
   publishedAt: 'publishedAt',
   publisherState: 'publisherState',
   publisherError: 'publisherError',
+  autoApprovalStatus: 'autoApprovalStatus',
+  scheduleReason: 'scheduleReason',
+  scheduleDataMode: 'scheduleDataMode',
+  scheduleConfidence: 'scheduleConfidence',
+  scheduleSampleCount: 'scheduleSampleCount',
+  publisherLeaseId: 'publisherLeaseId',
+  publisherLeaseUntil: 'publisherLeaseUntil',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1363,7 +1370,12 @@ export const ContentPlanItemOrderByRelevanceFieldEnum = {
   approvalCommand: 'approvalCommand',
   approvalReference: 'approvalReference',
   approvalAttemptId: 'approvalAttemptId',
-  publisherError: 'publisherError'
+  publisherError: 'publisherError',
+  autoApprovalStatus: 'autoApprovalStatus',
+  scheduleReason: 'scheduleReason',
+  scheduleDataMode: 'scheduleDataMode',
+  scheduleConfidence: 'scheduleConfidence',
+  publisherLeaseId: 'publisherLeaseId'
 } as const
 
 export type ContentPlanItemOrderByRelevanceFieldEnum = (typeof ContentPlanItemOrderByRelevanceFieldEnum)[keyof typeof ContentPlanItemOrderByRelevanceFieldEnum]

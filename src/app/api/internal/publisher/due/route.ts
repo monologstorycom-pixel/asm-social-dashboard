@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { automationSwitches, claimPublishLease } from "@/lib/automation";
 import { HttpError, readJson, safeRoute } from "@/lib/http";
 import { authorizeInternalRequest } from "@/lib/operations";
 import { MetaPublisherClient } from "@/lib/meta-publisher";
@@ -34,16 +35,13 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   return safeRoute(async () => {
     authorizeInternalRequest(request);
+    if (!automationSwitches().autoPublish) throw new HttpError(503, "Publishing is locked; AUTO_PUBLISH is off");
     if (process.env.META_PUBLISH_ENV !== "staging") throw new HttpError(503, "Publishing is locked; META_PUBLISH_ENV must be staging");
     const stagingAccountId = process.env.META_STAGING_IG_USER_ID;
     if (!stagingAccountId || !/^\d+$/.test(stagingAccountId)) throw new HttpError(503, "META_STAGING_IG_USER_ID is not configured");
     const { Content_ID } = publishSchema.parse(await readJson(request));
-    const plan = await db.contentPlanItem.findUnique({
-      where: { contentId: Content_ID },
-      include: { assets: { where: { isFinal: true }, orderBy: { slideNumber: "asc" } }, contentPost: { include: { socialAccount: true } } },
-    });
+    const plan = await claimPublishLease(Content_ID);
     if (!plan || !plan.contentPost || !plan.approvalAttemptId) throw new HttpError(404, "Publishable content plan item not found");
-    if (plan.status !== "scheduled" || !plan.scheduledAt || plan.scheduledAt > new Date()) throw new HttpError(409, "Content is not due for publishing");
     if (plan.contentPost.socialAccount.platform !== "instagram" || plan.contentPost.socialAccount.platformAccountId !== stagingAccountId) throw new HttpError(403, "Target is not the configured staging Instagram account");
     if (!plan.finalCaption || plan.assets.some((asset) => !asset.publicUrl) || !plan.assets.length) throw new HttpError(409, "Publishing requires a caption and public URLs for all final assets");
 

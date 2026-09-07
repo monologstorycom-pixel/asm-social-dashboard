@@ -75,6 +75,12 @@ test("schedule validation rejects missing, malformed, and out-of-window values",
   assert.equal(scheduleInPublishWindow("2026-08-25T09:30", "2026-08-25", "pagi").error, "Jendela publikasi tidak dapat dibaca.");
 });
 
+test("content plan dashboard shows automation switches and publisher recommendation fields", () => {
+  const source = readFileSync(new URL("../src/app/content-plan/content-plan-client.tsx", import.meta.url), "utf8");
+  for (const label of ["AUTO_APPROVAL", "AUTO_SCHEDULE", "AUTO_PUBLISH", "schedule_reason", "schedule_data_mode", "schedule_confidence", "publisher_state", "publisher_error", "auto_approval_status"]) assert.match(source, new RegExp(label));
+  assert.doesNotMatch(source, /INTERNAL_API_TOKEN|Authorization.*Bearer/);
+});
+
 test("approved content uses the dedicated accessible schedule control", () => {
   const source = readFileSync(new URL("../src/app/content-plan/content-plan-client.tsx", import.meta.url), "utf8");
   assert.match(source, /item\.status === "approved"/);

@@ -145,6 +145,7 @@ export const PublisherState = {
   idle: 'idle',
   ready: 'ready',
   scheduled: 'scheduled',
+  publishing: 'publishing',
   published: 'published',
   failed: 'failed'
 } as const

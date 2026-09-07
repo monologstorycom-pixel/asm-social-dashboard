@@ -10,10 +10,11 @@ type PlanItem = {
   slide_1: string; slide_2: string; slide_3: string; slide_4_5: string; visual_direction: string; cta: string; caption_brief: string;
   primary_metric: string; secondary_metric: string; engagement_mechanic: string; story_companion: string; experiment_tag: string;
   product_focus: string; claim_guardrail: string; assets_needed: string; status: ContentPlanStatus; approval_status: string;
-  publish_status: string; publishing_mode: string; created_at: string; updated_at: string;
+  publish_status: string; publishing_mode: string; qa_status?: string; qa_result?: string | null; auto_approval_status?: string | null; scheduled_at?: string | null; schedule_reason?: string | null; schedule_data_mode?: string | null; schedule_confidence?: string | null; schedule_sample_count?: number; publisher_state?: string | null; publisher_error?: string | null; publisher_lease_until?: string | null; created_at: string; updated_at: string;
 };
 type ListResponse = { items: PlanItem[]; pagination: { page: number; pageSize: number; total: number; totalPages: number } };
 type TodayResponse = { date: string; timezone: string; items: PlanItem[] };
+type AutomationResponse = { switches: { autoApproval: boolean; autoSchedule: boolean; autoPublish: boolean } };
 type PreviewRow = { row: number; contentId?: string; valid: boolean; errors: string[]; duplicateReason: "within_file" | "existing_database" | null };
 type Preview = { summary: ImportSummary; rows: PreviewRow[]; errors: Array<{ row: number; contentId?: string; message: string }> };
 type ImportResult = { inserted: number; skipped: number; errors: Array<{ row: number; contentId?: string; message: string }>; count: { total: number; inserted: number; skipped: number; invalid: number } };
@@ -24,7 +25,7 @@ const MAX_FILE_SIZE = 1024 * 1024;
 const briefSections: Array<[string, Array<[keyof PlanItem, string]>]> = [
   ["Jadwal & tujuan", [["Content_ID", "Content ID"], ["date", "Tanggal rencana"], ["hari", "Hari"], ["test_publish_window", "Jendela publikasi"], ["audience", "Audiens"], ["pillar", "Pilar"], ["goal", "Tujuan"], ["format", "Format"], ["creative_style", "Gaya kreatif"], ["topic", "Topik"], ["product_focus", "Fokus produk"]]],
   ["Brief editorial", [["working_title", "Judul kerja"], ["hook", "Hook"], ["core_angle", "Sudut inti"], ["slide_1", "Slide 1"], ["slide_2", "Slide 2"], ["slide_3", "Slide 3"], ["slide_4_5", "Slide 4–5"], ["visual_direction", "Arah visual"], ["assets_needed", "Aset yang dibutuhkan"], ["cta", "CTA"], ["caption_brief", "Brief caption"]]],
-  ["Pengukuran & pengawalan", [["primary_metric", "Metrik utama"], ["secondary_metric", "Metrik sekunder"], ["engagement_mechanic", "Mekanisme interaksi"], ["story_companion", "Pendamping story"], ["experiment_tag", "Tag eksperimen"], ["claim_guardrail", "Pengawalan klaim"], ["publishing_mode", "Mode publikasi"], ["status", "Status alur kerja"], ["approval_status", "Persetujuan"], ["publish_status", "Status publikasi"]]],
+  ["Pengukuran & pengawalan", [["primary_metric", "Metrik utama"], ["secondary_metric", "Metrik sekunder"], ["engagement_mechanic", "Mekanisme interaksi"], ["story_companion", "Pendamping story"], ["experiment_tag", "Tag eksperimen"], ["claim_guardrail", "Pengawalan klaim"], ["publishing_mode", "Mode publikasi"], ["status", "Status produksi"], ["qa_status", "Status QA"], ["auto_approval_status", "Auto-approval"], ["test_publish_window", "Publish window"], ["scheduled_at", "Scheduled at"], ["schedule_reason", "Alasan rekomendasi AI"], ["schedule_data_mode", "Data mode"], ["schedule_confidence", "Confidence"], ["publisher_state", "Status publisher"], ["publisher_error", "Error publisher"], ["approval_status", "Persetujuan"], ["publish_status", "Status publikasi"]]],
 ];
 
 async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -52,12 +53,14 @@ export default function ContentPlanClient() {
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [importBusy, setImportBusy] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [automation, setAutomation] = useState<AutomationResponse["switches"] | null>(null);
 
   useEffect(() => {
     const controller = new AbortController(); setTodayLoading(true);
     apiJson<TodayResponse>("/api/content-plan/today", { signal: controller.signal }).then(setToday).catch((reason: unknown) => {
       if (!(reason instanceof DOMException && reason.name === "AbortError")) setNotice("Konten hari ini tidak dapat dimuat.");
     }).finally(() => { if (!controller.signal.aborted) setTodayLoading(false); });
+    apiJson<AutomationResponse>("/api/dashboard/automation", { signal: controller.signal }).then((data) => setAutomation(data.switches)).catch(() => setAutomation(null));
     return () => controller.abort();
   }, [refresh]);
 
@@ -132,6 +135,7 @@ export default function ContentPlanClient() {
   return <div className="page-wrap content-plan-page">
     <header className="page-header"><div><p className="eyebrow">Operasi editorial</p><h1>RENCANA KONTEN</h1><p>Satu sumber kebenaran untuk brief, kesiapan alur kerja, dan niat publikasi yang terukur.</p></div><span className="live-badge"><span/>Rencana berbasis API</span></header>
     <div className="cp-live" aria-live="polite">{notice}</div>
+    {automation && <section className="panel" aria-label="Global kill switch"><div className="section-heading"><div><p className="eyebrow">Global kill switch</p><h2>AUTOMATION</h2></div><small>AUTO_APPROVAL: {automation.autoApproval ? "ON" : "OFF"} · AUTO_SCHEDULE: {automation.autoSchedule ? "ON" : "OFF"} · AUTO_PUBLISH: {automation.autoPublish ? "ON" : "OFF"}</small></div></section>}
 
     <section className="panel today-panel" aria-labelledby="today-heading">
       <div className="section-heading"><div><p className="eyebrow">Asia/Jakarta · WIB</p><h2 id="today-heading">KONTEN HARI INI</h2></div>{today && <small>{planDateLabel(today.date)}</small>}</div>

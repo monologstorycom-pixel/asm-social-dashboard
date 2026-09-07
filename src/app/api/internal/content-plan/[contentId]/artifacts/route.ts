@@ -1,5 +1,6 @@
 import { artifactSchema } from "@/lib/operations-api";
 import { contentIdSchema, contentPlanJson } from "@/lib/content-plan-api";
+import { autoApproveAndSchedule } from "@/lib/automation";
 import { db } from "@/lib/db";
 import { HttpError, readJson, safeRoute } from "@/lib/http";
 import { authorizeInternalRequest, mapPlanFields } from "@/lib/operations";
@@ -49,6 +50,7 @@ export async function POST(request: Request, context: Context) {
       if (updated.count !== 1) throw new HttpError(409, "Content artifacts changed concurrently; retry with fresh data");
       return tx.contentPlanItem.findUniqueOrThrow({ where: { id: plan.id }, include: { assets: { orderBy: { slideNumber: "asc" } }, contentPost: true } });
     });
-    return Response.json({ item: contentPlanJson(item) });
+    const automated = item.qaStatus === "passed" ? await autoApproveAndSchedule(contentId) : { item, autoApproved: false, autoScheduled: false };
+    return Response.json({ item: contentPlanJson(automated.item), automation: { autoApproved: automated.autoApproved, autoScheduled: automated.autoScheduled, recommendation: "recommendation" in automated ? automated.recommendation : undefined } });
   });
 }
