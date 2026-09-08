@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { automationSwitches, recommendScheduledAt } from "../src/lib/automation";
+import { automationSwitches, claimPublishLease, recommendScheduledAt } from "../src/lib/automation";
 
 import {
   analyticsSourceFilters,
@@ -71,12 +71,49 @@ test("automation switches fail closed unless explicitly enabled", () => {
   assert.deepEqual(automationSwitches({ AUTO_APPROVAL: "true", AUTO_SCHEDULE: "1", AUTO_PUBLISH: "yes" }), { autoApproval: true, autoSchedule: true, autoPublish: true });
 });
 
-test("publisher poll is a server-only five-minute safe target", () => {
+test("publisher poll uses lifecycle gates and can claim an auto-approved scheduled item", async () => {
   const route = readFileSync(new URL("../src/app/api/internal/publisher/poll/route.ts", import.meta.url), "utf8");
   assert.match(route, /authorizeInternalRequest\(request\)/);
   assert.match(route, /AUTO_PUBLISH is off/);
   assert.match(route, /\/api\/internal\/publisher\/due/);
+  assert.match(route, /publishStatus:\s*"scheduled"/);
+  assert.match(route, /publisherState:\s*"scheduled"/);
+  assert.match(route, /scheduledAt:\s*\{\s*lte:\s*new Date\(\)\s*\}/);
+  assert.match(route, /approvalAttemptId:\s*\{\s*not:\s*null\s*\}/);
+  assert.doesNotMatch(route, /approvalStatus:\s*"approved"/);
   assert.doesNotMatch(route, /Response\.redirect|SESSION_COOKIE/);
+
+  const now = new Date("2026-09-08T06:00:00.000Z");
+  const item = {
+    id: "plan-1",
+    contentId: "ASM-30D-20260908-01",
+    status: "scheduled",
+    qaStatus: "passed",
+    finalCaption: "caption",
+    scheduledAt: new Date("2026-09-08T05:04:00.000Z"),
+    approvalStatus: "auto_approved",
+    approvalAttemptId: "attempt-1",
+    publisherState: "scheduled",
+    publisherLeaseUntil: null,
+    assets: [{ publicUrl: "https://cdn.test/final.png" }],
+    contentPost: { socialAccount: { platform: "instagram", platformAccountId: "17841405865261475" } },
+  };
+  let leaseWhere: unknown;
+  const client = {
+    contentPlanItem: {
+      findUnique: async () => item,
+      updateMany: async (query: unknown) => { leaseWhere = query; return { count: 1 }; },
+      findUniqueOrThrow: async () => item,
+    },
+  };
+
+  const claimed = await claimPublishLease(item.contentId, client as never, now);
+  assert.equal(claimed.contentId, item.contentId);
+  assert.equal(claimed.approvalStatus, "auto_approved");
+  assert.deepEqual(leaseWhere, {
+    where: { id: item.id, status: "scheduled", publisherState: "scheduled", approvalAttemptId: item.approvalAttemptId, OR: [{ publisherLeaseUntil: null }, { publisherLeaseUntil: { lt: now } }] },
+    data: { publisherState: "publishing", publisherLeaseId: claimed.leaseId, publisherLeaseUntil: new Date("2026-09-08T06:04:00.000Z"), publisherError: null },
+  });
 });
 
 test("AI scheduling selects a specific minute inside the content publish window", () => {
