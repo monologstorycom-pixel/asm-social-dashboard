@@ -28,9 +28,12 @@ test("publisher creates carousel children before the parent", async () => {
     const url = String(input);
     const body = init?.body?.toString() || "";
     calls.push(`${url} ${body}`);
-    if (url.includes("carousel-parent?")) return Response.json({ status_code: "FINISHED" });
+    if (url.includes("child-") || url.includes("carousel-parent?")) return Response.json({ status_code: "FINISHED" });
     if (url.endsWith("/123/media_publish")) return Response.json({ id: "media-2" });
-    if (url.endsWith("/123/media") && body.includes("media_type=CAROUSEL")) return Response.json({ id: "carousel-parent" });
+    if (url.endsWith("/123/media") && body.includes("media_type=CAROUSEL")) {
+      assert.equal(calls.filter((call) => call.includes("child-") && call.includes("status_code")).length, 2);
+      return Response.json({ id: "carousel-parent" });
+    }
     if (url.endsWith("/123/media")) return Response.json({ id: `child-${++child}` });
     throw new Error(`Unexpected URL ${url}`);
   };
@@ -42,8 +45,9 @@ test("publisher creates carousel children before the parent", async () => {
   ]);
   assert.match(calls[0], /is_carousel_item=true/);
   assert.match(calls[1], /media_type=VIDEO/);
-  assert.match(calls[2], /media_type=CAROUSEL/);
-  assert.match(calls[2], /children=child-1%2Cchild-2/);
+  assert.equal(calls.filter((call) => call.includes("child-") && call.includes("status_code")).length, 2);
+  const parent = calls.find((call) => call.includes("media_type=CAROUSEL")) || "";
+  assert.match(parent, /children=child-1%2Cchild-2/);
 });
 
 test("publisher rejects non-HTTPS assets before any Meta request", async () => {

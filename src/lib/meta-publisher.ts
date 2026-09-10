@@ -25,6 +25,7 @@ export class MetaPublisherClient {
       creationId = await this.createContainer(accountId, caption, assets[0]);
     } else {
       const children = await Promise.all(assets.map((asset) => this.createContainer(accountId, "", asset, true)));
+      await Promise.all(children.map((child) => this.waitUntilReady(child)));
       creationId = await this.post(`${accountId}/media`, { media_type: "CAROUSEL", caption, children: children.join(",") });
     }
     await this.waitUntilReady(creationId);
