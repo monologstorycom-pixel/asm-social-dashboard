@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { buildApiQuery, CONTENT_PLAN_WORKFLOW, type ContentPlanStatus, duplicateReasonLabel, friendlyLabel, importSummaryItems, type ImportSummary, nextContentPlanStatus, planDateLabel, scheduleInPublishWindow } from "@/lib/frontend";
+import { buildApiQuery, CONTENT_PLAN_WORKFLOW, type ContentPlanStatus, duplicateReasonLabel, friendlyLabel, importSummaryItems, type ImportSummary, nextContentPlanStatus, planDateLabel, scheduleDataModeLabel, scheduleFallbackPolicy, scheduleInPublishWindow, scheduledTimeLabel } from "@/lib/frontend";
 
 type PlanItem = {
   id: string; Content_ID: string; date: string; hari: string; test_publish_window: string; pillar: string; goal: string;
@@ -22,8 +22,9 @@ type Filters = { search: string; status: string; pillar: string; topic: string; 
 const initialFilters: Filters = { search: "", status: "", pillar: "", topic: "", dateFrom: "", dateTo: "", sort: "asc", page: 1 };
 const MAX_FILE_SIZE = 1024 * 1024;
 
-const briefSections: Array<[string, Array<[keyof PlanItem, string]>]> = [
-  ["Jadwal & tujuan", [["Content_ID", "Content ID"], ["date", "Tanggal rencana"], ["hari", "Hari"], ["test_publish_window", "Jendela publikasi"], ["audience", "Audiens"], ["pillar", "Pilar"], ["goal", "Tujuan"], ["format", "Format"], ["creative_style", "Gaya kreatif"], ["topic", "Topik"], ["product_focus", "Fokus produk"]]],
+type BriefField = keyof PlanItem | "schedule_fallback_policy";
+const briefSections: Array<[string, Array<[BriefField, string]>]> = [
+  ["Jadwal & tujuan", [["Content_ID", "Content ID"], ["date", "Tanggal rencana"], ["hari", "Hari"], ["scheduled_at", "Jam publish aktual"], ["test_publish_window", "Publish window"], ["schedule_reason", "Alasan pilihan AI"], ["schedule_data_mode", "Data mode"], ["schedule_confidence", "Confidence"], ["schedule_fallback_policy", "Fallback policy"], ["audience", "Audiens"], ["pillar", "Pilar"], ["goal", "Tujuan"], ["format", "Format"], ["creative_style", "Gaya kreatif"], ["topic", "Topik"], ["product_focus", "Fokus produk"]]],
   ["Brief editorial", [["working_title", "Judul kerja"], ["hook", "Hook"], ["core_angle", "Sudut inti"], ["slide_1", "Slide 1"], ["slide_2", "Slide 2"], ["slide_3", "Slide 3"], ["slide_4_5", "Slide 4–5"], ["visual_direction", "Arah visual"], ["assets_needed", "Aset yang dibutuhkan"], ["cta", "CTA"], ["caption_brief", "Brief caption"]]],
   ["Pengukuran & pengawalan", [["primary_metric", "Metrik utama"], ["secondary_metric", "Metrik sekunder"], ["engagement_mechanic", "Mekanisme interaksi"], ["story_companion", "Pendamping story"], ["experiment_tag", "Tag eksperimen"], ["claim_guardrail", "Pengawalan klaim"], ["publishing_mode", "Mode publikasi"], ["status", "Status produksi"], ["qa_status", "Status QA"], ["auto_approval_status", "Auto-approval"], ["test_publish_window", "Publish window"], ["scheduled_at", "Scheduled at"], ["schedule_reason", "Alasan rekomendasi AI"], ["schedule_data_mode", "Data mode"], ["schedule_confidence", "Confidence"], ["publisher_state", "Status publisher"], ["publisher_error", "Error publisher"], ["approval_status", "Persetujuan"], ["publish_status", "Status publikasi"]]],
 ];
@@ -161,7 +162,15 @@ export default function ContentPlanClient() {
 
 function Badge({ value }: { value: string }) { return <span className={`cp-badge ${value}`}>{friendlyLabel(value || "tidak diketahui")}</span>; }
 function TodayBrief({ item, open }: { item: PlanItem; open: () => void }) { return <article className="today-brief"><div className="today-primary"><div><span className="content-id">{item.Content_ID}</span><h3>{item.working_title || "Brief tanpa judul"}</h3><p>{item.hook || item.core_angle || "Tidak ada hook atau sudut inti yang diberikan."}</p></div><div className="today-actions"><Badge value={item.status}/><button className="primary-action" type="button" onClick={open}>BUKA BRIEF</button></div></div><dl className="today-meta"><div><dt>Rencana</dt><dd>{planDateLabel(item.date)} · {item.hari || "—"} · {item.test_publish_window || "—"}</dd></div><div><dt>Audiens</dt><dd>{item.audience || "—"}</dd></div><div><dt>Arah</dt><dd>{item.pillar || "—"} · {item.format || "—"} · {item.creative_style || "—"}</dd></div><div><dt>Governansi</dt><dd>{friendlyLabel(item.approval_status)} persetujuan · {friendlyLabel(item.publish_status)} publikasi</dd></div></dl><details><summary>Selengkapi brief</summary><BriefFields item={item}/></details></article>; }
-function BriefFields({ item }: { item: PlanItem }) { return <div className="brief-sections">{briefSections.map(([heading, fields]) => <section key={heading}><h3>{heading}</h3><dl>{fields.map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{key === "date" ? planDateLabel(String(item[key])) : String(item[key] || "—")}</dd></div>)}</dl></section>)}</div>; }
+function briefFieldValue(item: PlanItem, key: BriefField) {
+  if (key === "schedule_fallback_policy") return scheduleFallbackPolicy(item.schedule_data_mode);
+  if (key === "scheduled_at") return scheduledTimeLabel(item.scheduled_at);
+  if (key === "schedule_data_mode") return scheduleDataModeLabel(item.schedule_data_mode);
+  if (key === "schedule_reason") return item.schedule_reason || "Belum tersedia; alasan akan dicatat saat jadwal dipilih.";
+  if (key === "schedule_confidence") return item.schedule_confidence || "Belum tersedia";
+  return key === "date" ? planDateLabel(String(item[key])) : String(item[key] || "—");
+}
+function BriefFields({ item }: { item: PlanItem }) { return <div className="brief-sections">{briefSections.map(([heading, fields]) => <section key={heading}><h3>{heading}</h3><dl>{fields.map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{briefFieldValue(item, key)}</dd></div>)}</dl></section>)}</div>; }
 function BriefDialog({ item, loading, busy, close, advance, schedule }: { item: PlanItem | null; loading: boolean; busy: boolean; close: () => void; advance: () => void; schedule: (value: string) => Promise<string> }) {
   const drawer = useRef<HTMLElement>(null); const closeRef = useRef<HTMLButtonElement>(null); const [scheduledAt, setScheduledAt] = useState(""); const [scheduleError, setScheduleError] = useState("");
   useEffect(() => { const previous = document.activeElement as HTMLElement | null; closeRef.current?.focus(); document.body.classList.add("modal-open"); const key = (event: KeyboardEvent) => { if (event.key === "Escape") close(); if (event.key === "Tab" && drawer.current) { const focusable = [...drawer.current.querySelectorAll<HTMLElement>("button,[href],input,select,textarea,[tabindex]:not([tabindex='-1'])")].filter((node) => !node.hasAttribute("disabled")); if (!focusable.length) return; const first = focusable[0], last = focusable.at(-1)!; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } } }; document.addEventListener("keydown", key); return () => { document.removeEventListener("keydown", key); document.body.classList.remove("modal-open"); previous?.focus(); }; }, [close]);

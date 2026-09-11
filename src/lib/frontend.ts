@@ -50,6 +50,23 @@ export function planDateLabel(value: string) {
   return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(year, month - 1, day)));
 }
 
+export function scheduledTimeLabel(value: string | null | undefined) {
+  if (!value) return "Belum dijadwalkan";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Jadwal tidak valid";
+  return `${new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Asia/Jakarta" }).format(date).replace(".", ":")} WIB`;
+}
+
+export function scheduleDataModeLabel(value: string | null | undefined) {
+  return value === "live_meta" || value === "analytics" ? "analytics" : value === "exploration" ? "exploration" : "Belum tersedia";
+}
+
+export function scheduleFallbackPolicy(value: string | null | undefined) {
+  return value === "live_meta" || value === "analytics"
+    ? "Tidak aktif; jadwal memakai data analytics."
+    : "Exploration terukur dalam publish window bila data analytics belum cukup.";
+}
+
 export function scheduleInPublishWindow(value: string, planDate: string, label: string): { iso: string; error: string } {
   if (!value) return { iso: "", error: "Pilih waktu publikasi." };
   const local = value.match(/^(\d{4})-(\d{2})-(\d{2})T([01]\d|2[0-3]):([0-5]\d)$/);

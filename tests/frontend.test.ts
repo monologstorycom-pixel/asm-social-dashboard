@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { bestMetricIds, buildApiQuery, carouselNext, carouselPrev, dataSourceLabel, dialogMediaAttrs, duplicateReasonLabel, friendlyLabel, importSummaryItems, nextContentPlanStatus, orderAssetsBySlide, planDateLabel, previewSrc, safeExternalLinkProps, scheduleInPublishWindow, slideIndicatorLabel, thumbnailAttrs, toggleSelection } from "../src/lib/frontend";
+import { bestMetricIds, buildApiQuery, carouselNext, carouselPrev, dataSourceLabel, dialogMediaAttrs, duplicateReasonLabel, friendlyLabel, importSummaryItems, nextContentPlanStatus, orderAssetsBySlide, planDateLabel, previewSrc, safeExternalLinkProps, scheduleDataModeLabel, scheduleFallbackPolicy, scheduleInPublishWindow, scheduledTimeLabel, slideIndicatorLabel, thumbnailAttrs, toggleSelection } from "../src/lib/frontend";
 
 const ids = ["a", "b", "c", "d", "e", "f"];
 
@@ -75,9 +75,20 @@ test("schedule validation rejects missing, malformed, and out-of-window values",
   assert.equal(scheduleInPublishWindow("2026-08-25T09:30", "2026-08-25", "pagi").error, "Jendela publikasi tidak dapat dibaca.");
 });
 
-test("content plan dashboard shows automation switches and publisher recommendation fields", () => {
+test("schedule observability formats WIB time, normalized mode, and fallback policy", () => {
+  assert.equal(scheduledTimeLabel("2026-09-11T05:26:00.000Z"), "12:26 WIB");
+  assert.equal(scheduledTimeLabel(null), "Belum dijadwalkan");
+  assert.equal(scheduleDataModeLabel("live_meta"), "analytics");
+  assert.equal(scheduleDataModeLabel("exploration"), "exploration");
+  assert.equal(scheduleFallbackPolicy("exploration"), "Exploration terukur dalam publish window bila data analytics belum cukup.");
+  assert.equal(scheduleFallbackPolicy("live_meta"), "Tidak aktif; jadwal memakai data analytics.");
+});
+
+test("content plan dashboard shows six schedule observability fields in Jadwal & tujuan", () => {
   const source = readFileSync(new URL("../src/app/content-plan/content-plan-client.tsx", import.meta.url), "utf8");
-  for (const label of ["AUTO_APPROVAL", "AUTO_SCHEDULE", "AUTO_PUBLISH", "schedule_reason", "schedule_data_mode", "schedule_confidence", "publisher_state", "publisher_error", "auto_approval_status"]) assert.match(source, new RegExp(label));
+  const scheduleSection = source.match(/\["Jadwal & tujuan"[\s\S]*?\]\],\n  \["Brief editorial"/)?.[0] ?? "";
+  for (const label of ["Jam publish aktual", "Publish window", "Alasan pilihan AI", "Data mode", "Confidence", "Fallback policy"]) assert.match(scheduleSection, new RegExp(label));
+  for (const field of ["scheduled_at", "test_publish_window", "schedule_reason", "schedule_data_mode", "schedule_confidence"]) assert.match(scheduleSection, new RegExp(field));
   assert.doesNotMatch(source, /INTERNAL_API_TOKEN|Authorization.*Bearer/);
 });
 
