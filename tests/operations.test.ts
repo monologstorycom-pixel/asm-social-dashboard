@@ -307,6 +307,11 @@ test("operational lifecycle writes use conditional compare-and-set", () => {
   ]) assert.match(readFileSync(new URL(path, import.meta.url), "utf8"), /updateMany\(/, path);
 });
 
+test("agent today endpoint requires internal bearer authentication", () => {
+  const route = readFileSync(new URL("../src/app/api/internal/agent/today/route.ts", import.meta.url), "utf8");
+  assert.match(route, /authorizeInternalRequest\(request\)/);
+});
+
 test("every non-preview mutation route requires internal bearer authentication", () => {
   for (const path of [
     "../src/app/api/posts/route.ts",
