@@ -16,7 +16,9 @@ export const artifactSchema = z.object({
     role: z.string().trim().min(1).max(50),
     final: z.boolean().default(true),
   }).refine((asset) => Boolean(asset.localPath || asset.publicUrl), { message: "localPath or publicUrl is required" })).min(1).max(100),
-}).strict().refine((body) => new Set(body.assets.map((asset) => asset.slideNumber)).size === body.assets.length, { message: "slideNumber values must be unique", path: ["assets"] });
+}).strict()
+  .refine((body) => new Set(body.assets.map((asset) => asset.slideNumber)).size === body.assets.length, { message: "slideNumber values must be unique", path: ["assets"] })
+  .refine((body) => body.qaStatus !== "passed" || body.assets.every((asset) => Boolean(asset.publicUrl)), { message: "publicUrl is required for every QA-passed asset", path: ["assets"] });
 
 export const approvalSchema = z.object({
   command: z.string(),

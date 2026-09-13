@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { automationSwitches, claimPublishLease, recommendScheduledAt } from "../src/lib/automation";
+import { artifactSchema } from "../src/lib/operations-api";
 
 import {
   analyticsSourceFilters,
@@ -69,6 +70,19 @@ test("schedule must be within the controlled parsed test window", () => {
 test("automation switches fail closed unless explicitly enabled", () => {
   assert.deepEqual(automationSwitches({}), { autoApproval: false, autoSchedule: false, autoPublish: false });
   assert.deepEqual(automationSwitches({ AUTO_APPROVAL: "true", AUTO_SCHEDULE: "1", AUTO_PUBLISH: "yes" }), { autoApproval: true, autoSchedule: true, autoPublish: true });
+});
+
+test("QA-passed artifacts require public URLs before automation", () => {
+  const body = {
+    socialAccountId: "bd5d0e4d-654b-48b1-a6b0-735ca6010ff0",
+    caption: "caption",
+    finalBrief: "brief",
+    qaStatus: "passed",
+    qaResult: "PASS",
+    assets: [{ slideNumber: 1, localPath: "/tmp/final.png", sha256: "a".repeat(64), mimeType: "image/png", role: "final", final: true }],
+  };
+  assert.throws(() => artifactSchema.parse(body), /publicUrl/);
+  assert.doesNotThrow(() => artifactSchema.parse({ ...body, assets: [{ ...body.assets[0], publicUrl: "https://cdn.test/final.png" }] }));
 });
 
 test("publisher poll uses lifecycle gates and can claim an auto-approved scheduled item", async () => {
