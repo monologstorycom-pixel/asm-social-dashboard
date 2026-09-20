@@ -19,6 +19,21 @@ import {
 
 export type OperationsDb = Pick<PrismaClient, "socialAccount" | "contentPost" | "postMetric" | "contentPlanItem" | "contentPlanAsset" | "$transaction">;
 
+const META_READ_CONCURRENCY = 5;
+
+async function mapMetaMedia(media: MetaMedia[], meta: MetaInsightsClient) {
+  const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>>; assets: ReturnType<typeof mapMediaToAssets> }> = new Array(media.length);
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(META_READ_CONCURRENCY, media.length) }, async () => {
+    while (next < media.length) {
+      const index = next++;
+      const item = await meta.getMediaDetail(media[index].id);
+      samples[index] = { item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id), assets: mapMediaToAssets("placeholder", item) };
+    }
+  }));
+  return samples;
+}
+
 export async function recordPublishResult(contentId: string, body: PublishResult, client: OperationsDb = db) {
   return client.$transaction(async (tx) => {
     const plan = await tx.contentPlanItem.findUnique({ where: { contentId }, include: { contentPost: true, assets: true } });
@@ -95,9 +110,7 @@ export async function importLiveMetaMediaPage(
   const page = await meta.listAccountMediaPage(accountId, after, pageSize);
   const media = page.data;
   if (!media.length) return { media: 0, imported: 0, snapshots: 0, existingSnapshots: 0, assets: 0, capturedAt: capturedAt.toISOString(), after: page.after ?? null, hasMore: false };
-  const details = await Promise.all(media.map((item) => meta.getMediaDetail(item.id)));
-  const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>>; assets: ReturnType<typeof mapMediaToAssets> }> = [];
-  for (const item of details) samples.push({ item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id), assets: mapMediaToAssets("placeholder", item) });
+  const samples = await mapMetaMedia(media, meta);
   let imported = 0;
   let snapshots = 0;
   let existingSnapshots = 0;
@@ -168,12 +181,7 @@ export async function importLiveMetaMedia(
   const BATCH_SIZE = 25;
   for (let batchStart = 0; batchStart < media.length; batchStart += BATCH_SIZE) {
     const batch = media.slice(batchStart, batchStart + BATCH_SIZE);
-    const details = await Promise.all(batch.map((item) => meta.getMediaDetail(item.id)));
-    const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>>; assets: ReturnType<typeof mapMediaToAssets> }> = [];
-    for (const item of details) {
-      const assetsMapped = mapMediaToAssets("placeholder", item);
-      samples.push({ item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id), assets: assetsMapped });
-    }
+    const samples = await mapMetaMedia(batch, meta);
     await client.$transaction(async (tx) => {
       for (const [index, sample] of samples.entries()) {
         const globalIndex = batchStart + index;

@@ -608,6 +608,39 @@ test("importLiveMetaMediaPage fetches metrics before opening the database transa
   assert.deepEqual(metricWrites, ["deleteMany", "create"], "immutable snapshot refresh must not use UPDATE");
 });
 
+test("importLiveMetaMediaPage bounds concurrent Meta reads while importing every item", async () => {
+  const media = Array.from({ length: 100 }, (_, index) => ({ id: `m${index}`, media_type: "IMAGE", permalink: `https://www.instagram.com/p/${index}/`, timestamp: "2026-08-25T12:00:00+0000" }));
+  let active = 0;
+  let peak = 0;
+  const read = async <T>(value: T) => {
+    active += 1;
+    peak = Math.max(peak, active);
+    await new Promise((resolve) => setTimeout(resolve, 2));
+    active -= 1;
+    return value;
+  };
+  const meta = {
+    getAccountProfile: async () => ({ id: "12345", name: "ASM Profile", username: "asm.profile" }),
+    listAccountMediaPage: async () => ({ data: media }),
+    getMediaDetail: async (id: string) => read(media.find((item) => item.id === id)!),
+    getMediaMetrics: async () => read({ reach: 0, impressions: 0, views: 0, likes: 0, comments: 0, saves: 0, shares: 0, engagementTotal: 0, engagementRate: 0 }),
+  } as unknown as InstanceType<typeof MetaInsightsClient>;
+  let posts = 0;
+  const client = {
+    socialAccount: { upsert: async () => ({ id: "acct" }) },
+    contentPost: { findUnique: async () => null, upsert: async () => ({ id: `post-${++posts}` }) },
+    postMetric: { findUnique: async () => null, create: async () => ({}) },
+    postAsset: { findUnique: async () => null, create: async () => ({}) },
+    $transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn(client),
+  } as unknown as OperationsDb;
+
+  const result = await importLiveMetaMediaPage("12345", new Date(), client, meta, undefined, 100);
+
+  assert.equal(result.media, 100, "must not reduce import coverage");
+  assert.ok(peak > 1, "Meta reads must not remain serial");
+  assert.ok(peak <= 5, `Meta reads must stay bounded; observed ${peak}`);
+});
+
 test("importLiveMetaMedia refreshes an existing ad_hoc insight snapshot", async () => {
   const media = [{ id: "m1", media_type: "IMAGE", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000" }];
   const metrics = { reach: 2, impressions: 3, views: 4, likes: 1, comments: 0, saves: 0, shares: 0, engagementTotal: 1, engagementRate: 50 };
