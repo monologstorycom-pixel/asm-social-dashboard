@@ -241,64 +241,70 @@ model ExperimentPost {
 }
 
 model ContentPlanItem {
-  id                 String             @id @default(uuid()) @db.Char(36)
-  contentId          String             @unique @map("content_id") @db.VarChar(191)
-  date               DateTime           @db.Date
-  day                String             @db.VarChar(20)
-  testPublishWindow  String             @map("test_publish_window") @db.VarChar(50)
-  pillar             String             @db.VarChar(100)
-  goal               String             @db.VarChar(100)
-  format             String             @db.VarChar(100)
-  creativeStyle      String             @map("creative_style") @db.VarChar(100)
-  audience           String             @db.Text
-  topicTag           String             @map("topic_tag") @db.VarChar(120)
-  workingTitle       String             @map("working_title") @db.VarChar(255)
-  hook               String             @db.Text
-  coreAngle          String             @map("core_angle") @db.Text
-  slide1             String             @map("slide_1") @db.Text
-  slide2             String             @map("slide_2") @db.Text
-  slide3             String             @map("slide_3") @db.Text
-  slide45            String             @map("slide_4_5") @db.Text
-  visualDirection    String             @map("visual_direction") @db.Text
-  cta                String             @db.Text
-  captionBrief       String             @map("caption_brief") @db.Text
-  primaryMetric      String             @map("primary_metric") @db.VarChar(100)
-  secondaryMetric    String             @map("secondary_metric") @db.VarChar(191)
-  engagementMechanic String             @map("engagement_mechanic") @db.Text
-  storyCompanion     String             @map("story_companion") @db.Text
-  experimentTag      String             @map("experiment_tag") @db.VarChar(255)
-  productFocus       String             @map("product_focus") @db.VarChar(255)
-  claimGuardrail     String             @map("claim_guardrail") @db.Text
-  assetsNeeded       String             @map("assets_needed") @db.Text
-  status             ContentPlanStatus  @default(planned)
-  approvalStatus     String             @map("approval_status") @db.VarChar(50)
-  publishStatus      String             @map("publish_status") @db.VarChar(50)
-  contentPostId      String?            @unique @map("content_post_id") @db.Char(36)
-  finalCaption       String?            @map("final_caption") @db.Text
-  finalBrief         String?            @map("final_brief") @db.Text
-  qaStatus           QaStatus           @default(pending) @map("qa_status")
-  qaResult           String?            @map("qa_result") @db.VarChar(191)
-  qaNotes            String?            @map("qa_notes") @db.Text
-  approvedAt         DateTime?          @map("approved_at")
-  approvalCommand    String?            @map("approval_command") @db.VarChar(50)
-  approvalReference  String?            @map("approval_reference") @db.VarChar(191)
-  approvalAttemptId  String?            @unique @map("approval_attempt_id") @db.Char(36)
-  approvalVersion    Int                @default(0) @map("approval_version") @db.UnsignedInt
-  scheduledAt        DateTime?          @map("scheduled_at")
-  publishedAt        DateTime?          @map("published_at")
-  publisherState     PublisherState     @default(idle) @map("publisher_state")
-  publisherError     String?            @map("publisher_error") @db.Text
-  autoApprovalStatus String?            @map("auto_approval_status") @db.VarChar(50)
-  scheduleReason     String?            @map("schedule_reason") @db.Text
-  scheduleDataMode   String?            @map("schedule_data_mode") @db.VarChar(50)
-  scheduleConfidence String?            @map("schedule_confidence") @db.VarChar(50)
-  scheduleSampleCount Int               @default(0) @map("schedule_sample_count") @db.UnsignedInt
-  publisherLeaseId   String?            @map("publisher_lease_id") @db.Char(36)
-  publisherLeaseUntil DateTime?         @map("publisher_lease_until")
-  createdAt          DateTime           @default(now()) @map("created_at")
-  updatedAt          DateTime           @updatedAt @map("updated_at")
-  contentPost        ContentPost?       @relation(fields: [contentPostId], references: [id], onDelete: SetNull)
-  assets             ContentPlanAsset[]
+  id                   String             @id @default(uuid()) @db.Char(36)
+  contentId            String             @unique @map("content_id") @db.VarChar(191)
+  date                 DateTime           @db.Date
+  day                  String             @db.VarChar(20)
+  testPublishWindow    String             @map("test_publish_window") @db.VarChar(50)
+  pillar               String             @db.VarChar(100)
+  goal                 String             @db.VarChar(100)
+  format               String             @db.VarChar(100)
+  creativeStyle        String             @map("creative_style") @db.VarChar(100)
+  audience             String             @db.Text
+  topicTag             String             @map("topic_tag") @db.VarChar(120)
+  workingTitle         String             @map("working_title") @db.VarChar(255)
+  hook                 String             @db.Text
+  coreAngle            String             @map("core_angle") @db.Text
+  slide1               String             @map("slide_1") @db.Text
+  slide2               String             @map("slide_2") @db.Text
+  slide3               String             @map("slide_3") @db.Text
+  slide45              String             @map("slide_4_5") @db.Text
+  visualDirection      String             @map("visual_direction") @db.Text
+  cta                  String             @db.Text
+  captionBrief         String             @map("caption_brief") @db.Text
+  primaryMetric        String             @map("primary_metric") @db.VarChar(100)
+  secondaryMetric      String             @map("secondary_metric") @db.VarChar(191)
+  engagementMechanic   String             @map("engagement_mechanic") @db.Text
+  storyCompanion       String             @map("story_companion") @db.Text
+  experimentTag        String             @map("experiment_tag") @db.VarChar(255)
+  productFocus         String             @map("product_focus") @db.VarChar(255)
+  claimGuardrail       String             @map("claim_guardrail") @db.Text
+  assetsNeeded         String             @map("assets_needed") @db.Text
+  status               ContentPlanStatus  @default(planned)
+  approvalStatus       String             @map("approval_status") @db.VarChar(50)
+  publishStatus        String             @map("publish_status") @db.VarChar(50)
+  contentPostId        String?            @unique @map("content_post_id") @db.Char(36)
+  finalCaption         String?            @map("final_caption") @db.Text
+  finalBrief           String?            @map("final_brief") @db.Text
+  qaStatus             QaStatus           @default(pending) @map("qa_status")
+  qaResult             String?            @map("qa_result") @db.VarChar(191)
+  qaNotes              String?            @map("qa_notes") @db.Text
+  approvedAt           DateTime?          @map("approved_at")
+  approvalCommand      String?            @map("approval_command") @db.VarChar(50)
+  approvalReference    String?            @map("approval_reference") @db.VarChar(191)
+  approvalAttemptId    String?            @unique @map("approval_attempt_id") @db.Char(36)
+  approvalVersion      Int                @default(0) @map("approval_version") @db.UnsignedInt
+  scheduledAt          DateTime?          @map("scheduled_at")
+  publishedAt          DateTime?          @map("published_at")
+  publisherState       PublisherState     @default(idle) @map("publisher_state")
+  publisherError       String?            @map("publisher_error") @db.Text
+  autoApprovalStatus   String?            @map("auto_approval_status") @db.VarChar(50)
+  scheduleReason       String?            @map("schedule_reason") @db.Text
+  scheduleDataMode     String?            @map("schedule_data_mode") @db.VarChar(50)
+  scheduleConfidence   String?            @map("schedule_confidence") @db.VarChar(50)
+  scheduleSampleCount  Int                @default(0) @map("schedule_sample_count") @db.UnsignedInt
+  publisherLeaseId     String?            @map("publisher_lease_id") @db.Char(36)
+  publisherLeaseUntil  DateTime?          @map("publisher_lease_until")
+  assetRevision        Int                @default(0) @map("asset_revision") @db.UnsignedInt
+  approvedAssetSetHash String?            @map("approved_asset_set_hash") @db.Char(64)
+  approvedCandidate    String?            @map("approved_candidate") @db.VarChar(100)
+  publisherRetryKey    String?            @map("publisher_retry_key") @db.VarChar(191)
+  publisherRetryCount  Int                @default(0) @map("publisher_retry_count") @db.UnsignedInt
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+  contentPost          ContentPost?       @relation(fields: [contentPostId], references: [id], onDelete: SetNull)
+  assets               ContentPlanAsset[]
+  publisherAudits      PublisherAudit[]
 
   @@index([date, status])
   @@index([pillar])
@@ -317,10 +323,43 @@ model ContentPlanAsset {
   mimeType      String          @map("mime_type") @db.VarChar(100)
   assetRole     String          @map("asset_role") @db.VarChar(50)
   isFinal       Boolean         @default(true) @map("is_final")
+  revision      Int             @default(1) @db.UnsignedInt
+  candidate     String          @default("final") @db.VarChar(100)
   createdAt     DateTime        @default(now()) @map("created_at")
   contentPlan   ContentPlanItem @relation(fields: [contentPlanId], references: [id], onDelete: Cascade)
 
   @@unique([contentPlanId, slideNumber])
   @@index([sha256])
   @@map("content_plan_assets")
+}
+
+model MetaSyncCheckpoint {
+  accountId   String    @id @map("account_id") @db.VarChar(191)
+  cursor      String?   @db.Text
+  status      String    @default("pending") @db.VarChar(30)
+  processed   Int       @default(0) @db.UnsignedInt
+  imported    Int       @default(0) @db.UnsignedInt
+  skipped     Int       @default(0) @db.UnsignedInt
+  failed      Int       @default(0) @db.UnsignedInt
+  unsupported Int       @default(0) @db.UnsignedInt
+  startedAt   DateTime? @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("meta_sync_checkpoints")
+}
+
+model PublisherAudit {
+  id                String          @id @default(uuid()) @db.Char(36)
+  contentPlanId     String          @map("content_plan_id") @db.Char(36)
+  action            String          @db.VarChar(100)
+  approvalAttemptId String?         @map("approval_attempt_id") @db.Char(36)
+  assetRevision     Int             @map("asset_revision") @db.UnsignedInt
+  retryKey          String?         @map("retry_key") @db.VarChar(191)
+  details           Json?
+  createdAt         DateTime        @default(now()) @map("created_at")
+  contentPlan       ContentPlanItem @relation(fields: [contentPlanId], references: [id], onDelete: Cascade)
+
+  @@index([contentPlanId, createdAt])
+  @@map("publisher_audits")
 }

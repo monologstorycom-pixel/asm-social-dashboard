@@ -24,7 +24,7 @@ export * as $Enums from './enums'
 export * from "./enums"
 /**
  * ## Prisma Client
- * 
+ *
  * Type-safe database client for TypeScript
  * @example
  * ```
@@ -34,7 +34,7 @@ export * from "./enums"
  * // Fetch zero or more SocialAccounts
  * const socialAccounts = await prisma.socialAccount.findMany()
  * ```
- * 
+ *
  * Read more in our [docs](https://pris.ly/d/client).
  */
 export const PrismaClient = $Class.getPrismaClientClass()
@@ -43,46 +43,56 @@ export { Prisma }
 
 /**
  * Model SocialAccount
- * 
+ *
  */
 export type SocialAccount = Prisma.SocialAccountModel
 /**
  * Model ContentPost
- * 
+ *
  */
 export type ContentPost = Prisma.ContentPostModel
 /**
  * Model PostAsset
- * 
+ *
  */
 export type PostAsset = Prisma.PostAssetModel
 /**
  * Model PostMetric
- * 
+ *
  */
 export type PostMetric = Prisma.PostMetricModel
 /**
  * Model ContentCalendar
- * 
+ *
  */
 export type ContentCalendar = Prisma.ContentCalendarModel
 /**
  * Model ContentExperiment
- * 
+ *
  */
 export type ContentExperiment = Prisma.ContentExperimentModel
 /**
  * Model ExperimentPost
- * 
+ *
  */
 export type ExperimentPost = Prisma.ExperimentPostModel
 /**
  * Model ContentPlanItem
- * 
+ *
  */
 export type ContentPlanItem = Prisma.ContentPlanItemModel
 /**
  * Model ContentPlanAsset
- * 
+ *
  */
 export type ContentPlanAsset = Prisma.ContentPlanAssetModel
+/**
+ * Model MetaSyncCheckpoint
+ *
+ */
+export type MetaSyncCheckpoint = Prisma.MetaSyncCheckpointModel
+/**
+ * Model PublisherAudit
+ *
+ */
+export type PublisherAudit = Prisma.PublisherAuditModel

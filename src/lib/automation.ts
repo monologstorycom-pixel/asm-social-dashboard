@@ -3,6 +3,7 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { HttpError } from "@/lib/http";
 import { APPROVAL_COMMAND, parsePublishWindow, type PublishWindow } from "@/lib/operations";
+import { approvedAssetIdentity, assertApprovedAssetIdentity, preflightAssets } from "@/lib/publisher-recovery";
 
 type Tx = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
 type AutomationDb = Pick<PrismaClient, "contentPlanItem" | "contentPost" | "postMetric" | "$transaction">;
@@ -65,21 +66,34 @@ async function comparableSamples(plan: PlanLike, tx: Tx) {
   return rows.flatMap((row) => row.contentPost.publishedAt ? [{ publishedAt: row.contentPost.publishedAt, engagementRate: Number(row.engagementRate) }] : []);
 }
 
-export async function autoApproveAndSchedule(contentId: string, client: AutomationDb = db, env = process.env) {
+export async function autoApproveAndSchedule(contentId: string, client: AutomationDb = db, env: Record<string, string | undefined> = process.env, fetcher: typeof fetch = fetch) {
   const switches = automationSwitches(env);
+  const snapshot = await client.contentPlanItem.findUnique({ where: { contentId }, include: { assets: { orderBy: { slideNumber: "asc" } }, contentPost: true } });
+  if (!snapshot) throw new HttpError(404, "Content plan item not found");
+  const gatesOk = snapshot.status === "ready_for_review" && snapshot.qaStatus === "passed" && snapshot.contentPostId && snapshot.finalCaption && snapshot.assets.length > 0 && snapshot.assets.every((asset) => asset.isFinal && asset.publicUrl) && snapshot.contentPost?.socialAccountId;
+  if (!gatesOk) return { item: snapshot, autoApproved: false, autoScheduled: false, reason: "Auto workflow skipped: QA, caption, final asset, or target account gate incomplete." };
+  const identities = new Set(snapshot.assets.map((asset) => `${asset.revision}:${asset.candidate}`));
+  if (identities.size !== 1 || snapshot.assets.some((asset) => asset.revision !== snapshot.assetRevision)) throw new HttpError(409, "Auto approval requires one explicit artifact revision and candidate");
+  const candidate = snapshot.assets[0].candidate;
+  const assets = snapshot.assets.map((asset) => ({ slideNumber: asset.slideNumber, publicUrl: asset.publicUrl!, mimeType: asset.mimeType, sha256: asset.sha256 }));
+  const approvedAssetSetHash = approvedAssetIdentity(snapshot.contentId, snapshot.assetRevision, candidate, assets);
+  await preflightAssets(assets, fetcher);
+
   return client.$transaction(async (tx) => {
-    let current = await tx.contentPlanItem.findUnique({ where: { contentId }, include: { assets: true, contentPost: true } });
+    let current = await tx.contentPlanItem.findUnique({ where: { contentId }, include: { assets: { orderBy: { slideNumber: "asc" } }, contentPost: true } });
     if (!current) throw new HttpError(404, "Content plan item not found");
-    const gatesOk = current.status === "ready_for_review" && current.qaStatus === "passed" && current.contentPostId && current.finalCaption && current.assets.length > 0 && current.assets.every((asset) => asset.isFinal && asset.publicUrl) && current.contentPost?.socialAccountId;
-    if (!gatesOk) return { item: current, autoApproved: false, autoScheduled: false, reason: "Auto workflow skipped: QA, caption, final asset, or target account gate incomplete." };
+    const currentAssets = current.assets.map((asset) => ({ slideNumber: asset.slideNumber, publicUrl: asset.publicUrl ?? "", mimeType: asset.mimeType, sha256: asset.sha256 }));
+    assertApprovedAssetIdentity(approvedAssetSetHash, current.contentId, current.assetRevision, candidate, currentAssets);
     let autoApproved = false;
     if (switches.autoApproval && current.status === "ready_for_review") {
-      const updated = await tx.contentPlanItem.updateMany({ where: { id: current.id, status: "ready_for_review", approvalVersion: current.approvalVersion }, data: { status: "approved", approvedAt: new Date(), approvalCommand: APPROVAL_COMMAND, approvalReference: `auto:${current.contentId}`, approvalAttemptId: randomUUID(), approvalVersion: { increment: 1 }, approvalStatus: "auto_approved", publisherState: "ready", publisherError: null, autoApprovalStatus: "auto_approved" } });
+      const updated = await tx.contentPlanItem.updateMany({ where: { id: current.id, status: "ready_for_review", approvalVersion: snapshot.approvalVersion, assetRevision: snapshot.assetRevision }, data: { status: "approved", approvedAt: new Date(), approvalCommand: APPROVAL_COMMAND, approvalReference: `auto:${current.contentId}`, approvalAttemptId: randomUUID(), approvalVersion: { increment: 1 }, approvalStatus: "auto_approved", publisherState: "ready", publisherError: null, autoApprovalStatus: "auto_approved", approvedAssetSetHash, approvedCandidate: candidate } });
       if (updated.count !== 1) throw new HttpError(409, "Content approval changed concurrently; retry with fresh data");
-      current = await tx.contentPlanItem.findUniqueOrThrow({ where: { id: current.id }, include: { assets: true, contentPost: true } });
+      current = await tx.contentPlanItem.findUniqueOrThrow({ where: { id: current.id }, include: { assets: { orderBy: { slideNumber: "asc" } }, contentPost: true } });
       autoApproved = true;
     }
     if (!switches.autoSchedule || current.status !== "approved" || !current.approvedAt || !current.approvalAttemptId) return { item: current, autoApproved, autoScheduled: false, reason: switches.autoSchedule ? "Auto schedule skipped: item is not approved." : "AUTO_SCHEDULE is off." };
+    const approvedAssets = current.assets.map((asset) => ({ slideNumber: asset.slideNumber, publicUrl: asset.publicUrl ?? "", mimeType: asset.mimeType, sha256: asset.sha256 }));
+    assertApprovedAssetIdentity(current.approvedAssetSetHash, current.contentId, current.assetRevision, current.approvedCandidate ?? "", approvedAssets);
     const recommendation = recommendScheduledAt(current, await comparableSamples(current, tx));
     const updated = await tx.contentPlanItem.updateMany({ where: { id: current.id, status: "approved", approvalAttemptId: current.approvalAttemptId, approvalVersion: current.approvalVersion }, data: { status: "scheduled", scheduledAt: recommendation.scheduledAt, publishStatus: "scheduled", publisherState: "scheduled", scheduleReason: recommendation.reason, scheduleDataMode: recommendation.dataMode, scheduleConfidence: recommendation.confidence, scheduleSampleCount: recommendation.sampleCount } });
     if (updated.count !== 1) throw new HttpError(409, "Content schedule changed concurrently; retry with fresh data");

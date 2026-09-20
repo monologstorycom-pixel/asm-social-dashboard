@@ -40,6 +40,14 @@ export class MetaPublisherClient {
     return payload;
   }
 
+  async listRecentMedia(accountId: string, limit = 25) {
+    if (!this.token) throw new HttpError(503, "META_ACCESS_TOKEN is not configured");
+    const response = await this.fetcher(`${this.graphBase}/${accountId}/media?fields=id,caption,timestamp&limit=${limit}`, { headers: { Authorization: `Bearer ${this.token}` }, cache: "no-store" });
+    const payload = await response.json() as { data?: Array<{ id: string; caption?: string; timestamp?: string }> };
+    if (!response.ok) throw new HttpError(502, `Meta recent media lookup failed (${response.status})`);
+    return payload.data ?? [];
+  }
+
   private createContainer(accountId: string, caption: string, asset: PublishAsset, carouselItem = false) {
     const video = asset.mimeType.startsWith("video/");
     return this.post(`${accountId}/media`, {

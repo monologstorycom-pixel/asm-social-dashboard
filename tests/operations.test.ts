@@ -75,6 +75,8 @@ test("automation switches fail closed unless explicitly enabled", () => {
 test("QA-passed artifacts require public URLs before automation", () => {
   const body = {
     socialAccountId: "bd5d0e4d-654b-48b1-a6b0-735ca6010ff0",
+    revision: 1,
+    candidate: "A",
     caption: "caption",
     finalBrief: "brief",
     qaStatus: "passed",

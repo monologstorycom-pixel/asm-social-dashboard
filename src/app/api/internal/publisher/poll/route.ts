@@ -2,6 +2,7 @@ import { automationSwitches } from "@/lib/automation";
 import { db } from "@/lib/db";
 import { HttpError, safeRoute } from "@/lib/http";
 import { authorizeInternalRequest } from "@/lib/operations";
+import { assertSchedulerSuccess } from "@/lib/publisher-recovery";
 
 export async function POST(request: Request) {
   return safeRoute(async () => {
@@ -19,8 +20,11 @@ export async function POST(request: Request) {
     let published = 0, failed = 0;
     for (const item of due) {
       const res = await fetch(`${base}/api/internal/publisher/due`, { method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json" }, body: JSON.stringify({ Content_ID: item.contentId }) });
-      res.ok ? published++ : failed++;
+      if (res.ok) published++;
+      else failed++;
     }
-    return Response.json({ locked: false, due: due.length, published, failed });
+    const result = { locked: false, due: due.length, published, failed };
+    assertSchedulerSuccess(result);
+    return Response.json(result);
   });
 }

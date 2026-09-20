@@ -5,6 +5,7 @@ import { HttpError, readJson, safeRoute } from "@/lib/http";
 import { authorizeInternalRequest } from "@/lib/operations";
 import { MetaPublisherClient } from "@/lib/meta-publisher";
 import { recordPublishResult } from "@/lib/operations-db";
+import { assertApprovedAssetIdentity, preflightAssets } from "@/lib/publisher-recovery";
 
 const publishSchema = z.object({ Content_ID: z.string().trim().min(1).max(191) }).strict();
 
@@ -44,6 +45,9 @@ export async function POST(request: Request) {
     if (!plan || !plan.contentPost || !plan.approvalAttemptId) throw new HttpError(404, "Publishable content plan item not found");
     if (plan.contentPost.socialAccount.platform !== "instagram" || plan.contentPost.socialAccount.platformAccountId !== stagingAccountId) throw new HttpError(403, "Target is not the configured staging Instagram account");
     if (!plan.finalCaption || plan.assets.some((asset) => !asset.publicUrl) || !plan.assets.length) throw new HttpError(409, "Publishing requires a caption and public URLs for all final assets");
+    const publishAssets = plan.assets.map((asset) => ({ slideNumber: asset.slideNumber, publicUrl: asset.publicUrl!, mimeType: asset.mimeType, sha256: asset.sha256 }));
+    assertApprovedAssetIdentity(plan.approvedAssetSetHash, plan.contentId, plan.assetRevision, plan.approvedCandidate ?? "", publishAssets);
+    await preflightAssets(publishAssets);
 
     const publisher = new MetaPublisherClient();
     try {

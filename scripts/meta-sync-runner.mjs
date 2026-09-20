@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 
 const [mode] = process.argv.slice(2);
+const maxHistoryPages = Math.min(100, Math.max(1, Number.parseInt(process.env.META_HISTORY_MAX_PAGES || "10", 10) || 10));
 const paths = {
   import: "/api/internal/meta/import",
   "sync-due": "/api/internal/meta/sync-due",
+  history: `/api/internal/meta/history?maxPages=${maxHistoryPages}`,
 };
 
 if (!Object.hasOwn(paths, mode)) {
-  console.error("Usage: node scripts/meta-sync-runner.mjs <import|sync-due>");
+  console.error("Usage: node scripts/meta-sync-runner.mjs <import|sync-due|history>");
   process.exit(2);
 }
 

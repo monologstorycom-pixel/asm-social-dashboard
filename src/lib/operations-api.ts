@@ -1,4 +1,21 @@
 import { z } from "zod";
+import { HttpError } from "@/lib/http";
+
+export function assertStableAssetUrl(publicUrl: string, contentId: string, revision: number, candidate: string, slideNumber: number, env: Record<string, string | undefined> = process.env) {
+  const configured = env.ASSET_PUBLIC_BASE_URL;
+  if (!configured) throw new HttpError(500, "ASSET_PUBLIC_BASE_URL is required for permanent asset storage");
+  const base = new URL(configured);
+  if (base.protocol !== "https:") throw new HttpError(500, "ASSET_PUBLIC_BASE_URL must use HTTPS");
+  const asset = new URL(publicUrl);
+  if (asset.origin !== base.origin) throw new HttpError(400, "publicUrl must use the ASSET_PUBLIC_BASE_URL origin");
+  if (asset.username || asset.password || asset.search || asset.hash) throw new HttpError(400, "publicUrl must be a deterministic permanent asset URL");
+  const baseParts = base.pathname.split("/").filter(Boolean).map(decodeURIComponent);
+  const parts = asset.pathname.split("/").filter(Boolean).map(decodeURIComponent);
+  const expected = [...baseParts, contentId, String(revision), candidate];
+  if (parts.length !== expected.length + 1 || expected.some((part, index) => parts[index] !== part) || !new RegExp(`^${slideNumber}\\.[a-z0-9]+$`, "i").test(parts.at(-1) || "")) {
+    throw new HttpError(400, "publicUrl must use deterministic /Content_ID/revision/candidate/slide.ext storage path");
+  }
+}
 
 export const artifactSchema = z.object({
   socialAccountId: z.uuid(),
@@ -7,6 +24,8 @@ export const artifactSchema = z.object({
   qaStatus: z.enum(["passed", "failed"]),
   qaResult: z.string().trim().min(1).max(191),
   qaNotes: z.string().trim().max(10000).optional(),
+  revision: z.number().int().min(1),
+  candidate: z.string().trim().min(1).max(100),
   assets: z.array(z.object({
     slideNumber: z.number().int().min(1).max(100),
     localPath: z.string().trim().min(1).max(4096).optional(),

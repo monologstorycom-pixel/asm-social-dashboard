@@ -1,4 +1,4 @@
-import { artifactSchema } from "@/lib/operations-api";
+import { artifactSchema, assertStableAssetUrl } from "@/lib/operations-api";
 import { contentIdSchema, contentPlanJson } from "@/lib/content-plan-api";
 import { autoApproveAndSchedule } from "@/lib/automation";
 import { db } from "@/lib/db";
@@ -12,6 +12,7 @@ export async function POST(request: Request, context: Context) {
     authorizeInternalRequest(request);
     const contentId = contentIdSchema.parse((await context.params).contentId);
     const body = artifactSchema.parse(await readJson(request));
+    for (const asset of body.assets) if (asset.publicUrl) assertStableAssetUrl(asset.publicUrl, contentId, body.revision, body.candidate, asset.slideNumber);
     const item = await db.$transaction(async (tx) => {
       const plan = await tx.contentPlanItem.findUnique({ where: { contentId }, include: { assets: true, contentPost: true } });
       if (!plan) throw new HttpError(404, "Content plan item not found");
@@ -31,8 +32,8 @@ export async function POST(request: Request, context: Context) {
         } });
       for (const asset of body.assets) await tx.contentPlanAsset.upsert({
         where: { contentPlanId_slideNumber: { contentPlanId: plan.id, slideNumber: asset.slideNumber } },
-        create: { contentPlanId: plan.id, slideNumber: asset.slideNumber, localPath: asset.localPath, publicUrl: asset.publicUrl, sha256: asset.sha256, mimeType: asset.mimeType, assetRole: asset.role, isFinal: asset.final },
-        update: { localPath: asset.localPath, publicUrl: asset.publicUrl, sha256: asset.sha256, mimeType: asset.mimeType, assetRole: asset.role, isFinal: asset.final },
+        create: { contentPlanId: plan.id, slideNumber: asset.slideNumber, localPath: asset.localPath, publicUrl: asset.publicUrl, sha256: asset.sha256, mimeType: asset.mimeType, assetRole: asset.role, isFinal: asset.final, revision: body.revision, candidate: body.candidate },
+        update: { localPath: asset.localPath, publicUrl: asset.publicUrl, sha256: asset.sha256, mimeType: asset.mimeType, assetRole: asset.role, isFinal: asset.final, revision: body.revision, candidate: body.candidate },
       });
       const submittedSlides = body.assets.map(({ slideNumber }) => slideNumber);
       await tx.contentPlanAsset.deleteMany({ where: { contentPlanId: plan.id, slideNumber: { notIn: submittedSlides } } });
@@ -45,7 +46,7 @@ export async function POST(request: Request, context: Context) {
       const ready = body.qaStatus === "passed" && body.assets.every((asset) => asset.final);
       const updated = await tx.contentPlanItem.updateMany({
         where: { id: plan.id, status: plan.status, approvalVersion: plan.approvalVersion },
-        data: { contentPostId: post.id, finalCaption: body.caption, finalBrief: body.finalBrief, qaStatus: body.qaStatus, qaResult: body.qaResult, qaNotes: body.qaNotes, status: ready ? "ready_for_review" : "creating" },
+        data: { contentPostId: post.id, finalCaption: body.caption, finalBrief: body.finalBrief, qaStatus: body.qaStatus, qaResult: body.qaResult, qaNotes: body.qaNotes, status: ready ? "ready_for_review" : "creating", assetRevision: body.revision, approvedAssetSetHash: null, approvedCandidate: null, approvedAt: null, approvalCommand: null, approvalReference: null, approvalAttemptId: null, approvalStatus: "pending", publisherState: "idle", publisherError: null },
       });
       if (updated.count !== 1) throw new HttpError(409, "Content artifacts changed concurrently; retry with fresh data");
       return tx.contentPlanItem.findUniqueOrThrow({ where: { id: plan.id }, include: { assets: { orderBy: { slideNumber: "asc" } }, contentPost: true } });

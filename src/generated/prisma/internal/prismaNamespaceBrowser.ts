@@ -59,7 +59,9 @@ export const ModelName = {
   ContentExperiment: 'ContentExperiment',
   ExperimentPost: 'ExperimentPost',
   ContentPlanItem: 'ContentPlanItem',
-  ContentPlanAsset: 'ContentPlanAsset'
+  ContentPlanAsset: 'ContentPlanAsset',
+  MetaSyncCheckpoint: 'MetaSyncCheckpoint',
+  PublisherAudit: 'PublisherAudit'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -242,6 +244,11 @@ export const ContentPlanItemScalarFieldEnum = {
   scheduleSampleCount: 'scheduleSampleCount',
   publisherLeaseId: 'publisherLeaseId',
   publisherLeaseUntil: 'publisherLeaseUntil',
+  assetRevision: 'assetRevision',
+  approvedAssetSetHash: 'approvedAssetSetHash',
+  approvedCandidate: 'approvedCandidate',
+  publisherRetryKey: 'publisherRetryKey',
+  publisherRetryCount: 'publisherRetryCount',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -259,10 +266,43 @@ export const ContentPlanAssetScalarFieldEnum = {
   mimeType: 'mimeType',
   assetRole: 'assetRole',
   isFinal: 'isFinal',
+  revision: 'revision',
+  candidate: 'candidate',
   createdAt: 'createdAt'
 } as const
 
 export type ContentPlanAssetScalarFieldEnum = (typeof ContentPlanAssetScalarFieldEnum)[keyof typeof ContentPlanAssetScalarFieldEnum]
+
+
+export const MetaSyncCheckpointScalarFieldEnum = {
+  accountId: 'accountId',
+  cursor: 'cursor',
+  status: 'status',
+  processed: 'processed',
+  imported: 'imported',
+  skipped: 'skipped',
+  failed: 'failed',
+  unsupported: 'unsupported',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MetaSyncCheckpointScalarFieldEnum = (typeof MetaSyncCheckpointScalarFieldEnum)[keyof typeof MetaSyncCheckpointScalarFieldEnum]
+
+
+export const PublisherAuditScalarFieldEnum = {
+  id: 'id',
+  contentPlanId: 'contentPlanId',
+  action: 'action',
+  approvalAttemptId: 'approvalAttemptId',
+  assetRevision: 'assetRevision',
+  retryKey: 'retryKey',
+  details: 'details',
+  createdAt: 'createdAt'
+} as const
+
+export type PublisherAuditScalarFieldEnum = (typeof PublisherAuditScalarFieldEnum)[keyof typeof PublisherAuditScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -271,6 +311,14 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const NullsOrder = {
@@ -395,7 +443,10 @@ export const ContentPlanItemOrderByRelevanceFieldEnum = {
   scheduleReason: 'scheduleReason',
   scheduleDataMode: 'scheduleDataMode',
   scheduleConfidence: 'scheduleConfidence',
-  publisherLeaseId: 'publisherLeaseId'
+  publisherLeaseId: 'publisherLeaseId',
+  approvedAssetSetHash: 'approvedAssetSetHash',
+  approvedCandidate: 'approvedCandidate',
+  publisherRetryKey: 'publisherRetryKey'
 } as const
 
 export type ContentPlanItemOrderByRelevanceFieldEnum = (typeof ContentPlanItemOrderByRelevanceFieldEnum)[keyof typeof ContentPlanItemOrderByRelevanceFieldEnum]
@@ -408,8 +459,46 @@ export const ContentPlanAssetOrderByRelevanceFieldEnum = {
   publicUrl: 'publicUrl',
   sha256: 'sha256',
   mimeType: 'mimeType',
-  assetRole: 'assetRole'
+  assetRole: 'assetRole',
+  candidate: 'candidate'
 } as const
 
 export type ContentPlanAssetOrderByRelevanceFieldEnum = (typeof ContentPlanAssetOrderByRelevanceFieldEnum)[keyof typeof ContentPlanAssetOrderByRelevanceFieldEnum]
+
+
+export const MetaSyncCheckpointOrderByRelevanceFieldEnum = {
+  accountId: 'accountId',
+  cursor: 'cursor',
+  status: 'status'
+} as const
+
+export type MetaSyncCheckpointOrderByRelevanceFieldEnum = (typeof MetaSyncCheckpointOrderByRelevanceFieldEnum)[keyof typeof MetaSyncCheckpointOrderByRelevanceFieldEnum]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const PublisherAuditOrderByRelevanceFieldEnum = {
+  id: 'id',
+  contentPlanId: 'contentPlanId',
+  action: 'action',
+  approvalAttemptId: 'approvalAttemptId',
+  retryKey: 'retryKey'
+} as const
+
+export type PublisherAuditOrderByRelevanceFieldEnum = (typeof PublisherAuditOrderByRelevanceFieldEnum)[keyof typeof PublisherAuditOrderByRelevanceFieldEnum]
 

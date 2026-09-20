@@ -28,10 +28,12 @@ export type AggregateContentPlanAsset = {
 
 export type ContentPlanAssetAvgAggregateOutputType = {
   slideNumber: number | null
+  revision: number | null
 }
 
 export type ContentPlanAssetSumAggregateOutputType = {
   slideNumber: number | null
+  revision: number | null
 }
 
 export type ContentPlanAssetMinAggregateOutputType = {
@@ -44,6 +46,8 @@ export type ContentPlanAssetMinAggregateOutputType = {
   mimeType: string | null
   assetRole: string | null
   isFinal: boolean | null
+  revision: number | null
+  candidate: string | null
   createdAt: Date | null
 }
 
@@ -57,6 +61,8 @@ export type ContentPlanAssetMaxAggregateOutputType = {
   mimeType: string | null
   assetRole: string | null
   isFinal: boolean | null
+  revision: number | null
+  candidate: string | null
   createdAt: Date | null
 }
 
@@ -70,6 +76,8 @@ export type ContentPlanAssetCountAggregateOutputType = {
   mimeType: number
   assetRole: number
   isFinal: number
+  revision: number
+  candidate: number
   createdAt: number
   _all: number
 }
@@ -77,10 +85,12 @@ export type ContentPlanAssetCountAggregateOutputType = {
 
 export type ContentPlanAssetAvgAggregateInputType = {
   slideNumber?: true
+  revision?: true
 }
 
 export type ContentPlanAssetSumAggregateInputType = {
   slideNumber?: true
+  revision?: true
 }
 
 export type ContentPlanAssetMinAggregateInputType = {
@@ -93,6 +103,8 @@ export type ContentPlanAssetMinAggregateInputType = {
   mimeType?: true
   assetRole?: true
   isFinal?: true
+  revision?: true
+  candidate?: true
   createdAt?: true
 }
 
@@ -106,6 +118,8 @@ export type ContentPlanAssetMaxAggregateInputType = {
   mimeType?: true
   assetRole?: true
   isFinal?: true
+  revision?: true
+  candidate?: true
   createdAt?: true
 }
 
@@ -119,6 +133,8 @@ export type ContentPlanAssetCountAggregateInputType = {
   mimeType?: true
   assetRole?: true
   isFinal?: true
+  revision?: true
+  candidate?: true
   createdAt?: true
   _all?: true
 }
@@ -219,6 +235,8 @@ export type ContentPlanAssetGroupByOutputType = {
   mimeType: string
   assetRole: string
   isFinal: boolean
+  revision: number
+  candidate: string
   createdAt: Date
   _count: ContentPlanAssetCountAggregateOutputType | null
   _avg: ContentPlanAssetAvgAggregateOutputType | null
@@ -255,6 +273,8 @@ export type ContentPlanAssetWhereInput = {
   mimeType?: Prisma.StringFilter<"ContentPlanAsset"> | string
   assetRole?: Prisma.StringFilter<"ContentPlanAsset"> | string
   isFinal?: Prisma.BoolFilter<"ContentPlanAsset"> | boolean
+  revision?: Prisma.IntFilter<"ContentPlanAsset"> | number
+  candidate?: Prisma.StringFilter<"ContentPlanAsset"> | string
   createdAt?: Prisma.DateTimeFilter<"ContentPlanAsset"> | Date | string
   contentPlan?: Prisma.XOR<Prisma.ContentPlanItemScalarRelationFilter, Prisma.ContentPlanItemWhereInput>
 }
@@ -269,6 +289,8 @@ export type ContentPlanAssetOrderByWithRelationInput = {
   mimeType?: Prisma.SortOrder
   assetRole?: Prisma.SortOrder
   isFinal?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
+  candidate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   contentPlan?: Prisma.ContentPlanItemOrderByWithRelationInput
   _relevance?: Prisma.ContentPlanAssetOrderByRelevanceInput
@@ -288,6 +310,8 @@ export type ContentPlanAssetWhereUniqueInput = Prisma.AtLeast<{
   mimeType?: Prisma.StringFilter<"ContentPlanAsset"> | string
   assetRole?: Prisma.StringFilter<"ContentPlanAsset"> | string
   isFinal?: Prisma.BoolFilter<"ContentPlanAsset"> | boolean
+  revision?: Prisma.IntFilter<"ContentPlanAsset"> | number
+  candidate?: Prisma.StringFilter<"ContentPlanAsset"> | string
   createdAt?: Prisma.DateTimeFilter<"ContentPlanAsset"> | Date | string
   contentPlan?: Prisma.XOR<Prisma.ContentPlanItemScalarRelationFilter, Prisma.ContentPlanItemWhereInput>
 }, "id" | "contentPlanId_slideNumber">
@@ -302,6 +326,8 @@ export type ContentPlanAssetOrderByWithAggregationInput = {
   mimeType?: Prisma.SortOrder
   assetRole?: Prisma.SortOrder
   isFinal?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
+  candidate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ContentPlanAssetCountOrderByAggregateInput
   _avg?: Prisma.ContentPlanAssetAvgOrderByAggregateInput
@@ -323,6 +349,8 @@ export type ContentPlanAssetScalarWhereWithAggregatesInput = {
   mimeType?: Prisma.StringWithAggregatesFilter<"ContentPlanAsset"> | string
   assetRole?: Prisma.StringWithAggregatesFilter<"ContentPlanAsset"> | string
   isFinal?: Prisma.BoolWithAggregatesFilter<"ContentPlanAsset"> | boolean
+  revision?: Prisma.IntWithAggregatesFilter<"ContentPlanAsset"> | number
+  candidate?: Prisma.StringWithAggregatesFilter<"ContentPlanAsset"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ContentPlanAsset"> | Date | string
 }
 
@@ -335,6 +363,8 @@ export type ContentPlanAssetCreateInput = {
   mimeType: string
   assetRole: string
   isFinal?: boolean
+  revision?: number
+  candidate?: string
   createdAt?: Date | string
   contentPlan: Prisma.ContentPlanItemCreateNestedOneWithoutAssetsInput
 }
@@ -349,6 +379,8 @@ export type ContentPlanAssetUncheckedCreateInput = {
   mimeType: string
   assetRole: string
   isFinal?: boolean
+  revision?: number
+  candidate?: string
   createdAt?: Date | string
 }
 
@@ -361,6 +393,8 @@ export type ContentPlanAssetUpdateInput = {
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   assetRole?: Prisma.StringFieldUpdateOperationsInput | string
   isFinal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  candidate?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contentPlan?: Prisma.ContentPlanItemUpdateOneRequiredWithoutAssetsNestedInput
 }
@@ -375,6 +409,8 @@ export type ContentPlanAssetUncheckedUpdateInput = {
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   assetRole?: Prisma.StringFieldUpdateOperationsInput | string
   isFinal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  candidate?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -388,6 +424,8 @@ export type ContentPlanAssetCreateManyInput = {
   mimeType: string
   assetRole: string
   isFinal?: boolean
+  revision?: number
+  candidate?: string
   createdAt?: Date | string
 }
 
@@ -400,6 +438,8 @@ export type ContentPlanAssetUpdateManyMutationInput = {
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   assetRole?: Prisma.StringFieldUpdateOperationsInput | string
   isFinal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  candidate?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -413,6 +453,8 @@ export type ContentPlanAssetUncheckedUpdateManyInput = {
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   assetRole?: Prisma.StringFieldUpdateOperationsInput | string
   isFinal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  candidate?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -447,11 +489,14 @@ export type ContentPlanAssetCountOrderByAggregateInput = {
   mimeType?: Prisma.SortOrder
   assetRole?: Prisma.SortOrder
   isFinal?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
+  candidate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type ContentPlanAssetAvgOrderByAggregateInput = {
   slideNumber?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
 }
 
 export type ContentPlanAssetMaxOrderByAggregateInput = {
@@ -464,6 +509,8 @@ export type ContentPlanAssetMaxOrderByAggregateInput = {
   mimeType?: Prisma.SortOrder
   assetRole?: Prisma.SortOrder
   isFinal?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
+  candidate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -477,11 +524,14 @@ export type ContentPlanAssetMinOrderByAggregateInput = {
   mimeType?: Prisma.SortOrder
   assetRole?: Prisma.SortOrder
   isFinal?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
+  candidate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
 export type ContentPlanAssetSumOrderByAggregateInput = {
   slideNumber?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
 }
 
 export type ContentPlanAssetCreateNestedManyWithoutContentPlanInput = {
@@ -535,6 +585,8 @@ export type ContentPlanAssetCreateWithoutContentPlanInput = {
   mimeType: string
   assetRole: string
   isFinal?: boolean
+  revision?: number
+  candidate?: string
   createdAt?: Date | string
 }
 
@@ -547,6 +599,8 @@ export type ContentPlanAssetUncheckedCreateWithoutContentPlanInput = {
   mimeType: string
   assetRole: string
   isFinal?: boolean
+  revision?: number
+  candidate?: string
   createdAt?: Date | string
 }
 
@@ -589,6 +643,8 @@ export type ContentPlanAssetScalarWhereInput = {
   mimeType?: Prisma.StringFilter<"ContentPlanAsset"> | string
   assetRole?: Prisma.StringFilter<"ContentPlanAsset"> | string
   isFinal?: Prisma.BoolFilter<"ContentPlanAsset"> | boolean
+  revision?: Prisma.IntFilter<"ContentPlanAsset"> | number
+  candidate?: Prisma.StringFilter<"ContentPlanAsset"> | string
   createdAt?: Prisma.DateTimeFilter<"ContentPlanAsset"> | Date | string
 }
 
@@ -601,6 +657,8 @@ export type ContentPlanAssetCreateManyContentPlanInput = {
   mimeType: string
   assetRole: string
   isFinal?: boolean
+  revision?: number
+  candidate?: string
   createdAt?: Date | string
 }
 
@@ -613,6 +671,8 @@ export type ContentPlanAssetUpdateWithoutContentPlanInput = {
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   assetRole?: Prisma.StringFieldUpdateOperationsInput | string
   isFinal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  candidate?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -625,6 +685,8 @@ export type ContentPlanAssetUncheckedUpdateWithoutContentPlanInput = {
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   assetRole?: Prisma.StringFieldUpdateOperationsInput | string
   isFinal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  candidate?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -637,6 +699,8 @@ export type ContentPlanAssetUncheckedUpdateManyWithoutContentPlanInput = {
   mimeType?: Prisma.StringFieldUpdateOperationsInput | string
   assetRole?: Prisma.StringFieldUpdateOperationsInput | string
   isFinal?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  candidate?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -652,6 +716,8 @@ export type ContentPlanAssetSelect<ExtArgs extends runtime.Types.Extensions.Inte
   mimeType?: boolean
   assetRole?: boolean
   isFinal?: boolean
+  revision?: boolean
+  candidate?: boolean
   createdAt?: boolean
   contentPlan?: boolean | Prisma.ContentPlanItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["contentPlanAsset"]>
@@ -668,10 +734,12 @@ export type ContentPlanAssetSelectScalar = {
   mimeType?: boolean
   assetRole?: boolean
   isFinal?: boolean
+  revision?: boolean
+  candidate?: boolean
   createdAt?: boolean
 }
 
-export type ContentPlanAssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contentPlanId" | "slideNumber" | "localPath" | "publicUrl" | "sha256" | "mimeType" | "assetRole" | "isFinal" | "createdAt", ExtArgs["result"]["contentPlanAsset"]>
+export type ContentPlanAssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "contentPlanId" | "slideNumber" | "localPath" | "publicUrl" | "sha256" | "mimeType" | "assetRole" | "isFinal" | "revision" | "candidate" | "createdAt", ExtArgs["result"]["contentPlanAsset"]>
 export type ContentPlanAssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   contentPlan?: boolean | Prisma.ContentPlanItemDefaultArgs<ExtArgs>
 }
@@ -691,6 +759,8 @@ export type $ContentPlanAssetPayload<ExtArgs extends runtime.Types.Extensions.In
     mimeType: string
     assetRole: string
     isFinal: boolean
+    revision: number
+    candidate: string
     createdAt: Date
   }, ExtArgs["result"]["contentPlanAsset"]>
   composites: {}
@@ -1071,6 +1141,8 @@ export interface ContentPlanAssetFieldRefs {
   readonly mimeType: Prisma.FieldRef<"ContentPlanAsset", 'String'>
   readonly assetRole: Prisma.FieldRef<"ContentPlanAsset", 'String'>
   readonly isFinal: Prisma.FieldRef<"ContentPlanAsset", 'Boolean'>
+  readonly revision: Prisma.FieldRef<"ContentPlanAsset", 'Int'>
+  readonly candidate: Prisma.FieldRef<"ContentPlanAsset", 'String'>
   readonly createdAt: Prisma.FieldRef<"ContentPlanAsset", 'DateTime'>
 }
     

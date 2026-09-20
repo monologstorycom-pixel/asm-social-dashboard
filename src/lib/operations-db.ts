@@ -17,7 +17,7 @@ import {
   type DataMode,
 } from "./operations";
 
-export type OperationsDb = Pick<PrismaClient, "socialAccount" | "contentPost" | "postMetric" | "contentPlanItem" | "contentPlanAsset" | "$transaction">;
+export type OperationsDb = Pick<PrismaClient, "socialAccount" | "contentPost" | "postMetric" | "contentPlanItem" | "contentPlanAsset" | "metaSyncCheckpoint" | "$transaction">;
 
 const META_READ_CONCURRENCY = 5;
 
@@ -222,6 +222,44 @@ export async function importLiveMetaMedia(
     });
   }
   return { media: media.length, imported, snapshots, existingSnapshots, assets, capturedAt: capturedAt.toISOString() };
+}
+
+export async function importHistoricalMetaMedia(
+  accountId = process.env.META_IG_USER_ID,
+  client: OperationsDb = db,
+  meta = new MetaInsightsClient(),
+  options: { maxPages?: number; restart?: boolean } = {},
+) {
+  if (!accountId) throw new HttpError(503, "META_IG_USER_ID is not configured");
+  const startedAt = new Date();
+  const checkpoint = await client.metaSyncCheckpoint.findUnique({ where: { accountId } });
+  if (checkpoint?.status === "complete" && !options.restart) return { noOp: true, checkpoint: null, cumulative: { processed: checkpoint.processed, imported: checkpoint.imported, skipped: checkpoint.skipped, failed: checkpoint.failed, unsupported: checkpoint.unsupported } };
+  if (options.restart && checkpoint) await client.metaSyncCheckpoint.update({ where: { accountId }, data: { cursor: null, status: "pending", processed: 0, imported: 0, skipped: 0, failed: 0, unsupported: 0, completedAt: null } });
+  let cursor = checkpoint?.cursor ?? undefined;
+  let api = 0, imported = 0, skipped = 0, failed = 0, snapshots = 0, assets = 0;
+  const unsupported = 0;
+  let pages = 0;
+  const seen = new Set<string>();
+  const profile = await meta.getAccountProfile(accountId);
+  await client.metaSyncCheckpoint.upsert({ where: { accountId }, create: { accountId, cursor, status: "running", startedAt }, update: { status: "running", startedAt, completedAt: null } });
+  while (pages < (options.maxPages ?? 5)) {
+    if (cursor && seen.has(cursor)) throw new HttpError(502, "Meta pagination cursor repeated");
+    if (cursor) seen.add(cursor);
+    try {
+      const page = await importLiveMetaMediaPage(accountId, new Date(), client, meta, cursor, 100);
+      pages += 1;
+      api += page.media; imported += page.imported; skipped += page.media - page.imported; snapshots += page.snapshots + page.existingSnapshots; assets += page.assets;
+      cursor = page.after ?? undefined;
+      await client.metaSyncCheckpoint.update({ where: { accountId }, data: { cursor: cursor ?? null, processed: { increment: page.media }, imported: { increment: page.imported }, skipped: { increment: page.media - page.imported }, status: cursor ? "running" : "complete", completedAt: cursor ? null : new Date() } });
+      if (!cursor || !page.media) break;
+    } catch (error) {
+      failed += 1;
+      await client.metaSyncCheckpoint.update({ where: { accountId }, data: { status: "failed", failed: { increment: 1 } } });
+      throw error;
+    }
+  }
+  const expected = profile.media_count ?? null;
+  return { profile: { id: profile.id, username: profile.username, mediaCount: expected }, api, imported, skipped, failed, unsupported, snapshots, assets, checkpoint: cursor ?? null, coverage: { processed: api, expected, complete: !cursor && failed === 0 && (expected === null || api >= expected) }, syncTime: { startedAt: startedAt.toISOString(), finishedAt: new Date().toISOString() } };
 }
 
 export async function syncPublishedPlan(contentId: string, now = new Date(), client: OperationsDb = db, meta = new MetaInsightsClient()) {

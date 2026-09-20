@@ -405,7 +405,9 @@ export const ModelName = {
   ContentExperiment: 'ContentExperiment',
   ExperimentPost: 'ExperimentPost',
   ContentPlanItem: 'ContentPlanItem',
-  ContentPlanAsset: 'ContentPlanAsset'
+  ContentPlanAsset: 'ContentPlanAsset',
+  MetaSyncCheckpoint: 'MetaSyncCheckpoint',
+  PublisherAudit: 'PublisherAudit'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -421,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "socialAccount" | "contentPost" | "postAsset" | "postMetric" | "contentCalendar" | "contentExperiment" | "experimentPost" | "contentPlanItem" | "contentPlanAsset"
+    modelProps: "socialAccount" | "contentPost" | "postAsset" | "postMetric" | "contentCalendar" | "contentExperiment" | "experimentPost" | "contentPlanItem" | "contentPlanAsset" | "metaSyncCheckpoint" | "publisherAudit"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1019,6 +1021,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MetaSyncCheckpoint: {
+      payload: Prisma.$MetaSyncCheckpointPayload<ExtArgs>
+      fields: Prisma.MetaSyncCheckpointFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MetaSyncCheckpointFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MetaSyncCheckpointPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MetaSyncCheckpointFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MetaSyncCheckpointPayload>
+        }
+        findFirst: {
+          args: Prisma.MetaSyncCheckpointFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MetaSyncCheckpointPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MetaSyncCheckpointFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MetaSyncCheckpointPayload>
+        }
+        findMany: {
+          args: Prisma.MetaSyncCheckpointFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MetaSyncCheckpointPayload>[]
+        }
+        create: {
+          args: Prisma.MetaSyncCheckpointCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MetaSyncCheckpointPayload>
+        }
+        createMany: {
+          args: Prisma.MetaSyncCheckpointCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.MetaSyncCheckpointDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MetaSyncCheckpointPayload>
+        }
+        update: {
+          args: Prisma.MetaSyncCheckpointUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MetaSyncCheckpointPayload>
+        }
+        deleteMany: {
+          args: Prisma.MetaSyncCheckpointDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MetaSyncCheckpointUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.MetaSyncCheckpointUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MetaSyncCheckpointPayload>
+        }
+        aggregate: {
+          args: Prisma.MetaSyncCheckpointAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMetaSyncCheckpoint>
+        }
+        groupBy: {
+          args: Prisma.MetaSyncCheckpointGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MetaSyncCheckpointGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MetaSyncCheckpointCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MetaSyncCheckpointCountAggregateOutputType> | number
+        }
+      }
+    }
+    PublisherAudit: {
+      payload: Prisma.$PublisherAuditPayload<ExtArgs>
+      fields: Prisma.PublisherAuditFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PublisherAuditFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublisherAuditPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PublisherAuditFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublisherAuditPayload>
+        }
+        findFirst: {
+          args: Prisma.PublisherAuditFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublisherAuditPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PublisherAuditFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublisherAuditPayload>
+        }
+        findMany: {
+          args: Prisma.PublisherAuditFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublisherAuditPayload>[]
+        }
+        create: {
+          args: Prisma.PublisherAuditCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublisherAuditPayload>
+        }
+        createMany: {
+          args: Prisma.PublisherAuditCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PublisherAuditDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublisherAuditPayload>
+        }
+        update: {
+          args: Prisma.PublisherAuditUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublisherAuditPayload>
+        }
+        deleteMany: {
+          args: Prisma.PublisherAuditDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PublisherAuditUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PublisherAuditUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublisherAuditPayload>
+        }
+        aggregate: {
+          args: Prisma.PublisherAuditAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePublisherAudit>
+        }
+        groupBy: {
+          args: Prisma.PublisherAuditGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PublisherAuditGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PublisherAuditCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PublisherAuditCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1222,6 +1356,11 @@ export const ContentPlanItemScalarFieldEnum = {
   scheduleSampleCount: 'scheduleSampleCount',
   publisherLeaseId: 'publisherLeaseId',
   publisherLeaseUntil: 'publisherLeaseUntil',
+  assetRevision: 'assetRevision',
+  approvedAssetSetHash: 'approvedAssetSetHash',
+  approvedCandidate: 'approvedCandidate',
+  publisherRetryKey: 'publisherRetryKey',
+  publisherRetryCount: 'publisherRetryCount',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1239,10 +1378,43 @@ export const ContentPlanAssetScalarFieldEnum = {
   mimeType: 'mimeType',
   assetRole: 'assetRole',
   isFinal: 'isFinal',
+  revision: 'revision',
+  candidate: 'candidate',
   createdAt: 'createdAt'
 } as const
 
 export type ContentPlanAssetScalarFieldEnum = (typeof ContentPlanAssetScalarFieldEnum)[keyof typeof ContentPlanAssetScalarFieldEnum]
+
+
+export const MetaSyncCheckpointScalarFieldEnum = {
+  accountId: 'accountId',
+  cursor: 'cursor',
+  status: 'status',
+  processed: 'processed',
+  imported: 'imported',
+  skipped: 'skipped',
+  failed: 'failed',
+  unsupported: 'unsupported',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MetaSyncCheckpointScalarFieldEnum = (typeof MetaSyncCheckpointScalarFieldEnum)[keyof typeof MetaSyncCheckpointScalarFieldEnum]
+
+
+export const PublisherAuditScalarFieldEnum = {
+  id: 'id',
+  contentPlanId: 'contentPlanId',
+  action: 'action',
+  approvalAttemptId: 'approvalAttemptId',
+  assetRevision: 'assetRevision',
+  retryKey: 'retryKey',
+  details: 'details',
+  createdAt: 'createdAt'
+} as const
+
+export type PublisherAuditScalarFieldEnum = (typeof PublisherAuditScalarFieldEnum)[keyof typeof PublisherAuditScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1251,6 +1423,14 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const NullsOrder = {
@@ -1375,7 +1555,10 @@ export const ContentPlanItemOrderByRelevanceFieldEnum = {
   scheduleReason: 'scheduleReason',
   scheduleDataMode: 'scheduleDataMode',
   scheduleConfidence: 'scheduleConfidence',
-  publisherLeaseId: 'publisherLeaseId'
+  publisherLeaseId: 'publisherLeaseId',
+  approvedAssetSetHash: 'approvedAssetSetHash',
+  approvedCandidate: 'approvedCandidate',
+  publisherRetryKey: 'publisherRetryKey'
 } as const
 
 export type ContentPlanItemOrderByRelevanceFieldEnum = (typeof ContentPlanItemOrderByRelevanceFieldEnum)[keyof typeof ContentPlanItemOrderByRelevanceFieldEnum]
@@ -1388,10 +1571,48 @@ export const ContentPlanAssetOrderByRelevanceFieldEnum = {
   publicUrl: 'publicUrl',
   sha256: 'sha256',
   mimeType: 'mimeType',
-  assetRole: 'assetRole'
+  assetRole: 'assetRole',
+  candidate: 'candidate'
 } as const
 
 export type ContentPlanAssetOrderByRelevanceFieldEnum = (typeof ContentPlanAssetOrderByRelevanceFieldEnum)[keyof typeof ContentPlanAssetOrderByRelevanceFieldEnum]
+
+
+export const MetaSyncCheckpointOrderByRelevanceFieldEnum = {
+  accountId: 'accountId',
+  cursor: 'cursor',
+  status: 'status'
+} as const
+
+export type MetaSyncCheckpointOrderByRelevanceFieldEnum = (typeof MetaSyncCheckpointOrderByRelevanceFieldEnum)[keyof typeof MetaSyncCheckpointOrderByRelevanceFieldEnum]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const PublisherAuditOrderByRelevanceFieldEnum = {
+  id: 'id',
+  contentPlanId: 'contentPlanId',
+  action: 'action',
+  approvalAttemptId: 'approvalAttemptId',
+  retryKey: 'retryKey'
+} as const
+
+export type PublisherAuditOrderByRelevanceFieldEnum = (typeof PublisherAuditOrderByRelevanceFieldEnum)[keyof typeof PublisherAuditOrderByRelevanceFieldEnum]
 
 
 
@@ -1523,7 +1744,18 @@ export type EnumQaStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
  * Reference to a field of type 'PublisherState'
  */
 export type EnumPublisherStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PublisherState'>
-    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
 
 
 /**
@@ -1692,6 +1924,8 @@ export type GlobalOmitConfig = {
   experimentPost?: Prisma.ExperimentPostOmit
   contentPlanItem?: Prisma.ContentPlanItemOmit
   contentPlanAsset?: Prisma.ContentPlanAssetOmit
+  metaSyncCheckpoint?: Prisma.MetaSyncCheckpointOmit
+  publisherAudit?: Prisma.PublisherAuditOmit
 }
 
 /* Types for Logging */

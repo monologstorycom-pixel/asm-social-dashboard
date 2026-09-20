@@ -20,8 +20,16 @@ Do not commit those values. Supply them through the scheduler's secret/environme
 Manual invocation:
 
 ```sh
-node scripts/meta-sync-runner.mjs import
+node scripts/meta-sync-runner.mjs import       # incremental: one recent page only
 node scripts/meta-sync-runner.mjs sync-due
+META_HISTORY_MAX_PAGES=10 node scripts/meta-sync-runner.mjs history
+
+# Historical backfill is a separate authenticated, bounded operation. Each run
+# processes 1-100 pages (default 10), commits in safe page transactions, and
+# persists its cursor after each successful page. Run it in non-production
+# first; reruns resume from meta_sync_checkpoints. A null checkpoint plus
+# coverage.complete=true means exhausted. "Near real time" means the hourly
+# incremental import schedule below; it is not webhook/instant delivery.
 ```
 
 Recommended external schedules (WIB):
@@ -47,3 +55,14 @@ ASM_SOCIAL_BASE_URL=http://example.com INTERNAL_API_TOKEN=fake \
 ```
 
 For end-to-end runner verification, target a local mock server with a fake token. Do not run either command against production during validation. Before enabling a real schedule, verify one non-production invocation returns HTTP 2xx, then verify scheduler logs and database snapshots without exposing tokens.
+
+## Permanent asset storage contract
+
+Artifact binaries stay outside the database. Staff must upload them to the
+persistent volume/object store served at `ASSET_PUBLIC_BASE_URL` before artifact
+submission. Configure an HTTPS base such as `https://dashboard.example.invalid/media`
+and mount the backing directory as a persistent runtime volume; container-local
+ephemeral storage is not supported. URLs must use the exact configured origin and
+path `/media/<Content_ID>/<revision>/<candidate>/<slide>.<ext>`. Query strings,
+fragments, alternate hosts, and extra path segments are rejected. The public
+server/proxy must serve those files without authentication so Meta can fetch them.
