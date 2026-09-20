@@ -96,14 +96,14 @@ export async function importLiveMetaMediaPage(
   const media = page.data;
   if (!media.length) return { media: 0, imported: 0, snapshots: 0, existingSnapshots: 0, assets: 0, capturedAt: capturedAt.toISOString(), after: page.after ?? null, hasMore: false };
   const details = await Promise.all(media.map((item) => meta.getMediaDetail(item.id)));
+  const samples: Array<{ item: MetaMedia; post: ReturnType<typeof mapMetaMediaToPost>; metrics: Awaited<ReturnType<MetaInsightsClient["getMediaMetrics"]>>; assets: ReturnType<typeof mapMediaToAssets> }> = [];
+  for (const item of details) samples.push({ item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id), assets: mapMediaToAssets("placeholder", item) });
   let imported = 0;
   let snapshots = 0;
   let existingSnapshots = 0;
   let assets = 0;
   await client.$transaction(async (tx) => {
-    for (const [index, item] of details.entries()) {
-      const assetsMapped = mapMediaToAssets("placeholder", item);
-      const sample = { item, post: mapMetaMediaToPost(item), metrics: await meta.getMediaMetrics(item.id), assets: assetsMapped };
+    for (const [index, sample] of samples.entries()) {
       const existing = await tx.contentPost.findUnique({ where: { instagramMediaId: sample.item.id }, select: { id: true, source: true } });
       if (existing?.source === "demo") throw new HttpError(409, "A demo post already uses a real Meta media ID; import stopped without overwriting demo");
       const post = await tx.contentPost.upsert({

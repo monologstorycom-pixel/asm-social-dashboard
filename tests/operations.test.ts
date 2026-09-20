@@ -28,7 +28,7 @@ import {
   validateScheduledAt,
 } from "../src/lib/operations";
 import { MetaInsightsClient } from "../src/lib/meta";
-import { importLiveMetaMedia, recordPublishResult, resolveAnalyticsMode, type OperationsDb } from "../src/lib/operations-db";
+import { importLiveMetaMedia, importLiveMetaMediaPage, recordPublishResult, resolveAnalyticsMode, type OperationsDb } from "../src/lib/operations-db";
 
 test("general lifecycle updates cannot bypass exact approval or operational invariants", () => {
   assert.doesNotThrow(() => assertGeneralTransition("approved_for_creation", "creating", {}));
@@ -577,6 +577,35 @@ test("importLiveMetaMedia skips demo posts and is idempotent for live re-import"
 
   await assert.rejects(() => importLiveMetaMedia("12345", new Date(), client, meta), /demo post/);
   assert.equal(postCount, 0, "must not upsert demo posts");
+});
+
+test("importLiveMetaMediaPage fetches metrics before opening the database transaction", async () => {
+  const media = [{ id: "m1", media_type: "IMAGE", permalink: "https://www.instagram.com/p/1/", timestamp: "2026-08-25T12:00:00+0000" }];
+  let transactionStarted = false;
+  const metricWrites: string[] = [];
+  const meta = {
+    getAccountProfile: async () => ({ id: "12345", name: "ASM Profile", username: "asm.profile" }),
+    listAccountMediaPage: async () => ({ data: media }),
+    getMediaDetail: async () => media[0],
+    getMediaMetrics: async () => {
+      assert.equal(transactionStarted, false, "Meta network reads must not hold a DB transaction open");
+      return { reach: 2, impressions: 3, views: 4, likes: 1, comments: 0, saves: 0, shares: 0, engagementTotal: 1, engagementRate: 50 };
+    },
+  } as unknown as InstanceType<typeof MetaInsightsClient>;
+  const client = {
+    socialAccount: { upsert: async () => ({ id: "acct" }) },
+    contentPost: { findUnique: async () => null, upsert: async () => ({ id: "post-1" }) },
+    postMetric: {
+      findUnique: async () => ({ id: "metric-1" }),
+      deleteMany: async () => { metricWrites.push("deleteMany"); return { count: 1 }; },
+      create: async () => { metricWrites.push("create"); return {}; },
+    },
+    postAsset: { findUnique: async () => null, create: async () => ({}) },
+    $transaction: async (fn: (tx: unknown) => Promise<unknown>) => { transactionStarted = true; return fn(client); },
+  } as unknown as OperationsDb;
+
+  await importLiveMetaMediaPage("12345", new Date("2026-09-05T00:00:00.000Z"), client, meta);
+  assert.deepEqual(metricWrites, ["deleteMany", "create"], "immutable snapshot refresh must not use UPDATE");
 });
 
 test("importLiveMetaMedia refreshes an existing ad_hoc insight snapshot", async () => {

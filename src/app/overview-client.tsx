@@ -21,6 +21,7 @@ type Overview = {
 };
 const metrics: MetricName[] = ["reach", "engagement", "saves", "shares"];
 const emptyFilters = { account: "", dateFrom: "", dateTo: "", topic: "", pillar: "", style: "", type: "", status: "" };
+const METRIC_REFRESH_MS = 60_000;
 
 type Filters = typeof emptyFilters;
 
@@ -31,17 +32,19 @@ export default function OverviewClient() {
   const [options, setOptions] = useState<FilterOptions>({ accounts: [], topics: [], pillars: [], styles: [], types: [], statuses: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refresh, setRefresh] = useState(0);
 
+  useEffect(() => { const timer = setInterval(() => setRefresh((value) => value + 1), METRIC_REFRESH_MS); return () => clearInterval(timer); }, []);
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true); setError("");
-    fetch(`/api/dashboard/overview?${buildApiQuery({ ...filters, metric })}`, { signal: controller.signal })
+    fetch(`/api/dashboard/overview?${buildApiQuery({ ...filters, metric })}`, { signal: controller.signal, cache: "no-store" })
       .then(async (response) => { if (!response.ok) throw new Error(); return response.json() as Promise<Overview>; })
       .then((payload) => { setData(payload); setOptions((current) => current.accounts.length ? current : payload.filterOptions); })
       .catch((reason: unknown) => { if (!(reason instanceof DOMException && reason.name === "AbortError")) setError("Analitik sedang tidak tersedia. Silakan coba lagi."); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [filters, metric]);
+  }, [filters, metric, refresh]);
 
   const update = (key: keyof Filters, value: string) => setFilters((current) => ({ ...current, [key]: value }));
   const totals = data?.totals;

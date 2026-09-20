@@ -134,3 +134,14 @@ test("Posts media opens detail and original link uses Meta permalink", () => {
   assert.match(source, /post\.permalink/);
   assert.match(source, />Buka post asli<\/a>/);
 });
+
+test("live dashboard revalidates uncached metrics and renders likes plus engagement per post", () => {
+  const posts = readFileSync(new URL("../src/app/posts/posts-client.tsx", import.meta.url), "utf8");
+  const overview = readFileSync(new URL("../src/app/overview-client.tsx", import.meta.url), "utf8");
+  for (const source of [posts, overview]) {
+    assert.match(source, /cache: "no-store"/);
+    assert.match(source, /setInterval\([^,]+, METRIC_REFRESH_MS\)/);
+  }
+  assert.match(posts, /<dt>Suka<\/dt><dd>\{compactNumber\.format\(metric\?\.likes \?\? 0\)\}<\/dd>/);
+  assert.match(posts, /<dt>Interaksi<\/dt><dd>\{compactNumber\.format\(metric\?\.engagementTotal \?\? 0\)\}<\/dd>/);
+});
