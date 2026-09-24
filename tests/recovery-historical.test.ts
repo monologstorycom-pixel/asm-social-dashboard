@@ -90,6 +90,8 @@ test("route contracts expose bounded history and recovery kill switch", () => {
   assert.match(recovery, /RECOVERY_ENABLED/);
   assert.doesNotMatch(recovery, /must be staging/);
   assert.match(recovery, /replacements/);
+  assert.match(recovery, /OR:\s*\[\s*\{ publisherRetryKey: null \},\s*\{ publisherRetryKey: \{ not: retryKey \} \}\s*\]/);
+  assert.doesNotMatch(recovery, /publisherRetryKey: \{ not: retryKey \}, publisherRetryCount/);
 });
 
 test("historical sync exhausts pagination, checkpoints every page, resumes, stays idempotent, and bounds concurrency", async () => {
