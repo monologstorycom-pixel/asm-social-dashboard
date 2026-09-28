@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
@@ -15,9 +16,16 @@ import {
   type RecoveryStore,
 } from "../src/lib/publisher-recovery";
 
-const payload = new Uint8Array(1024 * 1024).fill(97);
-const sha = "9bc1b2a288b26af7257a36277ae3816a7d4f16e89c1e7e77d0a5c48bad62b360";
-const asset = (overrides: Record<string, unknown> = {}) => ({ slideNumber: 1, publicUrl: "https://cdn.example/content/C-1/r1/1.png", mimeType: "image/png", sha256: sha, ...overrides });
+const jpeg = (width = 1080, height = 1080, bodySize = 1024 * 1024) => {
+  const bytes = new Uint8Array(bodySize).fill(97);
+  bytes.set([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x04, 0x00, 0x00, 0xff, 0xc0, 0x00, 0x11, 0x08, height >> 8, height & 0xff, width >> 8, width & 0xff, 0x03, 0x01, 0x11, 0x00, 0x02, 0x11, 0x00, 0x03, 0x11, 0x00], 0);
+  bytes.set([0xff, 0xd9], bytes.length - 2);
+  return bytes;
+};
+const payload = jpeg();
+const sha = createHash("sha256").update(payload).digest("hex");
+const asset = (overrides: Record<string, unknown> = {}) => ({ slideNumber: 1, publicUrl: "https://cdn.example/content/C-1/r1/1.jpg", mimeType: "image/jpeg", sha256: sha, ...overrides });
+const jpegResponse = (bytes = payload, headers: Record<string, string> = {}) => new Response(bytes, { headers: { "content-type": "image/jpeg", ...headers } });
 
 test("artifact contract requires explicit revision and candidate", () => {
   const body = { socialAccountId: "bd5d0e4d-654b-48b1-a6b0-735ca6010ff0", caption: "x", finalBrief: "x", qaStatus: "passed", qaResult: "ok", revision: 2, candidate: "A", assets: [{ ...asset(), role: "final", final: true }] };
@@ -146,7 +154,7 @@ test("asset preflight rejects 404, MIME mismatch, hash mismatch, expired tempora
     const url = String(input);
     if (url.includes("404")) return new Response("", { status: 404 });
     if (url.includes("wrong-mime")) return new Response("abc", { headers: { "content-type": "text/html", "content-length": "3" } });
-    return new Response(payload, { headers: { "content-type": "image/png", "content-length": String(payload.length) } });
+    return new Response(payload, { headers: { "content-type": "image/jpeg", "content-length": String(payload.length) } });
   };
   await assert.rejects(() => preflightAssets([asset({ publicUrl: "https://cdn.example/404.png" })], fetcher as typeof fetch), /HTTP 200/);
   await assert.rejects(() => preflightAssets([asset({ publicUrl: "https://cdn.example/wrong-mime.png" })], fetcher as typeof fetch), /MIME/);
@@ -178,8 +186,8 @@ test("failed recovery repairs target, retries exactly once, is idempotent, and s
   };
   const publish = async () => { publishCalls++; return { mediaId: "m1", permalink: "https://instagram.test/p/m1" }; };
   const replacements = [{ slideNumber: 1, publicUrl: "https://cdn.example/content/C-1/r2/1.png", expectedSha256: sha, revision: 2, candidate: "A" }];
-  const first = await recoverFailedPublication({ contentId: "C-1", retryKey: "r1", replacements, store, fetcher: (async () => new Response(payload, { headers: { "content-type": "image/png" } })) as typeof fetch, publish });
-  const replay = await recoverFailedPublication({ contentId: "C-1", retryKey: "r1", replacements, store, fetcher: (async () => new Response(payload, { headers: { "content-type": "image/png" } })) as typeof fetch, publish });
+  const first = await recoverFailedPublication({ contentId: "C-1", retryKey: "r1", replacements, store, fetcher: (async () => new Response(payload, { headers: { "content-type": "image/jpeg" } })) as typeof fetch, publish });
+  const replay = await recoverFailedPublication({ contentId: "C-1", retryKey: "r1", replacements, store, fetcher: (async () => new Response(payload, { headers: { "content-type": "image/jpeg" } })) as typeof fetch, publish });
   assert.equal(first.mediaId, "m1");
   assert.equal(replay.idempotent, true);
   assert.equal(publishCalls, 1);

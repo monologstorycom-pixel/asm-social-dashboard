@@ -92,7 +92,7 @@ test("publisher poll uses lifecycle gates and can claim an auto-approved schedul
   assert.match(route, /authorizeInternalRequest\(request\)/);
   assert.match(route, /AUTO_PUBLISH is off/);
   assert.match(route, /\/api\/internal\/publisher\/due/);
-  assert.match(route, /publishStatus:\s*"scheduled"/);
+  assert.match(route, /status:\s*"scheduled"/);
   assert.match(route, /publisherState:\s*"scheduled"/);
   assert.match(route, /scheduledAt:\s*\{\s*lte:\s*new Date\(\)\s*\}/);
   assert.match(route, /approvalAttemptId:\s*\{\s*not:\s*null\s*\}/);

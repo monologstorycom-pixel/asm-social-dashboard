@@ -4,6 +4,7 @@ import { automationSwitches, claimPublishLease } from "@/lib/automation";
 import { HttpError, readJson, safeRoute } from "@/lib/http";
 import { authorizeInternalRequest } from "@/lib/operations";
 import { MetaPublisherClient } from "@/lib/meta-publisher";
+import { resolveMetaPublishAccount } from "@/lib/meta-publish-environment";
 import { recordPublishResult } from "@/lib/operations-db";
 import { assertApprovedAssetIdentity, preflightAssets } from "@/lib/publisher-recovery";
 
@@ -37,13 +38,11 @@ export async function POST(request: Request) {
   return safeRoute(async () => {
     authorizeInternalRequest(request);
     if (!automationSwitches().autoPublish) throw new HttpError(503, "Publishing is locked; AUTO_PUBLISH is off");
-    if (process.env.META_PUBLISH_ENV !== "staging") throw new HttpError(503, "Publishing is locked; META_PUBLISH_ENV must be staging");
-    const stagingAccountId = process.env.META_STAGING_IG_USER_ID;
-    if (!stagingAccountId || !/^\d+$/.test(stagingAccountId)) throw new HttpError(503, "META_STAGING_IG_USER_ID is not configured");
     const { Content_ID } = publishSchema.parse(await readJson(request));
     const plan = await claimPublishLease(Content_ID);
     if (!plan || !plan.contentPost || !plan.approvalAttemptId) throw new HttpError(404, "Publishable content plan item not found");
-    if (plan.contentPost.socialAccount.platform !== "instagram" || plan.contentPost.socialAccount.platformAccountId !== stagingAccountId) throw new HttpError(403, "Target is not the configured staging Instagram account");
+    if (plan.contentPost.socialAccount.platform !== "instagram") throw new HttpError(403, "Target is not an Instagram account");
+    const targetAccountId = resolveMetaPublishAccount(plan.contentPost.socialAccount.platformAccountId);
     if (!plan.finalCaption || plan.assets.some((asset) => !asset.publicUrl) || !plan.assets.length) throw new HttpError(409, "Publishing requires a caption and public URLs for all final assets");
     const publishAssets = plan.assets.map((asset) => ({ slideNumber: asset.slideNumber, publicUrl: asset.publicUrl!, mimeType: asset.mimeType, sha256: asset.sha256 }));
     assertApprovedAssetIdentity(plan.approvedAssetSetHash, plan.contentId, plan.assetRevision, plan.approvedCandidate ?? "", publishAssets);
@@ -51,7 +50,7 @@ export async function POST(request: Request) {
 
     const publisher = new MetaPublisherClient();
     try {
-      const { mediaId } = await publisher.publish(stagingAccountId, plan.finalCaption, plan.assets.map((asset) => ({ publicUrl: asset.publicUrl!, mimeType: asset.mimeType })));
+      const { mediaId } = await publisher.publish(targetAccountId, plan.finalCaption, plan.assets.map((asset) => ({ publicUrl: asset.publicUrl!, mimeType: asset.mimeType })));
       const media = await publisher.getPublishedMedia(mediaId);
       if (!media.permalink || !media.timestamp) throw new HttpError(502, "Meta published media response is incomplete");
       await recordPublishResult(Content_ID, { success: true, approvalAttemptId: plan.approvalAttemptId, instagramMediaId: mediaId, publishedAt: new Date(media.timestamp).toISOString(), permalink: media.permalink });

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { HttpError, readJson, safeRoute } from "@/lib/http";
 import { MetaPublisherClient } from "@/lib/meta-publisher";
+import { resolveMetaPublishAccount } from "@/lib/meta-publish-environment";
 import { authorizeInternalRequest } from "@/lib/operations";
 import { recoverFailedPublication, type RecoveryStore } from "@/lib/publisher-recovery";
 
@@ -16,7 +17,9 @@ export async function POST(request: Request) {
       load: async (contentId) => {
         const plan = await db.contentPlanItem.findUnique({ where: { contentId }, include: { assets: { where: { isFinal: true }, orderBy: { slideNumber: "asc" } }, contentPost: { include: { socialAccount: true } } } });
         if (!plan?.contentPost) return null;
-        return { contentId: plan.contentId, status: plan.status, publisherState: plan.publisherState, approvalAttemptId: plan.approvalAttemptId, revision: plan.assetRevision, candidate: plan.approvedCandidate ?? "", approvedAssetSetHash: plan.approvedAssetSetHash, assets: plan.assets.flatMap((a) => a.publicUrl ? [{ slideNumber: a.slideNumber, publicUrl: a.publicUrl, mimeType: a.mimeType, sha256: a.sha256 }] : []), targetAccountId: plan.contentPost.socialAccount.platformAccountId, publisherError: plan.publisherError, leaseId: plan.publisherLeaseId };
+        if (plan.contentPost.socialAccount.platform !== "instagram") throw new HttpError(403, "Target is not an Instagram account");
+        const targetAccountId = resolveMetaPublishAccount(plan.contentPost.socialAccount.platformAccountId);
+        return { contentId: plan.contentId, status: plan.status, publisherState: plan.publisherState, approvalAttemptId: plan.approvalAttemptId, revision: plan.assetRevision, candidate: plan.approvedCandidate ?? "", approvedAssetSetHash: plan.approvedAssetSetHash, assets: plan.assets.flatMap((a) => a.publicUrl ? [{ slideNumber: a.slideNumber, publicUrl: a.publicUrl, mimeType: a.mimeType, sha256: a.sha256 }] : []), targetAccountId, publisherError: plan.publisherError, leaseId: plan.publisherLeaseId };
       },
       findRecentPublication: async (plan) => {
         const linked = await db.contentPlanItem.findUnique({ where: { contentId: plan.contentId }, select: { contentPost: { select: { instagramMediaId: true } } } });

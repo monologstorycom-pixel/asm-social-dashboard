@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   return safeRoute(async () => {
     authorizeInternalRequest(request);
     const due = await db.contentPlanItem.findMany({
-      where: { publishStatus: "scheduled", publisherState: "scheduled", scheduledAt: { lte: new Date() }, approvalAttemptId: { not: null } },
+      where: { status: "scheduled", publisherState: "scheduled", scheduledAt: { lte: new Date() }, approvalAttemptId: { not: null } },
       select: { contentId: true },
       orderBy: { scheduledAt: "asc" },
       take: 10,
