@@ -41,7 +41,7 @@ export async function preflightAssets(assets: RecoveryAsset[], fetcher: typeof f
     const mime = response.headers.get("content-type")?.split(";", 1)[0].toLowerCase();
     if (mime !== asset.mimeType.toLowerCase() || !mime.startsWith("image/")) throw new HttpError(409, "Asset preflight MIME mismatch");
     const bytes = new Uint8Array(await response.arrayBuffer());
-    if (bytes.length < 1024 * 1024 || bytes.length > 25 * 1024 * 1024) throw new HttpError(409, "Asset preflight size must be between 1 MiB and 25 MiB");
+    if (bytes.length === 0 || bytes.length > 25 * 1024 * 1024) throw new HttpError(409, "Asset preflight size must be between 1 byte and 25 MiB");
     if (createHash("sha256").update(bytes).digest("hex") !== asset.sha256) throw new HttpError(409, "Asset preflight SHA256 mismatch");
   }
 }
