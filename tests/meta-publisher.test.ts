@@ -44,6 +44,7 @@ test("publisher creates carousel children before the parent", async () => {
     { publicUrl: "https://cdn.test/two.mp4", mimeType: "video/mp4" },
   ]);
   assert.match(calls[0], /is_carousel_item=true/);
+  assert.match(calls[0], /media_type=IMAGE/);
   assert.match(calls[1], /media_type=VIDEO/);
   assert.equal(calls.filter((call) => call.includes("child-") && call.includes("status_code")).length, 2);
   const parent = calls.find((call) => call.includes("media_type=CAROUSEL")) || "";

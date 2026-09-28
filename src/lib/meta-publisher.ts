@@ -51,7 +51,7 @@ export class MetaPublisherClient {
   private createContainer(accountId: string, caption: string, asset: PublishAsset, carouselItem = false) {
     const video = asset.mimeType.startsWith("video/");
     return this.post(`${accountId}/media`, {
-      ...(video ? { media_type: carouselItem ? "VIDEO" : "REELS", video_url: asset.publicUrl } : { image_url: asset.publicUrl }),
+      ...(video ? { media_type: carouselItem ? "VIDEO" : "REELS", video_url: asset.publicUrl } : { ...(carouselItem ? { media_type: "IMAGE" } : {}), image_url: asset.publicUrl }),
       ...(caption ? { caption } : {}),
       ...(carouselItem ? { is_carousel_item: "true" } : {}),
     });
