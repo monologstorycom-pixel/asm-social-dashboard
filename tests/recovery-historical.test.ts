@@ -11,6 +11,7 @@ import { artifactSchema, assertStableAssetUrl } from "../src/lib/operations-api"
 import {
   approvedAssetIdentity,
   assertApprovedAssetIdentity,
+  findRecentPublicationByContentId,
   preflightAssets,
   recoverFailedPublication,
   type RecoveryStore,
@@ -192,6 +193,15 @@ test("failed recovery repairs target, retries exactly once, is idempotent, and s
   assert.equal(replay.idempotent, true);
   assert.equal(publishCalls, 1);
   assert.equal(audits.length, 1);
+});
+
+test("retry reconciliation matches only the exact Content_ID token", () => {
+  const recent = [
+    { id: "wrong", caption: "ASM-30D-20261001-240" },
+    { id: "right", caption: "Publish ASM-30D-20261001-24\ncaption" },
+  ];
+  assert.deepEqual(findRecentPublicationByContentId(recent, "ASM-30D-20261001-24"), recent[1]);
+  assert.equal(findRecentPublicationByContentId(recent, "missing"), null);
 });
 
 test("ambiguous previous outcome prevents duplicate retry", async () => {

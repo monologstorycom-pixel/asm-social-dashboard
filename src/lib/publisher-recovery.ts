@@ -48,6 +48,11 @@ export async function preflightAssets(assets: RecoveryAsset[], fetcher: typeof f
 
 const sanitized = (error: unknown) => (error instanceof Error ? error.message : "Publisher retry failed").replace(/(?:token|secret|authorization)\s*[=:]\s*\S+/gi, "$1=[redacted]").slice(0, 500);
 
+export function findRecentPublicationByContentId<T extends { caption?: string }>(items: T[], contentId: string): T | null {
+  const escaped = contentId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return items.find((item) => new RegExp(`(^|\\W)${escaped}(?=\\W|$)`).test(item.caption ?? "")) ?? null;
+}
+
 export async function recoverFailedPublication(input: { contentId: string; retryKey: string; replacements?: RecoveryReplacement[]; store: RecoveryStore; fetcher?: typeof fetch; publish: (accountId: string, assets: RecoveryAsset[]) => Promise<{ mediaId: string; permalink: string }> }) {
   const plan = await input.store.load(input.contentId);
   if (!plan) throw new HttpError(404, "Content plan item not found");

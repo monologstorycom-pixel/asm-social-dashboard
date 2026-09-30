@@ -4,7 +4,7 @@ import { HttpError, readJson, safeRoute } from "@/lib/http";
 import { MetaPublisherClient } from "@/lib/meta-publisher";
 import { resolveMetaPublishAccount } from "@/lib/meta-publish-environment";
 import { authorizeInternalRequest } from "@/lib/operations";
-import { recoverFailedPublication, type RecoveryStore } from "@/lib/publisher-recovery";
+import { findRecentPublicationByContentId, recoverFailedPublication, type RecoveryStore } from "@/lib/publisher-recovery";
 
 const schema = z.object({ Content_ID: z.string().trim().min(1).max(191), retryKey: z.string().trim().min(8).max(191), replacements: z.array(z.object({ slideNumber: z.number().int().min(1), publicUrl: z.url(), expectedSha256: z.string().regex(/^[a-f0-9]{64}$/), revision: z.number().int().min(1), candidate: z.string().trim().min(1).max(100) }).strict()).max(10).default([]) }).strict();
 
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
         const linked = await db.contentPlanItem.findUnique({ where: { contentId: plan.contentId }, select: { contentPost: { select: { instagramMediaId: true } } } });
         if (linked?.contentPost?.instagramMediaId) return { mediaId: linked.contentPost.instagramMediaId };
         const recent = await publisher.listRecentMedia(plan.targetAccountId, 25);
-        const match = recent.find((media) => media.caption?.includes(plan.contentId));
+        const match = findRecentPublicationByContentId(recent, plan.contentId);
         return match ? { mediaId: match.id } : null;
       },
       beginRetry: async (contentId, retryKey) => (await db.contentPlanItem.updateMany({ where: { contentId, publisherState: "failed", OR: [{ publisherRetryKey: null }, { publisherRetryKey: { not: retryKey } }], publisherRetryCount: 0 }, data: { publisherState: "publishing", publisherRetryKey: retryKey, publisherRetryCount: { increment: 1 }, publisherLeaseId: null, publisherLeaseUntil: null, publisherError: null } })).count === 1,

@@ -6,7 +6,7 @@ import { authorizeInternalRequest } from "@/lib/operations";
 import { MetaPublisherClient } from "@/lib/meta-publisher";
 import { resolveMetaPublishAccount } from "@/lib/meta-publish-environment";
 import { recordPublishResult } from "@/lib/operations-db";
-import { assertApprovedAssetIdentity, preflightAssets } from "@/lib/publisher-recovery";
+import { assertApprovedAssetIdentity, findRecentPublicationByContentId, preflightAssets } from "@/lib/publisher-recovery";
 
 const publishSchema = z.object({ Content_ID: z.string().trim().min(1).max(191) }).strict();
 
@@ -50,6 +50,15 @@ export async function POST(request: Request) {
 
     const publisher = new MetaPublisherClient();
     try {
+      if (plan.previousPublisherState !== "scheduled") {
+        const existing = findRecentPublicationByContentId(await publisher.listRecentMedia(targetAccountId, 25), Content_ID);
+        if (existing) {
+          const media = await publisher.getPublishedMedia(existing.id);
+          if (!media.permalink || !media.timestamp) throw new HttpError(502, "Meta published media response is incomplete");
+          await recordPublishResult(Content_ID, { success: true, approvalAttemptId: plan.approvalAttemptId, instagramMediaId: existing.id, publishedAt: new Date(media.timestamp).toISOString(), permalink: media.permalink });
+          return Response.json({ Content_ID, instagramMediaId: existing.id, permalink: media.permalink, idempotent: true });
+        }
+      }
       const { mediaId } = await publisher.publish(targetAccountId, plan.finalCaption, plan.assets.map((asset) => ({ publicUrl: asset.publicUrl!, mimeType: asset.mimeType })));
       const media = await publisher.getPublishedMedia(mediaId);
       if (!media.permalink || !media.timestamp) throw new HttpError(502, "Meta published media response is incomplete");

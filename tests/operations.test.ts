@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { automationSwitches, claimPublishLease, recommendScheduledAt } from "../src/lib/automation";
+import { automationSwitches, claimPublishLease, isPublisherPollEligible, PUBLISH_RETRY_COOLDOWN_MS, PUBLISH_RETRY_MAX_ATTEMPTS, recommendScheduledAt } from "../src/lib/automation";
 import { artifactSchema } from "../src/lib/operations-api";
 
 import {
@@ -93,8 +93,8 @@ test("publisher poll uses lifecycle gates and can claim an auto-approved schedul
   assert.match(route, /AUTO_PUBLISH is off/);
   assert.match(route, /\/api\/internal\/publisher\/due/);
   assert.match(route, /status:\s*"scheduled"/);
-  assert.match(route, /publisherState:\s*"scheduled"/);
-  assert.match(route, /scheduledAt:\s*\{\s*lte:\s*new Date\(\)\s*\}/);
+  assert.match(route, /publisherClaimStates\(now\)/);
+  assert.match(route, /scheduledAt:\s*\{\s*lte:\s*now\s*\}/);
   assert.match(route, /approvalAttemptId:\s*\{\s*not:\s*null\s*\}/);
   assert.doesNotMatch(route, /approvalStatus:\s*"approved"/);
   assert.doesNotMatch(route, /Response\.redirect|SESSION_COOKIE/);
@@ -127,9 +127,48 @@ test("publisher poll uses lifecycle gates and can claim an auto-approved schedul
   assert.equal(claimed.contentId, item.contentId);
   assert.equal(claimed.approvalStatus, "auto_approved");
   assert.deepEqual(leaseWhere, {
-    where: { id: item.id, status: "scheduled", publisherState: "scheduled", approvalAttemptId: item.approvalAttemptId, OR: [{ publisherLeaseUntil: null }, { publisherLeaseUntil: { lt: now } }] },
+    where: { id: item.id, status: "scheduled", approvalAttemptId: item.approvalAttemptId, OR: [{ publisherState: "scheduled" }, { publisherState: "failed", publisherRetryCount: { lt: PUBLISH_RETRY_MAX_ATTEMPTS }, updatedAt: { lte: new Date(now.getTime() - PUBLISH_RETRY_COOLDOWN_MS) } }, { publisherState: "publishing", publisherLeaseUntil: { lt: now } }] },
     data: { publisherState: "publishing", publisherLeaseId: claimed.leaseId, publisherLeaseUntil: new Date("2026-09-08T06:04:00.000Z"), publisherError: null },
   });
+});
+
+test("publisher retry polling enforces cooldown, attempt cap, and expired-lease recovery", () => {
+  const now = new Date("2026-09-08T06:00:00.000Z");
+  const old = new Date(now.getTime() - PUBLISH_RETRY_COOLDOWN_MS);
+  assert.equal(isPublisherPollEligible({ publisherState: "failed", publisherRetryCount: 0, updatedAt: new Date(now.getTime() - 1) }, now), false, "new failure must cool down");
+  assert.equal(isPublisherPollEligible({ publisherState: "failed", publisherRetryCount: PUBLISH_RETRY_MAX_ATTEMPTS - 1, updatedAt: old }, now), true, "cooled-down retry remains eligible");
+  assert.equal(isPublisherPollEligible({ publisherState: "failed", publisherRetryCount: PUBLISH_RETRY_MAX_ATTEMPTS, updatedAt: old }, now), false, "exhausted retry requires intervention");
+  assert.equal(isPublisherPollEligible({ publisherState: "publishing", publisherRetryCount: PUBLISH_RETRY_MAX_ATTEMPTS, updatedAt: now, publisherLeaseUntil: new Date(now.getTime() - 1) }, now), true, "expired lease remains recoverable");
+});
+
+test("publisher retries failed state and reclaims only an expired publishing lease", async () => {
+  const now = new Date("2026-09-08T06:00:00.000Z");
+  for (const state of [
+    { publisherState: "failed", publishStatus: "failed", publisherLeaseUntil: null },
+    { publisherState: "publishing", publishStatus: "publishing", publisherLeaseUntil: new Date("2026-09-08T05:59:00.000Z") },
+  ]) {
+    let where: unknown;
+    const item = { id: "p", contentId: "C", status: "scheduled", qaStatus: "passed", finalCaption: "caption C", scheduledAt: new Date("2026-09-08T05:00:00.000Z"), approvalAttemptId: "a", assets: [{ publicUrl: "https://cdn.test/x.png" }], contentPost: { socialAccount: {} }, ...state };
+    const client = { contentPlanItem: { findUnique: async () => item, updateMany: async (query: { where: unknown }) => { where = query.where; return { count: 1 }; }, findUniqueOrThrow: async () => item } };
+    await claimPublishLease("C", client as never, now);
+    assert.deepEqual((where as { OR: unknown }).OR, [{ publisherState: "scheduled" }, { publisherState: "failed", publisherRetryCount: { lt: PUBLISH_RETRY_MAX_ATTEMPTS }, updatedAt: { lte: new Date(now.getTime() - PUBLISH_RETRY_COOLDOWN_MS) } }, { publisherState: "publishing", publisherLeaseUntil: { lt: now } }]);
+  }
+});
+
+test("publisher runner is authenticated, locked, observable, and exits nonzero", () => {
+  const runner = readFileSync(new URL("../scripts/publisher-runner.mjs", import.meta.url), "utf8");
+  assert.match(runner, /INTERNAL_API_TOKEN/);
+  assert.match(runner, /\/api\/internal\/publisher\/poll/);
+  assert.match(runner, /flock|wx/);
+  assert.match(runner, /process\.exitCode = 1/);
+  assert.match(runner, /console\.error/);
+});
+
+test("ASM acceptance prompts accept scheduled after automatic approval and scheduling", () => {
+  for (const path of ["/home/asm/.hermes/scripts/asm-daily-social-pm.py", "/home/asm/.hermes/scripts/asm-staff-social.py"]) {
+    const source = readFileSync(path, "utf8");
+    assert.match(source, /ready_for_review[\s\S]*scheduled|scheduled[\s\S]*ready_for_review/);
+  }
 });
 
 test("AI scheduling selects a specific minute inside the content publish window", () => {

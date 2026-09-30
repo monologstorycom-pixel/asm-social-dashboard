@@ -11,6 +11,23 @@ type AutomationDb = Pick<PrismaClient, "contentPlanItem" | "contentPost" | "post
 export const AUTO_APPROVAL_ENV = "AUTO_APPROVAL";
 export const AUTO_SCHEDULE_ENV = "AUTO_SCHEDULE";
 export const AUTO_PUBLISH_ENV = "AUTO_PUBLISH";
+export const PUBLISH_RETRY_COOLDOWN_MS = 15 * 60_000;
+export const PUBLISH_RETRY_MAX_ATTEMPTS = 3;
+
+type PublisherPollState = { publisherState: string; publisherRetryCount: number; updatedAt: Date; publisherLeaseUntil?: Date | null };
+export function isPublisherPollEligible(item: PublisherPollState, now: Date) {
+  if (item.publisherState === "scheduled") return true;
+  if (item.publisherState === "publishing") return Boolean(item.publisherLeaseUntil && item.publisherLeaseUntil < now);
+  return item.publisherState === "failed" && item.publisherRetryCount < PUBLISH_RETRY_MAX_ATTEMPTS && item.updatedAt <= new Date(now.getTime() - PUBLISH_RETRY_COOLDOWN_MS);
+}
+
+export function publisherClaimStates(now: Date) {
+  return [
+    { publisherState: "scheduled" as const },
+    { publisherState: "failed" as const, publisherRetryCount: { lt: PUBLISH_RETRY_MAX_ATTEMPTS }, updatedAt: { lte: new Date(now.getTime() - PUBLISH_RETRY_COOLDOWN_MS) } },
+    { publisherState: "publishing" as const, publisherLeaseUntil: { lt: now } },
+  ];
+}
 
 export function enabled(value: string | undefined) { return value === "true" || value === "1" || value === "yes"; }
 export function automationSwitches(env: Record<string, string | undefined> = process.env) {
@@ -109,7 +126,7 @@ export async function claimPublishLease(contentId: string, client: AutomationDb 
   if (!item || !item.contentPost || !item.approvalAttemptId) throw new HttpError(404, "Publishable content plan item not found");
   if (item.status !== "scheduled" || !item.scheduledAt || item.scheduledAt > now) throw new HttpError(409, "Content is not due for publishing");
   if (item.qaStatus !== "passed" || !item.finalCaption || !item.assets.length || item.assets.some((asset) => !asset.publicUrl)) throw new HttpError(409, "Publishing requires passed QA, caption, target account, and public URLs for all final assets");
-  const updated = await client.contentPlanItem.updateMany({ where: { id: item.id, status: "scheduled", publisherState: "scheduled", approvalAttemptId: item.approvalAttemptId, OR: [{ publisherLeaseUntil: null }, { publisherLeaseUntil: { lt: now } }] }, data: { publisherState: "publishing", publisherLeaseId: leaseId, publisherLeaseUntil: leaseUntil, publisherError: null } });
+  const updated = await client.contentPlanItem.updateMany({ where: { id: item.id, status: "scheduled", approvalAttemptId: item.approvalAttemptId, OR: publisherClaimStates(now) }, data: { publisherState: "publishing", publisherLeaseId: leaseId, publisherLeaseUntil: leaseUntil, publisherError: null, ...(item.publisherState === "failed" && { publisherRetryCount: { increment: 1 } }) } });
   if (updated.count !== 1) throw new HttpError(409, "Publish job already claimed");
-  return { ...(await client.contentPlanItem.findUniqueOrThrow({ where: { id: item.id }, include: { assets: { where: { isFinal: true }, orderBy: { slideNumber: "asc" } }, contentPost: { include: { socialAccount: true } } } })), leaseId };
+  return { ...(await client.contentPlanItem.findUniqueOrThrow({ where: { id: item.id }, include: { assets: { where: { isFinal: true }, orderBy: { slideNumber: "asc" } }, contentPost: { include: { socialAccount: true } } } })), leaseId, previousPublisherState: item.publisherState };
 }
