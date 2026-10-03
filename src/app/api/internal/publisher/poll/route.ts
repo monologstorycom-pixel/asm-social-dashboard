@@ -1,3 +1,4 @@
+import { findDailyWatchdogFailures } from "@/lib/agent-due";
 import { automationSwitches, PUBLISH_RETRY_MAX_ATTEMPTS, publisherClaimStates } from "@/lib/automation";
 import { db } from "@/lib/db";
 import { HttpError, safeRoute } from "@/lib/http";
@@ -8,6 +9,9 @@ export async function POST(request: Request) {
   return safeRoute(async () => {
     authorizeInternalRequest(request);
     const now = new Date();
+    const watchdogFailures = await findDailyWatchdogFailures(db, now);
+    for (const failure of watchdogFailures) console.error(JSON.stringify({ level: "error", event: "daily_content_watchdog", ...failure }));
+    if (watchdogFailures.length) throw new HttpError(503, `${watchdogFailures.length} daily content watchdog failure(s)`);
     const due = await db.contentPlanItem.findMany({
       where: { status: "scheduled", scheduledAt: { lte: now }, approvalAttemptId: { not: null }, OR: publisherClaimStates(now) },
       select: { contentId: true },

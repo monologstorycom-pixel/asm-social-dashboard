@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
-import { agentDueStatuses, buildAgentDueWhere, claimAgentDueItem, wibDateKey } from "../src/lib/agent-due";
+import { agentDueStatuses, buildAgentDueWhere, buildDailyWatchdogWhere, claimAgentDueItem, dailyWatchdogFailure, wibDateKey } from "../src/lib/agent-due";
 
 const today = new Date("2026-09-08T01:00:00.000Z"); // 08:00 WIB
 
@@ -42,4 +43,35 @@ test("claim is atomic so double claim only lets one worker win", async () => {
 
   assert.equal([first, second].filter(Boolean).length, 1);
   assert.equal(row.status, "creating");
+});
+
+test("watchdog selects only stale creating items from today's WIB plan", () => {
+  const now = new Date("2026-09-08T05:00:00.000Z");
+  assert.deepEqual(buildDailyWatchdogWhere(now, 120), {
+    date: { gte: new Date("2026-09-08T00:00:00.000Z"), lt: new Date("2026-09-09T00:00:00.000Z") },
+    status: "creating",
+    updatedAt: { lte: new Date("2026-09-08T03:00:00.000Z") },
+  });
+});
+
+test("watchdog failure includes Content_ID, lifecycle stage, age, and reason", () => {
+  assert.deepEqual(dailyWatchdogFailure({ contentId: "ASM-30D-20260908-01", status: "creating", updatedAt: new Date("2026-09-08T02:30:00.000Z") }, new Date("2026-09-08T05:00:00.000Z")), {
+    Content_ID: "ASM-30D-20260908-01",
+    stage: "creating",
+    ageMinutes: 150,
+    reason: "daily_content_stale",
+  });
+});
+
+test("published daily content never matches the stale watchdog lifecycle filter", () => {
+  assert.equal(buildDailyWatchdogWhere(today, 120).status, "creating");
+});
+
+test("watchdog and publisher poll routes authenticate and poll fails on watchdog failures", () => {
+  const watchdog = readFileSync(new URL("../src/app/api/internal/agent/watchdog/route.ts", import.meta.url), "utf8");
+  const poll = readFileSync(new URL("../src/app/api/internal/publisher/poll/route.ts", import.meta.url), "utf8");
+  assert.match(watchdog, /authorizeInternalRequest\(request\)/);
+  assert.match(watchdog, /simulateStale/);
+  assert.match(poll, /findDailyWatchdogFailures/);
+  assert.match(poll, /daily content watchdog failure/);
 });

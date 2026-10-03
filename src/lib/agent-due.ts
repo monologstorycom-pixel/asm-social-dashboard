@@ -26,6 +26,29 @@ export function buildAgentDueWhere(now = new Date()) {
 }
 
 export type AgentDueRecord = Record<string, unknown> & { contentId: string; date: Date };
+export type DailyWatchdogRecord = { contentId: string; status: string; updatedAt: Date };
+export const DAILY_CONTENT_STALE_MINUTES = 120;
+
+export function dailyContentStaleMinutes(value = process.env.DAILY_CONTENT_STALE_MINUTES) {
+  if (value === undefined) return DAILY_CONTENT_STALE_MINUTES;
+  const minutes = Number(value);
+  if (!Number.isInteger(minutes) || minutes < 1) throw new Error("DAILY_CONTENT_STALE_MINUTES must be a positive integer");
+  return minutes;
+}
+
+export function buildDailyWatchdogWhere(now = new Date(), staleMinutes = dailyContentStaleMinutes()) {
+  const { gte, lt } = contentPlanDateRangeForWibDay(now);
+  return { date: { gte, lt: new Date(lt) }, status: "creating" as const, updatedAt: { lte: new Date(now.getTime() - staleMinutes * 60_000) } };
+}
+
+export function dailyWatchdogFailure(item: DailyWatchdogRecord, now = new Date()) {
+  return { Content_ID: item.contentId, stage: item.status, ageMinutes: Math.floor((now.getTime() - item.updatedAt.getTime()) / 60_000), reason: "daily_content_stale" as const };
+}
+
+export async function findDailyWatchdogFailures(db: { contentPlanItem: { findMany(args: { where: ReturnType<typeof buildDailyWatchdogWhere>; select: { contentId: true; status: true; updatedAt: true }; orderBy: { updatedAt: "asc" }; take: number }): Promise<DailyWatchdogRecord[]> } }, now = new Date()) {
+  const items = await db.contentPlanItem.findMany({ where: buildDailyWatchdogWhere(now), select: { contentId: true, status: true, updatedAt: true }, orderBy: { updatedAt: "asc" }, take: 100 });
+  return items.map((item) => dailyWatchdogFailure(item, now));
+}
 
 type AgentDueDb = {
   contentPlanItem: {
